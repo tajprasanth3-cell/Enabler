@@ -91,6 +91,7 @@ export const FinancialManagement: React.FC = () => {
       { companyShare: revResult.companyShare, remainingShare: revResult.remainingShare },
       `Revenue split calculation at ${calcCompanySharePct}:${100 - calcCompanySharePct}`
     );
+    setFeedback({ type: 'success', message: 'Revenue share calculation saved to the audit log.' });
   };
 
   const handleSaveProfitCalculation = () => {
@@ -104,6 +105,7 @@ export const FinancialManagement: React.FC = () => {
       },
       `Profit split calculation: Net profit ₹${profitResult.netProfit}`
     );
+    setFeedback({ type: 'success', message: 'Profit share calculation saved to the audit log.' });
   };
 
   const handleSaveDiscountCalculation = () => {
@@ -113,6 +115,7 @@ export const FinancialManagement: React.FC = () => {
       { discountAmount: discResult.discountAmount, finalPrice: discResult.finalPrice },
       `Discount calculation at ${discPct}%`
     );
+    setFeedback({ type: 'success', message: 'Discount calculation saved to the audit log.' });
   };
 
   const handleSaveGrowthCalculation = () => {
@@ -122,6 +125,7 @@ export const FinancialManagement: React.FC = () => {
       { difference: growthResult.difference, growthPercentage: growthResult.growthPercentage },
       `Revenue growth from ₹${growthPrev.toLocaleString()} to ₹${growthCurr.toLocaleString()}`
     );
+    setFeedback({ type: 'success', message: 'Sales growth calculation saved to the audit log.' });
   };
 
   const handleSaveDefaultRatio = () => {
@@ -136,7 +140,10 @@ export const FinancialManagement: React.FC = () => {
 
   const handleConfirmPayment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLeadId) return;
+    if (!selectedLeadId) {
+      setFeedback({ type: 'error', message: 'Select a converted lead before confirming payment.' });
+      return;
+    }
     if (
       !Number.isFinite(txGrossAmount) ||
       txGrossAmount <= 0 ||

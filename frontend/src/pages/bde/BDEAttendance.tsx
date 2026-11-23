@@ -92,6 +92,11 @@ export const BDEAttendance: React.FC = () => {
     );
   };
 
+  const handlePunchIn = () => {
+    const result = punchIn();
+    setPunchFeedback({ type: result.ok ? 'success' : 'error', message: result.message });
+  };
+
   // Leave Modal State
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveType, setLeaveType] = useState('Casual Leave');
@@ -181,7 +186,7 @@ export const BDEAttendance: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <button
-              onClick={punchIn}
+              onClick={handlePunchIn}
               disabled={punchState === 'PUNCHED_IN'}
               className={`px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
                 punchState === 'PUNCHED_IN'

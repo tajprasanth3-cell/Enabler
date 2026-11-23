@@ -200,9 +200,10 @@
       "status": "NEW",
       "currentTeamId": "team-1",
       "currentTeamName": "Team Alpha",
-      "currentBdeId": null,
-      "currentBdeName": null,
-      "createdAt": "2026-02-14"
+      "currentBdeId": "usr-5",
+      "currentBdeName": "Sneha Gupta",
+      "createdAt": "2026-02-14",
+      "assignedToBdeAt": "2026-11-23T08:24:32.976Z"
     },
     {
       "id": "lead-108",
@@ -214,9 +215,10 @@
       "status": "NEW",
       "currentTeamId": "team-1",
       "currentTeamName": "Team Alpha",
-      "currentBdeId": null,
-      "currentBdeName": null,
-      "createdAt": "2026-02-14"
+      "currentBdeId": "usr-5",
+      "currentBdeName": "Sneha Gupta",
+      "createdAt": "2026-02-14",
+      "assignedToBdeAt": "2026-11-23T08:24:32.976Z"
     },
     {
       "id": "lead-109",
@@ -371,6 +373,27 @@
     "gracePeriodMinutes": 15
   },
   "auditLogs": [
+    {
+      "id": "audit-1795422272977-322",
+      "action": "LEAD_ALLOCATED_STAGE2",
+      "category": "ALLOCATION",
+      "actorId": "usr-2",
+      "actorName": "Priya Patel",
+      "actorRole": "TEAM_LEAD",
+      "targetId": "team-1",
+      "targetType": "TEAM",
+      "summary": "Allocated 2 leads from Team Pool to 1 BDEs (2 each)",
+      "details": {
+        "teamId": "team-1",
+        "bdeIds": [
+          "usr-5"
+        ],
+        "countPerBde": 2,
+        "totalAllocated": 2
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T08:24:32.977Z"
+    },
     {
       "id": "audit-1795418813053-805",
       "action": "FOLLOWUP_CREATED",

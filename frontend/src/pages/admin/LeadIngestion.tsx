@@ -70,7 +70,7 @@ function parseCsvRows(text: string): string[][] {
 }
 
 export const LeadIngestion: React.FC = () => {
-  const { leads, teams, ingestLeads, allocateStage1AdminToTeams } = useApp();
+  const { leads, teams, ingestLeads, allocateStage1AdminToTeams, notify } = useApp();
 
   // Ingestion Modal / Form State
   const [candidateName, setCandidateName] = useState('');
@@ -178,7 +178,10 @@ export const LeadIngestion: React.FC = () => {
 
   const handleManualAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!candidateName || !candidatePhone) return;
+    if (!candidateName.trim() || !candidatePhone.trim()) {
+      notify('error', 'Candidate name and phone are required.');
+      return;
+    }
 
     const res = ingestLeads([
       {

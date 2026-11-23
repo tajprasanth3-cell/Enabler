@@ -38,11 +38,17 @@ export const BDEWorkingQueue: React.FC = () => {
     requestLeadReplenishment,
     replenishmentAlerts,
     getAllowedStatuses,
+    notify,
   } = useApp();
 
   const myLeads = leads.filter((l: Lead) => l.currentBdeId === currentUser.id);
   const openLeads = myLeads.filter((l: Lead) => OPEN_LEAD_STATUSES.includes(l.status));
   const isAlertSent = replenishmentAlerts.some((a: { bdeId: string }) => a.bdeId === currentUser.id);
+
+  const handleRequestReplenishment = () => {
+    const result = requestLeadReplenishment();
+    notify(result.ok ? 'success' : 'warning', result.message);
+  };
 
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState('');
@@ -168,7 +174,7 @@ export const BDEWorkingQueue: React.FC = () => {
           </div>
 
           <button
-            onClick={requestLeadReplenishment}
+            onClick={handleRequestReplenishment}
             disabled={isAlertSent}
             className={`w-full md:w-auto px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
               isAlertSent

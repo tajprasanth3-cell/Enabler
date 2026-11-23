@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect } from 'react';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type {
   UserRole,
   User,
@@ -31,6 +31,15 @@ import { followupsService } from '../services/followupsService';
 import { settingsService } from '../services/settingsService';
 
 export type ThemeMode = 'royal-violet' | 'emerald-mint' | 'cyber-amber' | 'ocean-azure' | 'clean-light';
+export type AppNotificationType = 'error' | 'warning' | 'success';
+export interface AppNotification {
+  type: AppNotificationType;
+  message: string;
+}
+export interface ActionResult {
+  ok: boolean;
+  message: string;
+}
 
 export interface ReportSubmission {
   id: string;
@@ -61,6 +70,10 @@ export interface PoolEscalation {
 export interface AppContextType {
   currentTheme: ThemeMode;
   setCurrentTheme: (theme: ThemeMode) => void;
+
+  notification: AppNotification | null;
+  notify: (type: AppNotificationType, message: string) => void;
+  dismissNotification: () => void;
 
   currentUser: User;
   currentRole: UserRole;
@@ -109,7 +122,7 @@ export interface AppContextType {
   attendanceRecords: AttendanceRecord[];
   punchState: PunchState;
   punchInTime: string | null;
-  punchIn: () => void;
+  punchIn: () => ActionResult;
   punchOut: () => boolean;
   adjustAttendance: (
     recordId: string,
@@ -141,7 +154,7 @@ export interface AppContextType {
   ) => void;
 
   isBdeExhausted: boolean;
-  requestLeadReplenishment: () => void;
+  requestLeadReplenishment: () => ActionResult;
   replenishmentAlerts: Array<{ bdeId: string; bdeName: string; teamId: string; timestamp: string }>;
   clearReplenishmentAlert: (bdeId: string) => void;
 
@@ -333,6 +346,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [reports, setReports] = usePersistentState<ReportSubmission[]>('reports', []);
   const [leaveRequests, setLeaveRequests] = usePersistentState<LeaveRequest[]>('leaveRequests', []);
   const [poolEscalations, setPoolEscalations] = usePersistentState<PoolEscalation[]>('poolEscalations', []);
+  const [notification, setNotification] = useState<AppNotification | null>(null);
+
+  const notify = useCallback((type: AppNotificationType, message: string) => {
+    setNotification({ type, message });
+  }, []);
+
+  const dismissNotification = useCallback(() => setNotification(null), []);
+
+  const notifySyncError = useCallback(
+    (label: string, error?: unknown) => {
+      console.warn(label, error);
+      notify('warning', `${label} Failed to sync with server; changes are saved locally.`);
+    },
+    [notify]
+  );
+
+  useEffect(() => {
+    if (!notification) return;
+    const timer = setTimeout(() => setNotification(null), 8000);
+    return () => clearTimeout(timer);
+  }, [notification]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', currentTheme);
@@ -383,12 +417,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }));
         }
       } catch (err) {
-        console.warn('Initial backend sync skipped; using persistent store', err);
+        notifySyncError('Initial backend sync', err);
       }
     };
 
     syncBackendData();
-  }, [setAttendanceRecords, setFollowUps, setLeads, setSystemSettings, setTeams, setTransactions, setUsers]);
+  }, [
+    notifySyncError,
+    setAttendanceRecords,
+    setFollowUps,
+    setLeads,
+    setSystemSettings,
+    setTeams,
+    setTransactions,
+    setUsers,
+  ]);
 
   const currentUser: User =
     users.find((user) => user.id === currentUserId && user.role === currentRole) ||
@@ -533,7 +576,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     setLeads((prev) => [...prev, ...cleanLeads]);
-    leadsService.ingestLeads(cleanLeads as any, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => console.warn('Backend ingest sync:', e));
+    leadsService.ingestLeads(cleanLeads as any, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => notifySyncError('Backend ingest sync:', e));
     logAudit('LEAD_INGEST', 'LEAD', 'pool', `Ingested ${added} leads; ${duplicates} duplicates skipped`, {
       added,
       duplicates,
@@ -589,7 +632,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
-    leadsService.allocateStage1({ teamIds, countPerTeam, method, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend stage1 sync:', e));
+    leadsService.allocateStage1({ teamIds, countPerTeam, method, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend stage1 sync:', e));
     logAudit('LEAD_ALLOCATE', 'LEAD', teamIds.join(','), `Allocated ${cursor} leads to ${teamIds.length} teams using ${method}`, {
       allocated: cursor,
       method,
@@ -677,7 +720,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
     setReplenishmentAlerts((prev) => prev.filter((alert) => !eligibleBdeIds.includes(alert.bdeId)));
-    leadsService.allocateStage2({ teamId, bdeIds: eligibleBdeIds, countPerBde, method: effectiveMethod, manualQuotas, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend stage2 sync:', e));
+    leadsService.allocateStage2({ teamId, bdeIds: eligibleBdeIds, countPerBde, method: effectiveMethod, manualQuotas, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend stage2 sync:', e));
     logAudit('LEAD_ALLOCATE', 'LEAD', teamId, `Distributed ${allocated} leads to ${eligibleBdeIds.length} BDEs using ${effectiveMethod}`, {
       allocated,
       method: effectiveMethod,
@@ -765,7 +808,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       remarks,
       nextFollowUpDate: scheduleFollowUp ? new Date(scheduleFollowUp.time).toISOString() : undefined,
       actor: { id: currentUser.id, name: currentUser.name, role: currentRole },
-    }).catch((e) => console.warn('Backend lead status sync:', e));
+    }).catch((e) => notifySyncError('Backend lead status sync:', e));
     return true;
   };
 
@@ -811,7 +854,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
     setReplenishmentAlerts((prev) => prev.filter((alert) => alert.bdeId !== fromBdeId));
-    leadsService.reassignLeads({ fromBdeId, toBdeId, reason, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend reassign sync:', e));
+    leadsService.reassignLeads({ fromBdeId, toBdeId, reason, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend reassign sync:', e));
     logAudit('LEAD_REASSIGN', 'LEAD', fromBdeId, `Reassigned ${affected.length} leads to ${targetBde.name}`, {
       fromBdeId,
       toBdeId,
@@ -847,12 +890,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     logAudit('FOLLOW_UP_COMPLETE', 'FOLLOW_UP', followUpId, `Completed follow-up for ${followUp.candidateName}`, {
       leadId: followUp.leadId,
     });
-    followupsService.updateFollowUp(followUpId, { status: 'COMPLETED', actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend followup sync:', e));
+    followupsService.updateFollowUp(followUpId, { status: 'COMPLETED', actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend followup sync:', e));
     return true;
   };
 
-  const punchIn = () => {
-    if (!isBde) return;
+  const punchIn = (): ActionResult => {
+    if (!isBde) return { ok: false, message: 'Only BDE users can punch in.' };
     const now = new Date().toISOString();
     const timeStr = formatClock(now) || '';
     const startMinutes = parseClockToMinutes(systemSettings.workdayStartTime);
@@ -864,7 +907,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const existing = attendanceRecords.find(
       (record) => record.userId === currentUser.id && record.date === today() && !record.punchOutTime
     );
-    if (existing) return;
+    if (existing) return { ok: false, message: 'You have already punched in today.' };
     setAttendanceRecords((prev) => [
       {
         id: uid('att'),
@@ -882,11 +925,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       },
       ...prev,
     ]);
-    attendanceService.punchIn(currentUser.id, currentUser.name, currentUser.teamId || '').catch((e) => console.warn('Backend punchIn sync:', e));
+    attendanceService.punchIn(currentUser.id, currentUser.name, currentUser.teamId || '').catch((e) => notifySyncError('Backend punchIn sync:', e));
     logAudit('ATTENDANCE_PUNCH_IN', 'ATTENDANCE', currentUser.id, `${currentUser.name} punched in at ${timeStr}`, {
       status,
       time: timeStr,
     });
+    return {
+      ok: true,
+      message: `Punched in at ${timeStr}${status === 'LATE' ? ' (late)' : ''}.`,
+    };
   };
 
   const punchOut = (): boolean => {
@@ -921,7 +968,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : record
       )
     );
-    attendanceService.punchOut(currentUser.id).catch((e) => console.warn('Backend punchOut sync:', e));
+    attendanceService.punchOut(currentUser.id).catch((e) => notifySyncError('Backend punchOut sync:', e));
     logAudit('ATTENDANCE_PUNCH_OUT', 'ATTENDANCE', openRecord.id, `${currentUser.name} punched out at ${timeStr}`, {
       workedMinutes,
       status,
@@ -984,7 +1031,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       previousPunchOutTime: record.punchOutTime,
       newPunchOutTime: revisedPunchOut,
     });
-    attendanceService.modifyAttendance(recordId, { status: newStatus, punchOutTime: revisedPunchOut || undefined, reason, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend attendance modify sync:', e));
+    attendanceService.modifyAttendance(recordId, { status: newStatus, punchOutTime: revisedPunchOut || undefined, reason, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend attendance modify sync:', e));
     return true;
   };
 
@@ -1050,7 +1097,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       investmentCost,
       notes,
       actor: { id: currentUser.id, name: currentUser.name, role: currentRole },
-    }).catch((e) => console.warn('Backend finance tx sync:', e));
+    }).catch((e) => notifySyncError('Backend finance tx sync:', e));
     return true;
   };
 
@@ -1188,7 +1235,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       maxLeadsPerBde: safePatch.maxLeadsPerBde,
       gracePeriodMinutes: safePatch.lateGracePeriodMinutes,
       shiftStartTime: safePatch.workdayStartTime,
-    }, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => console.warn('Backend settings sync:', e));
+    }, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => notifySyncError('Backend settings sync:', e));
   };
 
   const toggleUserStatus = (userId: string): boolean => {
@@ -1207,7 +1254,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newStatus: nextStatus,
       openLeads,
     });
-    usersService.toggleStatus(userId, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => console.warn('Backend user toggle sync:', e));
+    usersService.toggleStatus(userId, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => notifySyncError('Backend user toggle sync:', e));
     return true;
   };
 
@@ -1232,7 +1279,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setTeams((prev) => prev.map((item) => (item.id === team.id ? { ...item, teamLeadId: user.id, teamLeadName: user.name } : item)));
     }
     logAudit('USER_CREATE', 'USER', user.id, `Created ${role} ${user.name}`, { email: normalizedEmail, teamId: team?.id });
-    usersService.createUser({ name: name.trim(), email: normalizedEmail, role, teamId: team?.id, phone: phone?.trim(), actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend user create sync:', e));
+    usersService.createUser({ name: name.trim(), email: normalizedEmail, role, teamId: team?.id, phone: phone?.trim(), actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend user create sync:', e));
     return true;
   };
 
@@ -1257,7 +1304,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map((user) => (user.id === teamLeadId ? { ...user, teamId: newTeam.id, teamName: newTeam.name } : user))
     );
     logAudit('TEAM_CREATE', 'TEAM', newTeam.id, `Created team ${newTeam.name}`, { teamLeadId });
-    teamsService.createTeam({ name: name.trim(), teamLeadId, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend team create sync:', e));
+    teamsService.createTeam({ name: name.trim(), teamLeadId, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend team create sync:', e));
     return true;
   };
 
@@ -1331,10 +1378,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setPoolEscalations((prev) => prev.filter((item) => item.teamId !== teamId));
   };
 
-  const requestLeadReplenishment = () => {
-    if (!isBde) return;
+  const requestLeadReplenishment = (): ActionResult => {
+    if (!isBde) return { ok: false, message: 'Only BDE users can request replenishment.' };
     const existing = replenishmentAlerts.find((alert) => alert.bdeId === currentUser.id);
-    if (existing) return;
+    if (existing) return { ok: false, message: 'A replenishment request is already pending.' };
     setReplenishmentAlerts((prev) => [
       {
         bdeId: currentUser.id,
@@ -1350,7 +1397,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       teamId: currentUser.teamId || 'team-1',
       teamName: currentUser.teamName || 'Team Alpha',
       reason: 'Working queue exhausted',
-    }).catch((e) => console.warn('Backend replenish sync:', e));
+    }).catch((e) => notifySyncError('Backend replenish sync:', e));
+    return { ok: true, message: 'Replenishment request sent to your Team Lead.' };
   };
 
   const clearReplenishmentAlert = (bdeId: string) => {
@@ -1362,6 +1410,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         currentTheme,
         setCurrentTheme,
+        notification,
+        notify,
+        dismissNotification,
         currentUser,
         currentRole,
         setCurrentRole,

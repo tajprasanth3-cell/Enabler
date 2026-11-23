@@ -22,7 +22,10 @@ export const TeamManagement: React.FC = () => {
 
   const handleCreateTeamSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTeamName.trim() || !selectedTLId) return;
+    if (!newTeamName.trim() || !selectedTLId) {
+      setFormError('Team name and team lead are required.');
+      return;
+    }
     if (!createTeam(newTeamName.trim(), selectedTLId)) {
       setFormError('Could not create the team. The selected team lead may already lead a team.');
       return;

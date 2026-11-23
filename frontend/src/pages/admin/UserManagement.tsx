@@ -59,7 +59,10 @@ export const UserManagement: React.FC = () => {
     e.preventDefault();
     const name = newUserName.trim();
     const email = newUserEmail.trim();
-    if (!name || !email) return;
+    if (!name || !email) {
+      showToast('error', 'Name and email are required.');
+      return;
+    }
 
     const teamId = newUserRole === 'ADMIN' ? undefined : newUserTeam;
     const created = createUser(name, email, newUserRole, teamId, newUserPhone.trim() || undefined);
@@ -76,7 +79,10 @@ export const UserManagement: React.FC = () => {
   };
 
   const handleToggleStatus = (user: User) => {
-    if (user.id === currentUser?.id && user.status === 'ACTIVE') return;
+    if (user.id === currentUser?.id && user.status === 'ACTIVE') {
+      showToast('error', 'You cannot deactivate your own active admin account.');
+      return;
+    }
     if (!toggleUserStatus(user.id)) {
       showToast(
         'error',
@@ -91,7 +97,10 @@ export const UserManagement: React.FC = () => {
 
   const handleReassignTeam = (user: User, teamId: string) => {
     const team = teams.find((item) => item.id === teamId);
-    if (!team) return;
+    if (!team) {
+      showToast('error', 'Selected team was not found.');
+      return;
+    }
     if (!reassignUserTeam(user.id, team.id, team.name)) {
       showToast('error', `Could not move ${user.name} to ${team.name}.`);
       return;

@@ -10,7 +10,9 @@ import UserManagement from '../pages/admin/UserManagement';
 import AttendanceOverview from '../pages/admin/AttendanceOverview';
 import ReportsAnalytics from '../pages/admin/ReportsAnalytics';
 import SystemSettings from '../pages/admin/SystemSettings';
-import TLDashboard from '../pages/team-lead/TLDashboard';
+import TLWorkbench from '../pages/team-lead/TLWorkbench';
+import TLPool from '../pages/team-lead/TLPool';
+import TLDistribution from '../pages/team-lead/TLDistribution';
 import BDEDashboard from '../pages/bde/BDEDashboard';
 import BDEWorkingQueue from '../pages/bde/BDEWorkingQueue';
 import BDEFollowUps from '../pages/bde/BDEFollowUps';
@@ -54,9 +56,9 @@ export const AppRoutes: React.FC = () => {
 
         <Route path="team-lead">
           <Route index element={<RoleHome />} />
-          <Route path="dashboard" element={<RoleGuard allow={['TEAM_LEAD']}><TLDashboard /></RoleGuard>} />
-          <Route path="pool" element={<RoleGuard allow={['TEAM_LEAD']}><TLDashboard /></RoleGuard>} />
-          <Route path="distribute" element={<RoleGuard allow={['TEAM_LEAD']}><TLDashboard /></RoleGuard>} />
+          <Route path="dashboard" element={<RoleGuard allow={['TEAM_LEAD']}><TLWorkbench /></RoleGuard>} />
+          <Route path="pool" element={<RoleGuard allow={['TEAM_LEAD']}><TLPool /></RoleGuard>} />
+          <Route path="distribute" element={<RoleGuard allow={['TEAM_LEAD']}><TLDistribution /></RoleGuard>} />
           <Route path="attendance" element={<RoleGuard allow={['TEAM_LEAD']}><AttendanceOverview /></RoleGuard>} />
           <Route path="reports" element={<RoleGuard allow={['TEAM_LEAD']}><ReportsAnalytics /></RoleGuard>} />
         </Route>
