@@ -11,7 +11,6 @@ import {
   FiClock,
   FiZap,
   FiMenu,
-  FiRotateCcw,
   FiLogOut,
 } from 'react-icons/fi';
 import { APP_ROUTES } from '../../utils/constants';
@@ -78,11 +77,6 @@ export const Navbar: React.FC = () => {
       : currentUser?.role === 'TEAM_LEAD'
       ? 'Alpha Team Lead'
       : 'BDE Executive';
-
-  const handleSwitchToAdmin = () => {
-    setCurrentRole('ADMIN');
-    navigate(APP_ROUTES.ADMIN.DASHBOARD);
-  };
 
   return (
     <>
@@ -209,17 +203,6 @@ export const Navbar: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={handleSwitchToAdmin}
-              title="Switch to Admin view (demo role preview, no login involved)"
-              aria-label="Switch to Admin view"
-              className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-full border border-[#CBD5E1] bg-white px-2 sm:px-3 shadow-xs hover:border-[#A7F3D0] hover:bg-[#ECFDF5] transition-all duration-200 cursor-pointer active:scale-95 group shrink-0"
-            >
-              <FiRotateCcw className="text-sm sm:text-base text-[#059669] group-hover:rotate-45 transition-transform" />
-              <span className="hidden lg:inline text-[10px] font-bold text-[#475569]">Admin view</span>
-            </button>
 
             <button
               type="button"

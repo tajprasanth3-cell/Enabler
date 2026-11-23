@@ -371,10 +371,48 @@
     "weeklyTargetLeads": 50,
     "monthlyTargetLeads": 200,
     "maxLeadsPerBde": 75,
-    "shiftStartTime": "09:00",
+    "shiftStartTime": "09:30",
     "gracePeriodMinutes": 15
   },
   "auditLogs": [
+    {
+      "id": "audit-1795425476021-4",
+      "action": "SETTINGS_UPDATED",
+      "category": "SYSTEM",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "SYSTEM_SETTINGS",
+      "summary": "System governance settings updated by Vikram Sharma",
+      "details": {
+        "previous": {
+          "companySharePercentage": 30,
+          "remainingSharePercentage": 70,
+          "profitSharePercentage": 30,
+          "conversionTargetPercentage": 25,
+          "dailyTargetLeads": 15,
+          "weeklyTargetLeads": 50,
+          "monthlyTargetLeads": 200,
+          "maxLeadsPerBde": 75,
+          "shiftStartTime": "09:00",
+          "gracePeriodMinutes": 15
+        },
+        "updated": {
+          "companySharePercentage": 30,
+          "remainingSharePercentage": 70,
+          "profitSharePercentage": 30,
+          "conversionTargetPercentage": 25,
+          "dailyTargetLeads": 15,
+          "weeklyTargetLeads": 50,
+          "monthlyTargetLeads": 200,
+          "maxLeadsPerBde": 75,
+          "shiftStartTime": "09:30",
+          "gracePeriodMinutes": 15
+        }
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T09:17:56.021Z"
+    },
     {
       "id": "audit-1795423489304-641",
       "action": "LEAD_ALLOCATED_STAGE1",
