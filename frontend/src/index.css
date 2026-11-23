@@ -1,0 +1,456 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   LeadFlow ROYAL COBALT & MIDNIGHT NAVY PALETTE
+   An ultra-modern, executive institutional aesthetic for Lead & Financial Engines
+   - Primary Accent: Royal Cobalt Blue (#2563EB / #1D4ED8 / #3B82F6)
+   - Dark Surface & Hero: Deep Midnight Navy (#0B1120 to #0F172A, border #1E293B)
+   - Canvas Background: Crisp Alabaster Slate (#F8FAFC)
+   - Card Surfaces: Pure White (#FFFFFF) with subtle slate borders (#E2E8F0)
+   - Glow & Badges: Soft Ice Cobalt Pill Tints (#EFF6FF, border #BFDBFE, text #1D4ED8)
+   - Financial Growth: Vivid Emerald (#10B981)
+   - Typography: Midnight Obsidian (#0F172A / #475569 / #64748B)
+   ========================================================================== */
+
+:root {
+  /* 1. Luminous Canvas & Card Surfaces */
+  --bg-main: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-elevated: #FFFFFF;
+
+  /* 2. Slate & Steel Borders */
+  --border-card: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --border-hover: #BFDBFE;
+
+  /* 3. Royal Cobalt Blue (Primary Brand) */
+  --cobalt-deep: #1E40AF;
+  --cobalt-primary: #2563EB;
+  --cobalt-vibrant: #3B82F6;
+  --cobalt-light: #EFF6FF;
+  --cobalt-border: #BFDBFE;
+  --cobalt-glow: rgba(37, 99, 235, 0.24);
+
+  /* Aliases for backwards compatibility */
+  --indigo-deep: #1E40AF;
+  --indigo-primary: #2563EB;
+  --indigo-vibrant: #3B82F6;
+  --indigo-light: #EFF6FF;
+  --indigo-border: #BFDBFE;
+  --indigo-glow: rgba(37, 99, 235, 0.24);
+
+  --teal-deep: #1E40AF;
+  --teal-primary: #2563EB;
+  --teal-vibrant: #3B82F6;
+  --teal-light: #EFF6FF;
+  --teal-border: #BFDBFE;
+  --teal-glow: rgba(37, 99, 235, 0.24);
+
+  /* 4. Financial Emerald Accents */
+  --emerald-growth: #10B981;
+  --emerald-deep: #059669;
+  --emerald-light: #ECFDF5;
+  --emerald-border: #A7F3D0;
+
+  /* 5. Deep Midnight Navy */
+  --navy-dark: #0B1120;
+  --navy-medium: #0F172A;
+  --navy-light: #1E293B;
+
+  --slate-dark: #0B1120;
+  --slate-medium: #0F172A;
+  --slate-light: #1E293B;
+
+  /* 6. Typography */
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --text-dim: #94A3B8;
+
+  /* Gradients */
+  --accent-gradient: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
+  --cobalt-gradient: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
+  --indigo-gradient: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
+  --navy-gradient: linear-gradient(135deg, #0B1120 0%, #0F172A 100%);
+  --titanium-gradient: linear-gradient(135deg, #0B1120 0%, #0F172A 100%);
+  --slate-gradient: linear-gradient(135deg, #0B1120 0%, #0F172A 100%);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', 'Helvetica Neue', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+  }
+}
+
+/* Custom Royal Cobalt & Slate Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2563EB;
+}
+
+/* ==========================================================================
+   AMBIENT FLOATING ORBS (ROYAL COBALT & MIDNIGHT GLOW)
+   ========================================================================== */
+
+@keyframes floatOrb1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(45px, -35px) scale(1.12);
+  }
+  66% {
+    transform: translate(-30px, 40px) scale(0.95);
+  }
+}
+
+@keyframes floatOrb2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  40% {
+    transform: translate(-50px, 45px) scale(1.15);
+  }
+  80% {
+    transform: translate(30px, -20px) scale(0.92);
+  }
+}
+
+@keyframes floatOrb3 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(35px, 50px) scale(1.08);
+  }
+}
+
+@keyframes shimmerCobalt {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Ambient Canvas with Floating Cobalt & Midnight Glow */
+.ambient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: var(--bg-main);
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(85px);
+}
+
+/* Royal Cobalt Orb */
+.orb-cobalt,
+.orb-indigo,
+.orb-teal {
+  top: 2%;
+  left: 8%;
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.14) 0%, rgba(37, 99, 235, 0) 70%);
+  animation: floatOrb1 24s ease-in-out infinite;
+}
+
+/* Ice Blue & Cyan Glow Orb */
+.orb-ice,
+.orb-lavender,
+.orb-mint {
+  top: 24%;
+  right: 6%;
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0) 70%);
+  animation: floatOrb2 28s ease-in-out infinite;
+}
+
+/* Deep Midnight Navy Orb */
+.orb-navy,
+.orb-titanium,
+.orb-slate {
+  bottom: 8%;
+  left: 32%;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(11, 17, 32, 0.08) 0%, rgba(11, 17, 32, 0) 70%);
+  animation: floatOrb3 22s ease-in-out infinite;
+}
+
+.orb-emerald {
+  @extend .orb-cobalt;
+}
+
+.orb-champagne {
+  @extend .orb-ice;
+}
+
+/* ==========================================================================
+   CARDS, PANELS & MODERN BUTTONS
+   ========================================================================== */
+
+.glass-panel {
+  background: #FFFFFF;
+  border: 1px solid var(--border-card);
+  box-shadow: 0 2px 14px -2px rgba(15, 23, 42, 0.04), 0 1px 3px -1px rgba(15, 23, 42, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel:hover {
+  border-color: #BFDBFE;
+  box-shadow: 0 10px 25px -4px rgba(37, 99, 235, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+  transform: translateY(-2px);
+}
+
+.glow-cobalt,
+.glow-indigo,
+.glow-teal {
+  box-shadow: 0 6px 22px -2px rgba(37, 99, 235, 0.28);
+}
+
+.glow-navy,
+.glow-slate {
+  box-shadow: 0 6px 22px -2px rgba(11, 17, 32, 0.22);
+}
+
+/* Modern Shimmer Button in Royal Cobalt */
+.shimmer-button,
+.shimmer-cobalt,
+.shimmer-indigo,
+.bde-theme .shimmer-button {
+  background: linear-gradient(90deg, #1D4ED8, #2563EB, #3B82F6, #1D4ED8) !important;
+  background-size: 250% 100% !important;
+  animation: shimmerCobalt 5s linear infinite !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.32) !important;
+  transition: all 0.25s ease;
+}
+
+.shimmer-button:hover,
+.shimmer-cobalt:hover,
+.shimmer-indigo:hover,
+.bde-theme .shimmer-button:hover {
+  box-shadow: 0 6px 24px rgba(37, 99, 235, 0.46) !important;
+  transform: translateY(-1px);
+}
+
+.bde-theme .glass-panel {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 14px -2px rgba(15, 23, 42, 0.04), 0 1px 3px -1px rgba(15, 23, 42, 0.02);
+}
+
+.bde-theme .glass-panel:hover {
+  border-color: #BFDBFE;
+  box-shadow: 0 10px 25px -4px rgba(37, 99, 235, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+}
+
+/* Gradient Text in Royal Cobalt */
+.gradient-text-cobalt,
+.gradient-text-indigo,
+.gradient-text-teal,
+.gradient-text-emerald {
+  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.table-scroll,
+.table-container,
+.data-table-wrapper,
+[data-table-scroll] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-strip,
+[data-tab-strip] {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-strip::-webkit-scrollbar,
+[data-tab-strip]::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-panel,
+.bottom-sheet,
+[data-bottom-sheet] {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 2rem);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-bottom-nav {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-bottom-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.w-screen,
+.min-w-screen {
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .app-header {
+    z-index: 40;
+  }
+
+  .table-scroll,
+  .table-container,
+  .data-table-wrapper,
+  [data-table-scroll] {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .tab-strip,
+  [data-tab-strip] {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .modal-panel,
+  .bottom-sheet,
+  [data-bottom-sheet] {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 4rem);
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-bottom-nav {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .app-header {
+    z-index: 40;
+  }
+
+  .table-scroll,
+  .table-container,
+  .data-table-wrapper,
+  [data-table-scroll] {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .tab-strip,
+  [data-tab-strip] {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .modal-panel,
+  .bottom-sheet,
+  [data-bottom-sheet] {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 3rem);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-header {
+    z-index: 40;
+  }
+
+  .table-scroll,
+  .table-container,
+  .data-table-wrapper,
+  [data-table-scroll] {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .modal-panel,
+  .bottom-sheet,
+  [data-bottom-sheet] {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 4rem);
+  }
+
+  .mobile-bottom-nav {
+    padding-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .orb {
+    animation: none !important;
+  }
+}

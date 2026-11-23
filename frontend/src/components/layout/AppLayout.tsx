@@ -1,0 +1,37 @@
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Navbar from './Navbar';
+import Sidebar from './Sidebar';
+import { motion, AnimatePresence } from 'framer-motion';
+
+export const AppLayout: React.FC = () => {
+  return (
+    <div className="min-h-screen flex flex-col relative overflow-x-clip transition-colors duration-200 bg-[#F8FAFC] text-[#0F172A] selection:bg-[#2563EB] selection:text-white bde-theme">
+      <div className="ambient-bg">
+        <div className="orb orb-cobalt" />
+        <div className="orb orb-ice" />
+        <div className="orb orb-navy" />
+      </div>
+
+      <Navbar />
+
+      <div className="flex flex-1 relative min-w-0">
+        <Sidebar />
+        <main className="min-w-0 flex-1 relative z-10 p-4 sm:p-6 lg:p-8 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-8 overflow-x-clip">
+          <AnimatePresence mode="wait">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default AppLayout;
