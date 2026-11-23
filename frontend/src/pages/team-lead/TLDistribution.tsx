@@ -200,8 +200,8 @@ export const TLDistribution: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
-        <div>
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+        <div className="max-w-2xl min-w-0">
           <button
             onClick={() => navigate(APP_ROUTES.TEAM_LEAD.DASHBOARD)}
             className="flex items-center gap-1.5 text-xs font-bold text-[#64748B] hover:text-[#2563EB] mb-2 cursor-pointer transition-colors"
@@ -216,22 +216,22 @@ export const TLDistribution: React.FC = () => {
           <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
             BDE Distribution & Workload Matrix
           </h1>
-          <p className="text-[#64748B] text-xs sm:text-sm mt-1">
+          <p className="text-[#64748B] text-xs sm:text-sm mt-1 leading-relaxed">
             Monitor real-time executive queue depth, distribute pooled leads, and reassign workloads during team leave.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap">
           <button
             onClick={openReassignModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] text-xs font-bold shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] text-xs font-bold shadow-xs cursor-pointer whitespace-nowrap"
           >
             <FiRepeat className="text-[#2563EB]" />
             <span>Reassign Leads (Absence / Leave)</span>
           </button>
           <button
             onClick={openStage2Modal}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl shimmer-button text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl shimmer-button text-white font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
           >
             <FiSend />
             <span>Batch Distribute ({teamPoolLeads.length} in Pool)</span>

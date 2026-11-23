@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
+import { apiRequest } from '../services/apiClient';
 import type {
   UserRole,
   User,
@@ -74,6 +75,10 @@ export interface AppContextType {
   notification: AppNotification | null;
   notify: (type: AppNotificationType, message: string) => void;
   dismissNotification: () => void;
+
+  isAuthenticated: boolean;
+  login: (email: string, role?: UserRole) => Promise<ActionResult>;
+  logout: () => void;
 
   currentUser: User;
   currentRole: UserRole;
@@ -326,6 +331,7 @@ function distribute(total: number, weights: number[]): number[] {
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentTheme, setCurrentTheme] = usePersistentState<ThemeMode>('theme', 'royal-violet');
+  const [authToken, setAuthToken] = usePersistentState<string>('authToken', '');
   const [currentRole, setCurrentRoleState] = usePersistentState<UserRole>('currentRole', 'ADMIN');
   const [currentUserId, setCurrentUserId] = usePersistentState<string>('currentUserId', INITIAL_USERS[0].id);
   const [users, setUsers] = usePersistentState<User[]>('users', INITIAL_USERS);
@@ -440,6 +446,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isAdmin = currentRole === 'ADMIN';
   const isTeamLead = currentRole === 'TEAM_LEAD';
   const isBde = currentRole === 'BDE';
+  const isAuthenticated = Boolean(authToken);
   const todayAttendance = attendanceRecords.find(
     (record) => record.userId === currentUser?.id && record.date === today()
   );
@@ -474,6 +481,64 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     },
     [currentUser?.id, currentUser?.name, currentRole, setAuditEvents]
   );
+
+  const login = useCallback(
+    async (email: string, role?: UserRole): Promise<ActionResult> => {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!normalizedEmail) return { ok: false, message: 'Enter your email address.' };
+
+      try {
+        const result = await apiRequest<{ user: User; token: string }>('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: normalizedEmail, role }),
+        });
+        if (!result?.token || !result?.user) throw new Error('Sign-in response was incomplete.');
+
+        localStorage.setItem('enabler_token', result.token);
+        setAuthToken(result.token);
+        setCurrentUserId(result.user.id);
+        setCurrentRoleState(result.user.role);
+        logAudit('LOGIN', 'SESSION', result.user.id, `${result.user.name} signed in`, {
+          role: result.user.role,
+          mode: 'server',
+        });
+        return { ok: true, message: `Welcome back, ${result.user.name}.` };
+      } catch (error) {
+        const localUser = users.find(
+          (user) =>
+            user.email.toLowerCase() === normalizedEmail && (!role || user.role === role)
+        );
+        if (!localUser) {
+          return {
+            ok: false,
+            message: error instanceof Error ? error.message : 'Sign-in failed. Please try again.',
+          };
+        }
+        if (localUser.status !== 'ACTIVE') {
+          return { ok: false, message: 'This account is inactive. Contact your administrator.' };
+        }
+
+        setAuthToken('local-demo');
+        setCurrentUserId(localUser.id);
+        setCurrentRoleState(localUser.role);
+        notify('warning', 'Server sign-in unavailable; signed in with the local demo directory.');
+        logAudit('LOGIN', 'SESSION', localUser.id, `${localUser.name} signed in locally`, {
+          role: localUser.role,
+          mode: 'local',
+        });
+        return { ok: true, message: `Signed in locally as ${localUser.name}.` };
+      }
+    },
+    [logAudit, notify, setAuthToken, setCurrentRoleState, setCurrentUserId, users]
+  );
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('enabler_token');
+    setAuthToken('');
+    logAudit('LOGOUT', 'SESSION', currentUser.id, `${currentUser.name} signed out`, {
+      role: currentRole,
+    });
+  }, [currentRole, currentUser.id, currentUser.name, logAudit, setAuthToken]);
 
   useEffect(() => {
     const stale = attendanceRecords.filter(
@@ -1413,6 +1478,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notification,
         notify,
         dismissNotification,
+        isAuthenticated,
+        login,
+        logout,
         currentUser,
         currentRole,
         setCurrentRole,

@@ -153,8 +153,8 @@ export const TLPool: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
-        <div>
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+        <div className="max-w-2xl min-w-0">
           <button
             onClick={() => navigate(APP_ROUTES.TEAM_LEAD.DASHBOARD)}
             className="flex items-center gap-1.5 text-xs font-bold text-[#64748B] hover:text-[#2563EB] mb-2 cursor-pointer transition-colors"
@@ -169,15 +169,15 @@ export const TLPool: React.FC = () => {
           <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
             {currentTeamName} Lead Pool
           </h1>
-          <p className="text-[#64748B] text-xs sm:text-sm mt-1">
+          <p className="text-[#64748B] text-xs sm:text-sm mt-1 leading-relaxed">
             Browse and search candidate leads allocated from Admin Master Pool, waiting for Stage 2 distribution to BDEs.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <button
             onClick={openStage2Modal}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl shimmer-button text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl shimmer-button text-white font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
           >
             <FiSend />
             <span>Batch Allocate to BDEs ({teamPoolLeads.length} Available)</span>

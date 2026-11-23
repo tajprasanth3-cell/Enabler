@@ -1,4 +1,6 @@
 export type AuditAction =
+  | 'LOGIN'
+  | 'LOGOUT'
   | 'ROLE_SWITCH'
   | 'USER_CREATE'
   | 'USER_STATUS_CHANGE'

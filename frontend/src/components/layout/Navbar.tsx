@@ -12,6 +12,7 @@ import {
   FiZap,
   FiMenu,
   FiRotateCcw,
+  FiLogOut,
 } from 'react-icons/fi';
 import { APP_ROUTES } from '../../utils/constants';
 
@@ -24,6 +25,7 @@ export const Navbar: React.FC = () => {
     replenishmentAlerts,
     punchState,
     punchInTime,
+    logout,
   } = useApp();
 
   const roles: Array<{

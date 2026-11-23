@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AuditTrail from '../pages/admin/AuditTrail';
@@ -18,9 +18,24 @@ import BDEWorkingQueue from '../pages/bde/BDEWorkingQueue';
 import BDEFollowUps from '../pages/bde/BDEFollowUps';
 import BDEAttendance from '../pages/bde/BDEAttendance';
 import BDEPerformance from '../pages/bde/BDEPerformance';
+import Login from '../pages/Login';
 import { APP_ROUTES, ROLE_HOME_ROUTES } from '../utils/constants';
 import { useApp } from '../context/useApp';
 import type { UserRole } from '../types';
+
+const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useApp();
+  const location = useLocation();
+  if (!isAuthenticated) {
+    return <Navigate to={APP_ROUTES.LOGIN} replace state={{ from: location.pathname }} />;
+  }
+  return <>{children}</>;
+};
+
+const RootRedirect: React.FC = () => {
+  const { isAuthenticated, currentRole } = useApp();
+  return <Navigate to={isAuthenticated ? ROLE_HOME_ROUTES[currentRole] : APP_ROUTES.LOGIN} replace />;
+};
 
 const RoleGuard: React.FC<{ allow: UserRole[]; children: React.ReactNode }> = ({ allow, children }) => {
   const { currentRole } = useApp();
@@ -38,7 +53,16 @@ const RoleHome: React.FC = () => {
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<AppLayout />}>
+      <Route path={APP_ROUTES.LOGIN} element={<Login />} />
+
+      <Route
+        path="/"
+        element={
+          <AuthGuard>
+            <AppLayout />
+          </AuthGuard>
+        }
+      >
         <Route index element={<RoleHome />} />
 
         <Route path="admin">
@@ -73,7 +97,7 @@ export const AppRoutes: React.FC = () => {
         </Route>
       </Route>
 
-      <Route path="*" element={<RoleHome />} />
+      <Route path="*" element={<RootRedirect />} />
     </Routes>
   );
 };
