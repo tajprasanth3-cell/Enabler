@@ -206,7 +206,7 @@ export const ReportsAnalytics: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiBarChart2 />
             <span>
               {currentRole === 'TEAM_LEAD' ? 'Team Performance Analytics' : 'Executive Business Intelligence'}
@@ -229,7 +229,7 @@ export const ReportsAnalytics: React.FC = () => {
                 key={r}
                 onClick={() => setDateRange(r)}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  dateRange === r ? 'bg-white text-[#2563EB] shadow-xs' : 'text-[#64748B] hover:text-[#0F172A]'
+                  dateRange === r ? 'bg-white text-[#059669] shadow-xs' : 'text-[#64748B] hover:text-[#0F172A]'
                 }`}
               >
                 {r === 'TODAY' ? 'Today' : r === 'WEEK' ? '7 Days' : r === 'MONTH' ? 'Month' : 'All Time'}
@@ -278,9 +278,9 @@ export const ReportsAnalytics: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] text-xs font-bold flex items-center gap-2"
+          className="p-3.5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs font-bold flex items-center gap-2"
         >
-          <FiCheckCircle className="text-base text-[#2563EB]" />
+          <FiCheckCircle className="text-base text-[#059669]" />
           <span>Performance report exported successfully as CSV! Check your downloads.</span>
         </motion.div>
       )}
@@ -290,12 +290,12 @@ export const ReportsAnalytics: React.FC = () => {
         <motion.div whileHover={{ y: -2 }} className="glass-panel p-4 sm:p-5 rounded-2xl min-w-0">
           <div className="flex items-center justify-between text-xs font-bold text-[#64748B]">
             <span>Total Leads Managed</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiPhoneCall className="text-base" />
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-2 truncate">{totalLeads}</div>
-          <div className="text-xs text-[#2563EB] font-semibold mt-1">
+          <div className="text-xs text-[#059669] font-semibold mt-1">
             {contactRate}% Contact Rate ({contactedLeads} touched)
           </div>
         </motion.div>
@@ -303,13 +303,13 @@ export const ReportsAnalytics: React.FC = () => {
         <motion.div whileHover={{ y: -2 }} className="glass-panel p-4 sm:p-5 rounded-2xl min-w-0">
           <div className="flex items-center justify-between text-xs font-bold text-[#64748B]">
             <span>Successful Conversions</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiCheckCircle className="text-base" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-[#2563EB] mt-2 truncate">{convertedLeads}</div>
+          <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-2 truncate">{convertedLeads}</div>
           <div className="text-xs text-[#64748B] font-semibold mt-1">
-            Overall Conversion: <span className="text-[#2563EB] font-bold">{conversionPct}%</span>
+            Overall Conversion: <span className="text-[#059669] font-bold">{conversionPct}%</span>
           </div>
         </motion.div>
 
@@ -318,7 +318,7 @@ export const ReportsAnalytics: React.FC = () => {
             <motion.div whileHover={{ y: -2 }} className="glass-panel p-4 sm:p-5 rounded-2xl min-w-0">
               <div className="flex items-center justify-between text-xs font-bold text-[#64748B]">
                 <span>Gross Confirmed Revenue</span>
-                <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+                <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
                   <FiDollarSign className="text-base" />
                 </div>
               </div>
@@ -333,15 +333,15 @@ export const ReportsAnalytics: React.FC = () => {
             <motion.div whileHover={{ y: -2 }} className="glass-panel p-4 sm:p-5 rounded-2xl min-w-0">
               <div className="flex items-center justify-between text-xs font-bold text-[#64748B]">
                 <span>Confirmed Organization Share</span>
-                <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+                <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
                   <FiTrendingUp className="text-base" />
                 </div>
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-[#2563EB] mt-2 truncate">
+              <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-2 truncate">
                 {formatCurrency(totalNetProfit)}
               </div>
               <div className="text-xs text-[#64748B] mt-1 truncate">
-                  Remaining Share: <span className="font-bold text-[#2563EB]">{formatCurrency(totalBdeCommissions)}</span>
+                  Remaining Share: <span className="font-bold text-[#059669]">{formatCurrency(totalBdeCommissions)}</span>
               </div>
             </motion.div>
           </>
@@ -354,7 +354,7 @@ export const ReportsAnalytics: React.FC = () => {
         <div className="lg:col-span-2 glass-panel p-6 rounded-2xl space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-              <FiTrendingUp className="text-[#2563EB]" />
+              <FiTrendingUp className="text-[#059669]" />
               <span>Full Lifecycle Pipeline Funnel</span>
             </h3>
             <span className="text-xs font-semibold text-[#64748B]">Stage drop-off rates</span>
@@ -365,13 +365,13 @@ export const ReportsAnalytics: React.FC = () => {
             <div>
               <div className="flex justify-between text-xs font-bold mb-1">
                 <span className="text-[#0F172A]">1. Leads Ingested & Allocated</span>
-                <span className="text-[#2563EB] font-mono">{totalLeads} leads (100%)</span>
+                <span className="text-[#059669] font-mono">{totalLeads} leads (100%)</span>
               </div>
               <div className="w-full bg-[#E2E8F0] h-3 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: '100%' }}
-                  className="bg-gradient-to-r from-[#1D4ED8] to-[#2563EB] h-full rounded-full"
+                  className="bg-gradient-to-r from-[#047857] to-[#10B981] h-full rounded-full"
                 />
               </div>
             </div>
@@ -380,7 +380,7 @@ export const ReportsAnalytics: React.FC = () => {
             <div>
               <div className="flex justify-between text-xs font-bold mb-1">
                 <span className="text-[#0F172A]">2. Contacted via Outreach / Dialer</span>
-                <span className="text-[#2563EB] font-mono">
+                <span className="text-[#059669] font-mono">
                   {contactedLeads} leads ({calculateConversionRate(contactedLeads, totalLeads)}%)
                 </span>
               </div>
@@ -388,7 +388,7 @@ export const ReportsAnalytics: React.FC = () => {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${calculateConversionRate(contactedLeads, totalLeads)}%` }}
-                  className="bg-[#2563EB] h-full rounded-full"
+                  className="bg-[#10B981] h-full rounded-full"
                 />
               </div>
             </div>
@@ -397,7 +397,7 @@ export const ReportsAnalytics: React.FC = () => {
             <div>
               <div className="flex justify-between text-xs font-bold mb-1">
                 <span className="text-[#0F172A]">3. Qualified Prospects (Interested / Callbacks)</span>
-                <span className="text-[#3B82F6] font-mono">
+                <span className="text-[#34D399] font-mono">
                   {interestedLeads} leads ({calculateConversionRate(interestedLeads, totalLeads)}%)
                 </span>
               </div>
@@ -405,7 +405,7 @@ export const ReportsAnalytics: React.FC = () => {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${calculateConversionRate(interestedLeads, totalLeads)}%` }}
-                  className="bg-[#3B82F6] h-full rounded-full"
+                  className="bg-[#34D399] h-full rounded-full"
                 />
               </div>
             </div>
@@ -414,7 +414,7 @@ export const ReportsAnalytics: React.FC = () => {
             <div>
               <div className="flex justify-between text-xs font-bold mb-1">
                 <span className="text-[#0F172A]">4. Closed & Enrolled (Converted)</span>
-                <span className="text-[#2563EB] font-mono">
+                <span className="text-[#059669] font-mono">
                   {convertedLeads} leads ({conversionPct}%)
                 </span>
               </div>
@@ -422,7 +422,7 @@ export const ReportsAnalytics: React.FC = () => {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${conversionPct}%` }}
-                  className="bg-gradient-to-r from-[#2563EB] to-[#818CF8] h-full rounded-full"
+                  className="bg-gradient-to-r from-[#10B981] to-[#818CF8] h-full rounded-full"
                 />
               </div>
             </div>
@@ -449,7 +449,7 @@ export const ReportsAnalytics: React.FC = () => {
         {/* Lead Source Effectiveness */}
         <div className="glass-panel p-6 rounded-2xl space-y-4">
           <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-            <FiAward className="text-[#2563EB]" />
+            <FiAward className="text-[#059669]" />
             <span>Conversion Rate By Source</span>
           </h3>
 
@@ -461,7 +461,7 @@ export const ReportsAnalytics: React.FC = () => {
                 <div key={src.name} className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-[#0F172A]">{src.name}</span>
-                    <span className="font-bold text-[#2563EB]">{src.rate}% Conv.</span>
+                    <span className="font-bold text-[#059669]">{src.rate}% Conv.</span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-[#64748B] mt-1">
                     <span>{src.count} total leads</span>
@@ -479,7 +479,7 @@ export const ReportsAnalytics: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-              <FiAward className="text-[#2563EB]" />
+              <FiAward className="text-[#059669]" />
               <span>{currentRole === 'ADMIN' ? 'BDE Executive Calling & Revenue Leaderboard' : 'BDE Calling & Conversion Leaderboard'}</span>
             </h3>
             <p className="text-xs text-[#64748B] mt-0.5">
@@ -488,7 +488,7 @@ export const ReportsAnalytics: React.FC = () => {
                 : 'Ranked by confirmed deal conversions and win rate.'}
             </p>
           </div>
-          <span className="text-xs text-[#2563EB] font-bold bg-[#EFF6FF] px-3 py-1 rounded-full border border-[#BFDBFE] self-start sm:self-auto">
+          <span className="text-xs text-[#059669] font-bold bg-[#ECFDF5] px-3 py-1 rounded-full border border-[#A7F3D0] self-start sm:self-auto">
             {bdeLeaderboard.length} Active BDEs
           </span>
         </div>
@@ -518,7 +518,7 @@ export const ReportsAnalytics: React.FC = () => {
                     <span
                       className={`w-6 h-6 rounded-full inline-flex items-center justify-center font-bold text-xs ${
                         idx === 0
-                          ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
+                          ? 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]'
                           : idx === 1
                           ? 'bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1]'
                           : idx === 2
@@ -534,9 +534,9 @@ export const ReportsAnalytics: React.FC = () => {
                     <div className="text-[10px] text-[#64748B]">Team: {bde.teamId || 'Team Alpha'}</div>
                   </td>
                   <td className="py-3.5 px-4 text-center font-mono font-bold text-[#475569]">{bde.assignedCount}</td>
-                  <td className="py-3.5 px-4 text-center font-mono font-bold text-[#2563EB]">{bde.convertedCount}</td>
+                  <td className="py-3.5 px-4 text-center font-mono font-bold text-[#059669]">{bde.convertedCount}</td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className="font-mono font-black text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded-full border border-[#BFDBFE]">
+                    <span className="font-mono font-black text-[#059669] bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]">
                       {bde.conversionRate}%
                     </span>
                   </td>
@@ -545,7 +545,7 @@ export const ReportsAnalytics: React.FC = () => {
                       <td className="py-3.5 px-4 text-right font-mono font-bold text-[#0F172A]">
                         {formatCurrency(bde.revenue)}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-[#2563EB]">
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-[#059669]">
                         {formatCurrency(bde.commission)}
                       </td>
                     </>
@@ -554,7 +554,7 @@ export const ReportsAnalytics: React.FC = () => {
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         bde.status === 'ACTIVE'
-                          ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
+                          ? 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]'
                           : 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
                       }`}
                     >

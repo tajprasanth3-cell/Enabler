@@ -199,7 +199,7 @@ export const TLDistribution: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div className="max-w-2xl min-w-0">
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUsers />
             <span>Frontline Workforce Balancing</span>
           </div>
@@ -216,7 +216,7 @@ export const TLDistribution: React.FC = () => {
             onClick={openReassignModal}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] text-xs font-bold shadow-xs cursor-pointer whitespace-nowrap"
           >
-            <FiRepeat className="text-[#2563EB]" />
+            <FiRepeat className="text-[#059669]" />
             <span>Reassign Leads (Absence / Leave)</span>
           </button>
           <button
@@ -293,7 +293,7 @@ export const TLDistribution: React.FC = () => {
       <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white overflow-hidden shadow-xs">
         <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
           <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-            <FiUserCheck className="text-[#2563EB]" />
+            <FiUserCheck className="text-[#059669]" />
             <span>BDE Workload Balancing & Quota Matrix ({teamBdes.length} Executives)</span>
           </h3>
           <span className="text-xs text-[#64748B] font-semibold">Max Threshold: {maxLeadsPerBde} leads</span>
@@ -329,7 +329,7 @@ export const TLDistribution: React.FC = () => {
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           bde.status === 'ACTIVE'
-                            ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
+                            ? 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]'
                             : 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
                         }`}
                       >
@@ -338,7 +338,7 @@ export const TLDistribution: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4 text-center font-semibold text-[#0F172A]">{bdeLeads.length}</td>
                     <td className="py-3.5 px-4 text-center font-bold">
-                      <span className={pending === 0 ? 'text-[#D97706]' : 'text-[#2563EB]'}>
+                      <span className={pending === 0 ? 'text-[#D97706]' : 'text-[#059669]'}>
                         {pending} / {maxLeadsPerBde}
                       </span>
                       <div className="w-24 bg-[#E2E8F0] h-1.5 rounded-full mx-auto mt-1 overflow-hidden">
@@ -348,13 +348,13 @@ export const TLDistribution: React.FC = () => {
                               ? 'bg-[#DC2626]'
                               : pending >= maxLeadsPerBde * 0.8
                               ? 'bg-[#D97706]'
-                              : 'bg-[#2563EB]'
+                              : 'bg-[#10B981]'
                           }`}
                           style={{ width: `${Math.min(100, (pending / maxLeadsPerBde) * 100)}%` }}
                         />
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-center font-bold text-[#2563EB]">{conv}</td>
+                    <td className="py-3.5 px-4 text-center font-bold text-[#059669]">{conv}</td>
                     <td className="py-3.5 px-4 text-center font-black text-[#0F172A]">{convPct}%</td>
                     <td className="py-3.5 px-4">
                       {reason ? (
@@ -370,7 +370,7 @@ export const TLDistribution: React.FC = () => {
                           At Cap
                         </span>
                       ) : (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] font-bold">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] font-bold">
                           {capacity} slots free
                         </span>
                       )}
@@ -402,7 +402,7 @@ export const TLDistribution: React.FC = () => {
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiSend className="text-[#2563EB]" />
+                <FiSend className="text-[#059669]" />
                 <span>Distribute Leads to Team BDEs</span>
               </h3>
               <button
@@ -414,7 +414,7 @@ export const TLDistribution: React.FC = () => {
             </div>
 
             <form onSubmit={handleExecuteStage2} className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] font-semibold">
+              <div className="p-3.5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] font-semibold">
                 Available in Pool: <strong>{teamPoolLeads.length} leads</strong>
               </div>
 
@@ -426,7 +426,7 @@ export const TLDistribution: React.FC = () => {
                     setAllocationMethod(e.target.value as AllocationMethod);
                     setAllocationError('');
                   }}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="EQUAL">Equal Distribution</option>
                   <option value="WORKLOAD_BASED">Workload-Based (Free Capacity)</option>
@@ -461,10 +461,10 @@ export const TLDistribution: React.FC = () => {
                               setSelectedBdes((prev) => prev.filter((id) => id !== b.id));
                             }
                           }}
-                          className="accent-[#2563EB]"
+                          className="accent-[#10B981]"
                         />
                         <span className="font-bold text-[#0F172A]">{b.name}</span>
-                        <span className="text-[#2563EB] text-[10px] font-semibold">
+                        <span className="text-[#059669] text-[10px] font-semibold">
                           {b.status} · {openLeadsForBde(b.id)}/{maxLeadsPerBde} open
                         </span>
                         {reason && <span className="text-[10px] font-bold text-[#DC2626]">({reason})</span>}
@@ -483,7 +483,7 @@ export const TLDistribution: React.FC = () => {
                     max={maxBatchCeiling}
                     value={countPerBde}
                     onChange={(e) => setCountPerBde(clampBatch(Number(e.target.value), maxBatchCeiling) || 1)}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
                   />
                   <p className="text-[10px] text-[#64748B] mt-1 font-medium">Max ceiling: {maxBatchCeiling}</p>
                 </div>
@@ -516,7 +516,7 @@ export const TLDistribution: React.FC = () => {
                               [id]: clampBatch(Number(e.target.value), cap),
                             }))
                           }
-                          className="w-20 bg-white border border-[#E2E8F0] rounded-xl p-2 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
+                          className="w-20 bg-white border border-[#E2E8F0] rounded-xl p-2 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
                         />
                       </div>
                     );
@@ -577,7 +577,7 @@ export const TLDistribution: React.FC = () => {
                     setReassignFromBde(e.target.value);
                     setReassignError('');
                   }}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="">Select source BDE...</option>
                   {teamBdes.map((b) => (
@@ -596,7 +596,7 @@ export const TLDistribution: React.FC = () => {
                     setReassignToBde(e.target.value);
                     setReassignError('');
                   }}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="">Select target BDE...</option>
                   {teamBdes

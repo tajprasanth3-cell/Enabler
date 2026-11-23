@@ -133,7 +133,7 @@ export const TLWorkbench: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUsers />
             <span>Team Lead Operational Command</span>
           </div>
@@ -215,54 +215,54 @@ export const TLWorkbench: React.FC = () => {
         <motion.div
           whileHover={{ y: -2 }}
           onClick={() => navigate(APP_ROUTES.TEAM_LEAD.LEAD_POOL)}
-          className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white cursor-pointer hover:border-[#2563EB] transition-all"
+          className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white cursor-pointer hover:border-[#10B981] transition-all"
         >
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span className="truncate">Team Pool</span>
-            <div className="p-1.5 rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-1.5 rounded-lg bg-[#ECFDF5] text-[#059669]">
               <FiLayers />
             </div>
           </div>
-          <div className="text-2xl font-black text-[#2563EB] mt-1.5">{teamPoolLeads.length}</div>
+          <div className="text-2xl font-black text-[#059669] mt-1.5">{teamPoolLeads.length}</div>
           <div className="text-[11px] text-[#64748B] mt-0.5 font-medium flex items-center justify-between">
             <span>Unassigned</span>
-            <span className="text-[#2563EB] font-bold">View Pool →</span>
+            <span className="text-[#059669] font-bold">View Pool →</span>
           </div>
         </motion.div>
 
         <motion.div
           whileHover={{ y: -2 }}
           onClick={() => navigate(APP_ROUTES.TEAM_LEAD.DISTRIBUTION)}
-          className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white cursor-pointer hover:border-[#2563EB] transition-all"
+          className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white cursor-pointer hover:border-[#10B981] transition-all"
         >
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span className="truncate">Active in Queue</span>
-            <div className="p-1.5 rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-1.5 rounded-lg bg-[#ECFDF5] text-[#059669]">
               <FiPhoneForwarded />
             </div>
           </div>
           <div className="text-2xl font-black text-[#0F172A] mt-1.5">{teamDistributedLeads.length}</div>
           <div className="text-[11px] text-[#64748B] mt-0.5 font-medium flex items-center justify-between">
             <span>In BDE Queues</span>
-            <span className="text-[#2563EB] font-bold">Matrix →</span>
+            <span className="text-[#059669] font-bold">Matrix →</span>
           </div>
         </motion.div>
 
         <motion.div whileHover={{ y: -2 }} className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white">
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span className="truncate">Conversions</span>
-            <div className="p-1.5 rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-1.5 rounded-lg bg-[#ECFDF5] text-[#059669]">
               <FiCheckCircle />
             </div>
           </div>
-          <div className="text-2xl font-black text-[#2563EB] mt-1.5">{teamConvertedLeads.length}</div>
+          <div className="text-2xl font-black text-[#059669] mt-1.5">{teamConvertedLeads.length}</div>
           <div className="text-[11px] text-[#64748B] mt-0.5 font-medium">Closed Deals</div>
         </motion.div>
 
         <motion.div whileHover={{ y: -2 }} className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white">
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span className="truncate">Win Rate %</span>
-            <div className="p-1.5 rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-1.5 rounded-lg bg-[#ECFDF5] text-[#059669]">
               <FiTrendingUp />
             </div>
           </div>
@@ -273,11 +273,11 @@ export const TLWorkbench: React.FC = () => {
         <motion.div
           whileHover={{ y: -2 }}
           onClick={() => navigate(APP_ROUTES.TEAM_LEAD.ATTENDANCE)}
-          className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white cursor-pointer hover:border-[#2563EB] transition-all"
+          className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white cursor-pointer hover:border-[#10B981] transition-all"
         >
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span className="truncate">Attendance Today</span>
-            <div className="p-1.5 rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-1.5 rounded-lg bg-[#ECFDF5] text-[#059669]">
               <FiClock />
             </div>
           </div>
@@ -286,7 +286,7 @@ export const TLWorkbench: React.FC = () => {
           </div>
           <div className="text-[11px] text-[#64748B] mt-0.5 font-medium flex items-center justify-between">
             <span>Clocked In</span>
-            <span className="text-[#2563EB] font-bold">Review →</span>
+            <span className="text-[#059669] font-bold">Review →</span>
           </div>
         </motion.div>
 
@@ -307,7 +307,7 @@ export const TLWorkbench: React.FC = () => {
         <div className="p-4 border-b border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
           <div>
             <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-              <FiUserCheck className="text-[#2563EB]" />
+              <FiUserCheck className="text-[#059669]" />
               <span>Frontline BDE Queue & Capacity Status ({teamBdes.length} Executives)</span>
             </h3>
             <p className="text-xs text-[#64748B] mt-0.5">
@@ -317,7 +317,7 @@ export const TLWorkbench: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate(APP_ROUTES.TEAM_LEAD.DISTRIBUTION)}
-              className="text-xs font-bold text-[#2563EB] hover:underline"
+              className="text-xs font-bold text-[#059669] hover:underline"
             >
               Full Distribution Matrix →
             </button>
@@ -354,7 +354,7 @@ export const TLWorkbench: React.FC = () => {
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           bde.status === 'ACTIVE'
-                            ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
+                            ? 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]'
                             : 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
                         }`}
                       >
@@ -363,7 +363,7 @@ export const TLWorkbench: React.FC = () => {
                     </td>
                     <td className="py-3 px-4 text-center font-semibold text-[#0F172A]">{bdeLeads.length}</td>
                     <td className="py-3 px-4 text-center font-bold">
-                      <span className={pending === 0 ? 'text-[#D97706]' : 'text-[#2563EB]'}>
+                      <span className={pending === 0 ? 'text-[#D97706]' : 'text-[#059669]'}>
                         {pending} / {maxLeadsPerBde}
                       </span>
                       <div className="w-24 bg-[#E2E8F0] h-1.5 rounded-full mx-auto mt-1 overflow-hidden">
@@ -373,13 +373,13 @@ export const TLWorkbench: React.FC = () => {
                               ? 'bg-[#DC2626]'
                               : pending >= maxLeadsPerBde * 0.8
                               ? 'bg-[#D97706]'
-                              : 'bg-[#2563EB]'
+                              : 'bg-[#10B981]'
                           }`}
                           style={{ width: `${Math.min(100, (pending / maxLeadsPerBde) * 100)}%` }}
                         />
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-center font-bold text-[#2563EB]">{conv}</td>
+                    <td className="py-3 px-4 text-center font-bold text-[#059669]">{conv}</td>
                     <td className="py-3 px-4 text-center font-black text-[#0F172A]">{convPct}%</td>
                     <td className="py-3 px-4">
                       {reason ? (
@@ -395,7 +395,7 @@ export const TLWorkbench: React.FC = () => {
                           At Cap
                         </span>
                       ) : (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] font-bold">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] font-bold">
                           {capacity} slots free
                         </span>
                       )}
@@ -422,7 +422,7 @@ export const TLWorkbench: React.FC = () => {
         <div className="p-4 border-b border-[#E2E8F0] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white">
           <div>
             <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-              <FiPhoneForwarded className="text-[#2563EB]" />
+              <FiPhoneForwarded className="text-[#059669]" />
               <span>Live Frontline Calling Queue ({filteredQueueLeads.length} Leads Active)</span>
             </h3>
             <p className="text-xs text-[#64748B] mt-0.5">
@@ -438,14 +438,14 @@ export const TLWorkbench: React.FC = () => {
                 placeholder="Search candidates, phone..."
                 value={queueSearch}
                 onChange={(e) => setQueueSearch(e.target.value)}
-                className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-9 pr-3 py-1.5 text-xs font-semibold text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:border-[#2563EB]"
+                className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-9 pr-3 py-1.5 text-xs font-semibold text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:border-[#10B981]"
               />
             </div>
 
             <select
               value={queueBdeFilter}
               onChange={(e) => setQueueBdeFilter(e.target.value)}
-              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#10B981]"
             >
               <option value="ALL">All Team BDEs</option>
               {teamBdes.map((b) => (
@@ -458,7 +458,7 @@ export const TLWorkbench: React.FC = () => {
             <select
               value={queueStatusFilter}
               onChange={(e) => setQueueStatusFilter(e.target.value)}
-              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#10B981]"
             >
               <option value="ALL">All Dispositions</option>
               <option value="NEW">New</option>
@@ -494,7 +494,7 @@ export const TLWorkbench: React.FC = () => {
                   <tr key={lead.id} className="hover:bg-[#F8FAFC] transition-colors">
                     <td className="py-3 px-4 font-bold text-[#0F172A]">{lead.candidateName}</td>
                     <td className="py-3 px-4 font-mono text-[#475569]">{lead.phone}</td>
-                    <td className="py-3 px-4 font-semibold text-[#2563EB]">{lead.currentBdeName || 'Assigned BDE'}</td>
+                    <td className="py-3 px-4 font-semibold text-[#059669]">{lead.currentBdeName || 'Assigned BDE'}</td>
                     <td className="py-3 px-4">
                       <span
                         className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border"

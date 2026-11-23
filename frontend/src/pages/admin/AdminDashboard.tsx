@@ -38,7 +38,7 @@ export const AdminDashboard: React.FC = () => {
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiGrid />
             <span>Executive Command Center</span>
           </div>
@@ -62,7 +62,7 @@ export const AdminDashboard: React.FC = () => {
             to={APP_ROUTES.ADMIN.FINANCE}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E2E8F0] font-bold text-xs transition-all shadow-xs"
           >
-            <FiDollarSign className="text-[#2563EB]" />
+            <FiDollarSign className="text-[#059669]" />
             <span>Financial Suite</span>
           </Link>
         </div>
@@ -107,12 +107,12 @@ export const AdminDashboard: React.FC = () => {
         >
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span>Total Leads Uploaded</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiLayers className="text-base" />
             </div>
           </div>
           <div className="text-3xl font-black text-[#0F172A] mt-2 truncate">{totalUploaded}</div>
-          <div className="text-xs text-[#2563EB] font-bold mt-1 flex items-center gap-1">
+          <div className="text-xs text-[#059669] font-bold mt-1 flex items-center gap-1">
             <FiArrowUpRight />
             <span>{totalAllocated} Allocated ({totalUploaded - totalAllocated} in Pool)</span>
           </div>
@@ -124,11 +124,11 @@ export const AdminDashboard: React.FC = () => {
         >
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span>Successful Conversions</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiCheckCircle className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#2563EB] mt-2 truncate">{totalConverted}</div>
+          <div className="text-3xl font-black text-[#059669] mt-2 truncate">{totalConverted}</div>
           <div className="text-xs text-[#64748B] mt-1 font-medium">
             Closed across {teams.length} Teams
           </div>
@@ -140,7 +140,7 @@ export const AdminDashboard: React.FC = () => {
         >
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span>Org Conversion Rate</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiTrendingUp className="text-base" />
             </div>
           </div>
@@ -156,14 +156,14 @@ export const AdminDashboard: React.FC = () => {
         >
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span>Confirmed Revenue</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiDollarSign className="text-base" />
             </div>
           </div>
           <div className="text-3xl font-black text-[#0F172A] mt-2 truncate">
             ₹{totalRevenueConfirmed.toLocaleString('en-IN')}
           </div>
-          <div className="text-xs text-[#2563EB] font-bold mt-1 truncate">
+          <div className="text-xs text-[#059669] font-bold mt-1 truncate">
             Company Share at current configured ratio ({companySharePct}%): ₹{((totalRevenueConfirmed * companySharePct) / 100).toLocaleString('en-IN')}
           </div>
           <div className="text-[11px] text-[#64748B] mt-0.5">
@@ -177,14 +177,14 @@ export const AdminDashboard: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-black text-[#0F172A] flex items-center gap-2">
-              <FiUsers className="text-[#2563EB]" />
+              <FiUsers className="text-[#059669]" />
               <span>Team Performance & Lead Distribution Benchmark</span>
             </h3>
             <p className="text-xs text-[#64748B] mt-0.5">
               Stage 1 lead allocation summary vs Stage 2 BDE execution
             </p>
           </div>
-          <span className="text-xs text-[#2563EB] bg-[#EFF6FF] px-3 py-1 rounded-full border border-[#BFDBFE] font-bold">
+          <span className="text-xs text-[#059669] bg-[#ECFDF5] px-3 py-1 rounded-full border border-[#A7F3D0] font-bold">
             {teams.length} Operational Teams
           </span>
         </div>
@@ -219,11 +219,11 @@ export const AdminDashboard: React.FC = () => {
                     <td className="py-3.5 px-3 text-[#475569]">{t.teamLeadName}</td>
                     <td className="py-3.5 px-3 text-[#475569] font-medium">{bdeCount} Execs</td>
                     <td className="py-3.5 px-3 font-bold text-[#D97706]">{teamPool} Unassigned</td>
-                    <td className="py-3.5 px-3 font-bold text-[#2563EB]">{bdeAssigned} Distributed</td>
+                    <td className="py-3.5 px-3 font-bold text-[#059669]">{bdeAssigned} Distributed</td>
                     <td className="py-3.5 px-3 font-bold text-[#0F172A]">{conversions}</td>
-                    <td className="py-3.5 px-3 font-black text-[#2563EB]">{convPct}%</td>
+                    <td className="py-3.5 px-3 font-black text-[#059669]">{convPct}%</td>
                     <td className="py-3.5 px-3">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
                         {t.status}
                       </span>
                     </td>
@@ -240,7 +240,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="glass-panel rounded-2xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-              <FiUserCheck className="text-[#2563EB]" />
+              <FiUserCheck className="text-[#059669]" />
               <span>Workforce Availability Summary</span>
             </h4>
             <span className="text-xs text-[#64748B] font-medium">{activeBdes + inactiveBdes} Total BDEs</span>
@@ -248,7 +248,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
               <div className="text-xs text-[#64748B] font-semibold">Active & Eligible BDEs</div>
-              <div className="text-2xl font-black text-[#2563EB] mt-1">{activeBdes}</div>
+              <div className="text-2xl font-black text-[#059669] mt-1">{activeBdes}</div>
               <div className="text-[11px] text-[#64748B] mt-0.5">Receives Stage 2 Leads</div>
             </div>
             <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
@@ -262,10 +262,10 @@ export const AdminDashboard: React.FC = () => {
         <div className="glass-panel rounded-2xl p-5 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h4 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-              <FiTrendingUp className="text-[#2563EB]" />
+              <FiTrendingUp className="text-[#059669]" />
               <span>Lead Flow Funnel Velocity</span>
             </h4>
-            <span className="text-xs text-[#2563EB] font-mono font-bold bg-[#EFF6FF] px-2.5 py-0.5 rounded-full border border-[#BFDBFE]">
+            <span className="text-xs text-[#059669] font-mono font-bold bg-[#ECFDF5] px-2.5 py-0.5 rounded-full border border-[#A7F3D0]">
               Live Stage Metrics
             </span>
           </div>
@@ -286,7 +286,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
             <div className="flex justify-between text-[#475569]">
               <span>Active in BDE Call Queues</span>
-              <span className="text-[#2563EB] font-bold">
+              <span className="text-[#059669] font-bold">
                 {leads.filter((l) => l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)).length}
               </span>
             </div>

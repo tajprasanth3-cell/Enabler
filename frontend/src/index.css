@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   Enabler ROYAL COBALT & MIDNIGHT NAVY PALETTE
-   An ultra-modern, executive institutional aesthetic for Lead & Financial Engines
-   - Primary Accent: Royal Cobalt Blue (#2563EB / #1D4ED8 / #3B82F6)
+   Enabler LIGHT GREEN & EMERALD SHADE PALETTE
+   An ultra-modern, fresh executive aesthetic for Lead & Financial Engines
+   - Primary Accent: Light Emerald Green (#10B981 / #059669 / #34D399)
    - Dark Surface & Hero: Deep Midnight Navy (#0B1120 to #0F172A, border #1E293B)
    - Canvas Background: Crisp Alabaster Slate (#F8FAFC)
    - Card Surfaces: Pure White (#FFFFFF) with subtle slate borders (#E2E8F0)
-   - Glow & Badges: Soft Ice Cobalt Pill Tints (#EFF6FF, border #BFDBFE, text #1D4ED8)
+   - Glow & Badges: Light Green Shade Tints (#ECFDF5, border #A7F3D0, text #047857)
    - Financial Growth: Vivid Emerald (#10B981)
    - Typography: Midnight Obsidian (#0F172A / #475569 / #64748B)
    ========================================================================== */
@@ -22,30 +22,30 @@
   /* 2. Slate & Steel Borders */
   --border-card: #E2E8F0;
   --border-subtle: #F1F5F9;
-  --border-hover: #BFDBFE;
+  --border-hover: #A7F3D0;
 
-  /* 3. Royal Cobalt Blue (Primary Brand) */
-  --cobalt-deep: #1E40AF;
-  --cobalt-primary: #2563EB;
-  --cobalt-vibrant: #3B82F6;
-  --cobalt-light: #EFF6FF;
-  --cobalt-border: #BFDBFE;
-  --cobalt-glow: rgba(37, 99, 235, 0.24);
+  /* 3. Light Green & Emerald Brand */
+  --cobalt-deep: #065F46;
+  --cobalt-primary: #10B981;
+  --cobalt-vibrant: #34D399;
+  --cobalt-light: #ECFDF5;
+  --cobalt-border: #A7F3D0;
+  --cobalt-glow: rgba(16, 185, 129, 0.24);
 
   /* Aliases for backwards compatibility */
-  --indigo-deep: #1E40AF;
-  --indigo-primary: #2563EB;
-  --indigo-vibrant: #3B82F6;
-  --indigo-light: #EFF6FF;
-  --indigo-border: #BFDBFE;
-  --indigo-glow: rgba(37, 99, 235, 0.24);
+  --indigo-deep: #065F46;
+  --indigo-primary: #10B981;
+  --indigo-vibrant: #34D399;
+  --indigo-light: #ECFDF5;
+  --indigo-border: #A7F3D0;
+  --indigo-glow: rgba(16, 185, 129, 0.24);
 
-  --teal-deep: #1E40AF;
-  --teal-primary: #2563EB;
-  --teal-vibrant: #3B82F6;
-  --teal-light: #EFF6FF;
-  --teal-border: #BFDBFE;
-  --teal-glow: rgba(37, 99, 235, 0.24);
+  --teal-deep: #065F46;
+  --teal-primary: #10B981;
+  --teal-vibrant: #34D399;
+  --teal-light: #ECFDF5;
+  --teal-border: #A7F3D0;
+  --teal-glow: rgba(16, 185, 129, 0.24);
 
   /* 4. Financial Emerald Accents */
   --emerald-growth: #10B981;
@@ -68,9 +68,9 @@
   --text-dim: #94A3B8;
 
   /* Gradients */
-  --accent-gradient: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
-  --cobalt-gradient: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
-  --indigo-gradient: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
+  --accent-gradient: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%);
+  --cobalt-gradient: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%);
+  --indigo-gradient: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%);
   --navy-gradient: linear-gradient(135deg, #0B1120 0%, #0F172A 100%);
   --titanium-gradient: linear-gradient(135deg, #0B1120 0%, #0F172A 100%);
   --slate-gradient: linear-gradient(135deg, #0B1120 0%, #0F172A 100%);
@@ -105,11 +105,11 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2563EB;
+  background: #10B981;
 }
 
 /* ==========================================================================
-   AMBIENT FLOATING ORBS (ROYAL COBALT & MIDNIGHT GLOW)
+   AMBIENT FLOATING ORBS (LIGHT GREEN & EMERALD SHADE GLOW)
    ========================================================================== */
 
 @keyframes floatOrb1 {
@@ -156,7 +156,7 @@
   }
 }
 
-@keyframes shimmerCobalt {
+@keyframes shimmerGreen {
   0% {
     background-position: -200% 0;
   }
@@ -166,7 +166,7 @@
   }
 }
 
-/* Ambient Canvas with Floating Cobalt & Midnight Glow */
+/* Ambient Canvas with Floating Light Green & Midnight Glow */
 .ambient-bg {
   position: fixed;
   top: 0;
@@ -186,19 +186,20 @@
   filter: blur(85px);
 }
 
-/* Royal Cobalt Orb */
+/* Light Emerald Green Orb */
 .orb-cobalt,
 .orb-indigo,
-.orb-teal {
+.orb-teal,
+.orb-emerald {
   top: 2%;
   left: 8%;
   width: 580px;
   height: 580px;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.14) 0%, rgba(37, 99, 235, 0) 70%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0) 70%);
   animation: floatOrb1 24s ease-in-out infinite;
 }
 
-/* Ice Blue & Cyan Glow Orb */
+/* Mint & Soft Green Glow Orb */
 .orb-ice,
 .orb-lavender,
 .orb-mint {
@@ -206,7 +207,7 @@
   right: 6%;
   width: 560px;
   height: 560px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0) 70%);
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.14) 0%, rgba(52, 211, 153, 0) 70%);
   animation: floatOrb2 28s ease-in-out infinite;
 }
 
@@ -220,10 +221,6 @@
   height: 520px;
   background: radial-gradient(circle, rgba(11, 17, 32, 0.08) 0%, rgba(11, 17, 32, 0) 70%);
   animation: floatOrb3 22s ease-in-out infinite;
-}
-
-.orb-emerald {
-  @extend .orb-cobalt;
 }
 
 .orb-champagne {
@@ -242,15 +239,16 @@
 }
 
 .glass-panel:hover {
-  border-color: #BFDBFE;
-  box-shadow: 0 10px 25px -4px rgba(37, 99, 235, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+  border-color: #A7F3D0;
+  box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
   transform: translateY(-2px);
 }
 
 .glow-cobalt,
 .glow-indigo,
-.glow-teal {
-  box-shadow: 0 6px 22px -2px rgba(37, 99, 235, 0.28);
+.glow-teal,
+.glow-emerald {
+  box-shadow: 0 6px 22px -2px rgba(16, 185, 129, 0.28);
 }
 
 .glow-navy,
@@ -258,23 +256,25 @@
   box-shadow: 0 6px 22px -2px rgba(11, 17, 32, 0.22);
 }
 
-/* Modern Shimmer Button in Royal Cobalt */
+/* Modern Shimmer Button in Light Emerald Green */
 .shimmer-button,
 .shimmer-cobalt,
 .shimmer-indigo,
+.shimmer-green,
 .bde-theme .shimmer-button {
-  background: linear-gradient(90deg, #1D4ED8, #2563EB, #3B82F6, #1D4ED8) !important;
+  background: linear-gradient(90deg, #059669, #10B981, #34D399, #059669) !important;
   background-size: 250% 100% !important;
-  animation: shimmerCobalt 5s linear infinite !important;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.32) !important;
+  animation: shimmerGreen 5s linear infinite !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.32) !important;
   transition: all 0.25s ease;
 }
 
 .shimmer-button:hover,
 .shimmer-cobalt:hover,
 .shimmer-indigo:hover,
+.shimmer-green:hover,
 .bde-theme .shimmer-button:hover {
-  box-shadow: 0 6px 24px rgba(37, 99, 235, 0.46) !important;
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.46) !important;
   transform: translateY(-1px);
 }
 
@@ -285,16 +285,16 @@
 }
 
 .bde-theme .glass-panel:hover {
-  border-color: #BFDBFE;
-  box-shadow: 0 10px 25px -4px rgba(37, 99, 235, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+  border-color: #A7F3D0;
+  box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
 }
 
-/* Gradient Text in Royal Cobalt */
+/* Gradient Text in Light Emerald Green */
 .gradient-text-cobalt,
 .gradient-text-indigo,
 .gradient-text-teal,
 .gradient-text-emerald {
-  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
+  background: linear-gradient(135deg, #047857 0%, #10B981 50%, #34D399 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

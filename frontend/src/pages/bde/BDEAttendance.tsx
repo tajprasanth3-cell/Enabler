@@ -31,7 +31,7 @@ const getRecordMinutes = (record: AttendanceRecord): number => {
 const getStatusClass = (status: AttendanceRecord['status']): string => {
   if (status === 'MISSING_PUNCH_OUT') return 'bg-[#FEF2F2] text-[#B91C1C] border-[#FECACA]';
   if (status === 'HALF_DAY') return 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]';
-  if (status === 'LATE') return 'bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE]';
+  if (status === 'LATE') return 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]';
   return 'bg-[#F0FDF4] text-[#15803D] border-[#BBF7D0]';
 };
 
@@ -148,7 +148,7 @@ export const BDEAttendance: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black text-[#0F172A] tracking-tight flex items-center gap-2">
-            <FiClock className="text-[#2563EB]" />
+            <FiClock className="text-[#059669]" />
             <span>Shift Attendance & Punch Clock</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#64748B] font-medium mt-0.5">
@@ -171,8 +171,8 @@ export const BDEAttendance: React.FC = () => {
 
       {/* Hero Live Punch Clock Banner (Deep Titanium Graphite) */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#0B1120] to-[#0F172A] p-6 sm:p-8 lg:p-10 shadow-xl text-white select-none border border-[#1E293B]">
-        <div className="w-64 h-64 rounded-full bg-[#2563EB]/15 absolute -top-12 -right-8 pointer-events-none blur-2xl" />
-        <div className="w-48 h-48 rounded-full bg-[#3B82F6]/10 absolute -bottom-16 -left-12 pointer-events-none blur-2xl" />
+        <div className="w-64 h-64 rounded-full bg-[#10B981]/15 absolute -top-12 -right-8 pointer-events-none blur-2xl" />
+        <div className="w-48 h-48 rounded-full bg-[#34D399]/10 absolute -bottom-16 -left-12 pointer-events-none blur-2xl" />
 
         <div className="relative z-10 space-y-4 sm:space-y-5">
           <div>
@@ -222,7 +222,7 @@ export const BDEAttendance: React.FC = () => {
             )}
           </div>
           {punchFeedback && (
-            <p className={`text-xs font-semibold ${punchFeedback.type === 'error' ? 'text-[#FCA5A5]' : 'text-[#BFDBFE]'}`}>
+            <p className={`text-xs font-semibold ${punchFeedback.type === 'error' ? 'text-[#FCA5A5]' : 'text-[#A7F3D0]'}`}>
               {punchFeedback.message}
             </p>
           )}
@@ -239,7 +239,7 @@ export const BDEAttendance: React.FC = () => {
 
         <div className="glass-panel p-5 rounded-2xl">
           <div className="text-xs text-[#64748B] font-semibold">Active Shift Duration</div>
-          <div className="text-2xl font-black text-[#2563EB] font-mono mt-1">
+          <div className="text-2xl font-black text-[#059669] font-mono mt-1">
             {punchState === 'PUNCHED_IN' ? liveDuration : todayRecord ? formatDuration(getRecordMinutes(todayRecord)) : '00h 00m 00s'}
           </div>
           <div className="text-[11px] text-[#64748B] mt-1">Full-day target: {systemSettings.fullDayThresholdHours} hours</div>
@@ -247,7 +247,7 @@ export const BDEAttendance: React.FC = () => {
 
         <div className="glass-panel p-5 rounded-2xl">
           <div className="text-xs text-[#64748B] font-semibold">Attendance Status</div>
-          <div className="text-2xl font-black text-[#2563EB] mt-1">{displayStatus}</div>
+          <div className="text-2xl font-black text-[#059669] mt-1">{displayStatus}</div>
           <div className="text-[11px] text-[#64748B] mt-1">
             {todayRecord?.earlyDeparture
               ? 'Early departure recorded'
@@ -276,7 +276,7 @@ export const BDEAttendance: React.FC = () => {
               {myRecords.map((rec: AttendanceRecord) => (
                 <tr key={rec.id} className="hover:bg-[#F8FAFC]">
                   <td className="py-2.5 px-3 font-semibold text-[#0F172A]">{rec.date}</td>
-                  <td className="py-2.5 px-3 font-mono text-[#2563EB] font-bold">{formatClock(rec.punchInTime) || '—'}</td>
+                  <td className="py-2.5 px-3 font-mono text-[#059669] font-bold">{formatClock(rec.punchInTime) || '—'}</td>
                   <td className="py-2.5 px-3 font-mono text-[#64748B]">{formatClock(rec.punchOutTime) || '—'}</td>
                   <td className="py-2.5 px-3 text-[#475569]">
                     {rec.punchInTime ? formatDuration(getRecordMinutes(rec)) : '—'}
@@ -347,7 +347,7 @@ export const BDEAttendance: React.FC = () => {
                 <select
                   value={leaveType}
                   onChange={(e) => setLeaveType(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="Casual Leave">Casual Leave (CL)</option>
                   <option value="Sick Leave">Sick Leave (SL)</option>
@@ -368,7 +368,7 @@ export const BDEAttendance: React.FC = () => {
                       setLeaveError('');
                       setLeaveSuccess('');
                     }}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                   />
                 </div>
                 <div>
@@ -382,7 +382,7 @@ export const BDEAttendance: React.FC = () => {
                       setLeaveError('');
                       setLeaveSuccess('');
                     }}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                   />
                 </div>
               </div>
@@ -399,7 +399,7 @@ export const BDEAttendance: React.FC = () => {
                     setLeaveSuccess('');
                   }}
                   placeholder="State the reason for leave request..."
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 
@@ -424,7 +424,7 @@ export const BDEAttendance: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-md cursor-pointer transition-all"
+                  className="px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#047857] text-white text-xs font-bold shadow-md cursor-pointer transition-all"
                 >
                   Submit Request
                 </button>

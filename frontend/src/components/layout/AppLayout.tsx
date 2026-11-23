@@ -9,7 +9,7 @@ export const AppLayout: React.FC = () => {
   const { notification, dismissNotification } = useApp();
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-x-clip transition-colors duration-200 bg-[#F8FAFC] text-[#0F172A] selection:bg-[#2563EB] selection:text-white bde-theme">
+    <div className="min-h-screen flex flex-col relative overflow-x-clip transition-colors duration-200 bg-[#F8FAFC] text-[#0F172A] selection:bg-[#10B981] selection:text-white bde-theme">
       <div className="ambient-bg">
         <div className="orb orb-cobalt" />
         <div className="orb orb-ice" />

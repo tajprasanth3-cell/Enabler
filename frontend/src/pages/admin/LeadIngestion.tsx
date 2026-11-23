@@ -226,7 +226,7 @@ export const LeadIngestion: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUploadCloud className="text-sm" />
             <span>Lead Ingestion & Stage 1 Allocation</span>
           </div>
@@ -263,16 +263,16 @@ export const LeadIngestion: React.FC = () => {
         <div className="lg:col-span-2 glass-panel rounded-2xl p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-              <FiFileText className="text-[#2563EB]" />
+              <FiFileText className="text-[#059669]" />
               <span>Bulk Data Upload (CSV Only)</span>
             </h3>
-            <span className="text-xs text-[#2563EB] font-semibold bg-[#EFF6FF] px-2.5 py-1 rounded-full border border-[#BFDBFE]">
+            <span className="text-xs text-[#059669] font-semibold bg-[#ECFDF5] px-2.5 py-1 rounded-full border border-[#A7F3D0]">
               Dedupe: Pool + Batch + Candidate ID
             </span>
           </div>
 
-          <div className="border-2 border-dashed border-[#CBD5E1] hover:border-[#2563EB] rounded-2xl p-6 text-center transition-all bg-[#F8FAFC]">
-            <FiUploadCloud className="mx-auto text-4xl text-[#2563EB] mb-2" />
+          <div className="border-2 border-dashed border-[#CBD5E1] hover:border-[#10B981] rounded-2xl p-6 text-center transition-all bg-[#F8FAFC]">
+            <FiUploadCloud className="mx-auto text-4xl text-[#059669] mb-2" />
             <h4 className="text-sm font-bold text-[#0F172A]">Import Candidate Master File</h4>
             <p className="text-xs text-[#64748B] max-w-md mx-auto mt-1 mb-1 font-medium">
               Choose a .csv or .txt file with a header row. Columns: candidateName (or name), phone, email, city, education, candidateId.
@@ -301,7 +301,7 @@ export const LeadIngestion: React.FC = () => {
               <button
                 type="button"
                 onClick={handleLoadSampleBatch}
-                className="px-5 py-2.5 rounded-xl bg-white text-[#2563EB] border border-[#BFDBFE] hover:bg-[#EFF6FF] font-bold text-xs cursor-pointer shadow-xs transition-all"
+                className="px-5 py-2.5 rounded-xl bg-white text-[#059669] border border-[#A7F3D0] hover:bg-[#ECFDF5] font-bold text-xs cursor-pointer shadow-xs transition-all"
               >
                 Load sample batch (6 records)
               </button>
@@ -334,14 +334,14 @@ export const LeadIngestion: React.FC = () => {
               className={`p-4 rounded-xl border flex items-center justify-between text-xs font-medium ${
                 uploadResult.duplicates > 0
                   ? 'bg-[#FFFBEB] border-[#FDE68A] text-[#D97706]'
-                  : 'bg-[#EFF6FF] border-[#BFDBFE] text-[#1E40AF]'
+                  : 'bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46]'
               }`}
             >
               <div className="flex items-center gap-2">
                 {uploadResult.duplicates > 0 ? (
                   <FiAlertCircle className="text-base text-[#D97706]" />
                 ) : (
-                  <FiCheckCircle className="text-base text-[#2563EB]" />
+                  <FiCheckCircle className="text-base text-[#059669]" />
                 )}
                 <span>
                   Successfully ingested <strong>{uploadResult.added}</strong> valid leads.
@@ -363,7 +363,7 @@ export const LeadIngestion: React.FC = () => {
         {/* Quick Add Single Candidate */}
         <div className="glass-panel rounded-2xl p-6 space-y-4">
           <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
+            <span className="w-2 h-2 rounded-full bg-[#10B981]" />
             <span>Quick Add Candidate</span>
           </h3>
           <form onSubmit={handleManualAdd} className="space-y-3 text-xs">
@@ -375,7 +375,7 @@ export const LeadIngestion: React.FC = () => {
                 value={candidateName}
                 onChange={(e) => setCandidateName(e.target.value)}
                 placeholder="e.g. Alok Verma"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
             <div>
@@ -386,7 +386,7 @@ export const LeadIngestion: React.FC = () => {
                 value={candidatePhone}
                 onChange={(e) => setCandidatePhone(e.target.value)}
                 placeholder="e.g. +91 99888 77665"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
             <div>
@@ -396,12 +396,12 @@ export const LeadIngestion: React.FC = () => {
                 value={candidateEmail}
                 onChange={(e) => setCandidateEmail(e.target.value)}
                 placeholder="candidate@email.com"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] font-bold border border-[#BFDBFE] transition-all cursor-pointer shadow-xs"
+              className="w-full py-2.5 rounded-xl bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] font-bold border border-[#A7F3D0] transition-all cursor-pointer shadow-xs"
             >
               Add Candidate
             </button>
@@ -413,7 +413,7 @@ export const LeadIngestion: React.FC = () => {
       <div className="glass-panel rounded-2xl p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <FiLayers className="text-[#2563EB]" />
+            <FiLayers className="text-[#059669]" />
             <h3 className="text-base font-bold text-[#0F172A]">Candidate Lead Repository</h3>
             <span className="text-xs text-[#64748B] font-semibold">({leads.length} Total Records)</span>
           </div>
@@ -424,7 +424,7 @@ export const LeadIngestion: React.FC = () => {
             <select
               value={filterTeam}
               onChange={(e) => setFilterTeam(e.target.value)}
-              className="bg-white border border-[#E2E8F0] rounded-xl py-1.5 px-3 text-[#0F172A] font-medium focus:outline-none focus:border-[#2563EB]"
+              className="bg-white border border-[#E2E8F0] rounded-xl py-1.5 px-3 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981]"
             >
               <option value="ALL">All Leads</option>
               <option value="UNASSIGNED">Unassigned Pool ({unassignedCount})</option>
@@ -465,7 +465,7 @@ export const LeadIngestion: React.FC = () => {
                   </td>
                   <td className="py-3 px-3 font-bold">
                     {lead.currentTeamName ? (
-                      <span className="text-[#2563EB] bg-[#EFF6FF] px-2.5 py-0.5 rounded-full border border-[#BFDBFE]">
+                      <span className="text-[#059669] bg-[#ECFDF5] px-2.5 py-0.5 rounded-full border border-[#A7F3D0]">
                         {lead.currentTeamName}
                       </span>
                     ) : (
@@ -501,7 +501,7 @@ export const LeadIngestion: React.FC = () => {
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiSend className="text-[#2563EB]" />
+                <FiSend className="text-[#059669]" />
                 <span>Stage 1: Allocate Leads to Teams</span>
               </h3>
               <button
@@ -513,7 +513,7 @@ export const LeadIngestion: React.FC = () => {
             </div>
 
             <form onSubmit={handleExecuteStage1Allocation} className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] font-semibold">
+              <div className="p-3.5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] font-semibold">
                 Total Unassigned Leads in Admin Pool: <strong>{unassignedCount}</strong>
               </div>
 
@@ -535,7 +535,7 @@ export const LeadIngestion: React.FC = () => {
                             setSelectedTeams((prev) => prev.filter((id) => id !== t.id));
                           }
                         }}
-                        className="accent-[#2563EB]"
+                        className="accent-[#10B981]"
                       />
                       <span className="font-bold text-[#0F172A]">{t.name}</span>
                       <span className="text-[#64748B] text-[11px]">(TL: {t.teamLeadName})</span>
@@ -555,7 +555,7 @@ export const LeadIngestion: React.FC = () => {
                     max={maxPerTeam}
                     value={effectiveLeadsPerTeam}
                     onChange={(e) => setLeadsPerTeam(Math.max(0, Number(e.target.value)))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
                   />
                 </div>
                 <div>
@@ -565,7 +565,7 @@ export const LeadIngestion: React.FC = () => {
                   <select
                     value={allocMethod}
                     onChange={(e) => setAllocMethod(e.target.value as any)}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981] focus:bg-white"
                   >
                     <option value="EQUAL">Equal Distribution</option>
                     <option value="WORKLOAD_BASED">Workload-Balanced</option>

@@ -40,7 +40,7 @@ export const Navbar: React.FC = () => {
       label: 'Admin Portal',
       shortLabel: 'Admin',
       path: APP_ROUTES.ADMIN.DASHBOARD,
-      icon: <FiShield className="text-[#2563EB]" />,
+      icon: <FiShield className="text-[#059669]" />,
     },
     {
       role: 'TEAM_LEAD',
@@ -54,7 +54,7 @@ export const Navbar: React.FC = () => {
       label: 'BDE Desk',
       shortLabel: 'BDE',
       path: APP_ROUTES.BDE.DASHBOARD,
-      icon: <FiUserCheck className="text-[#2563EB]" />,
+      icon: <FiUserCheck className="text-[#059669]" />,
     },
   ];
 
@@ -94,7 +94,7 @@ export const Navbar: React.FC = () => {
             onClick={handleToggleTabletNav}
             title="Toggle navigation"
             aria-label="Toggle navigation"
-            className="hidden md:inline-flex lg:hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+            className="hidden md:inline-flex lg:hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:border-[#A7F3D0] hover:bg-[#ECFDF5] hover:text-[#059669]"
           >
             <FiMenu className="text-base" />
           </button>
@@ -106,7 +106,7 @@ export const Navbar: React.FC = () => {
             <motion.div
               whileHover={{ scale: 1.06, rotate: 4 }}
               whileTap={{ scale: 0.95 }}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-[#0B1120] via-[#0F172A] to-[#2563EB] flex items-center justify-center shadow-md shadow-[#2563EB]/25 text-white font-extrabold text-base sm:text-lg shrink-0"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-[#0B1120] via-[#0F172A] to-[#10B981] flex items-center justify-center shadow-md shadow-[#10B981]/25 text-white font-extrabold text-base sm:text-lg shrink-0"
             >
               <FiZap className="text-white text-sm sm:text-base" />
             </motion.div>
@@ -115,7 +115,7 @@ export const Navbar: React.FC = () => {
                 <span className="font-extrabold text-base sm:text-lg gradient-text-cobalt tracking-tight truncate">
                   Enabler
                 </span>
-                <span className="hidden sm:inline-block text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] font-bold uppercase tracking-wider shrink-0">
+                <span className="hidden sm:inline-block text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] font-bold uppercase tracking-wider shrink-0">
                   ENTERPRISE
                 </span>
               </div>
@@ -126,17 +126,17 @@ export const Navbar: React.FC = () => {
           </div>
 
           {currentRole === 'BDE' && (
-            <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFF6FF] border border-[#BFDBFE] text-xs shrink-0">
-              <FiClock className="text-[#2563EB]" />
+            <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-xs shrink-0">
+              <FiClock className="text-[#059669]" />
               <span className="text-[#64748B] font-medium">Shift Clock:</span>
               <span
                 className={`font-bold flex items-center gap-1.5 ${
-                  punchState === 'PUNCHED_IN' ? 'text-[#2563EB]' : 'text-[#64748B]'
+                  punchState === 'PUNCHED_IN' ? 'text-[#059669]' : 'text-[#64748B]'
                 }`}
               >
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    punchState === 'PUNCHED_IN' ? 'bg-[#2563EB] animate-pulse' : 'bg-[#94A3B8]'
+                    punchState === 'PUNCHED_IN' ? 'bg-[#10B981] animate-pulse' : 'bg-[#94A3B8]'
                   }`}
                 />
                 {punchState === 'PUNCHED_IN' ? `In since ${punchInTime}` : 'Punched Out'}
@@ -167,7 +167,7 @@ export const Navbar: React.FC = () => {
                   {isActive && (
                     <motion.div
                       layoutId="activeRolePillCobalt"
-                      className="absolute inset-0 bg-gradient-to-r from-[#1D4ED8] via-[#2563EB] to-[#3B82F6] rounded-lg -z-10 shadow-sm"
+                      className="absolute inset-0 bg-gradient-to-r from-[#047857] via-[#10B981] to-[#34D399] rounded-lg -z-10 shadow-sm"
                       transition={{ type: 'spring', stiffness: 450, damping: 30 }}
                     />
                   )}
@@ -190,8 +190,8 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center gap-2.5">
               {/* Avatar Wrapper */}
               <div className="relative shrink-0">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-[#EFF6FF] to-[#DBEAFE] border border-[#BFDBFE] flex items-center justify-center text-[#2563EB] shadow-xs">
-                  <FiUser className="text-sm sm:text-base text-[#2563EB]" />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-[#ECFDF5] to-[#D1FAE5] border border-[#A7F3D0] flex items-center justify-center text-[#059669] shadow-xs">
+                  <FiUser className="text-sm sm:text-base text-[#059669]" />
                 </div>
                 <span
                   className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#10B981] border-2 border-white ring-1 ring-[#10B981]/20"
@@ -215,9 +215,9 @@ export const Navbar: React.FC = () => {
               onClick={handleSwitchToAdmin}
               title="Switch to Admin view (demo role preview, no login involved)"
               aria-label="Switch to Admin view"
-              className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-full border border-[#CBD5E1] bg-white px-2 sm:px-3 shadow-xs hover:border-[#BFDBFE] hover:bg-[#EFF6FF] transition-all duration-200 cursor-pointer active:scale-95 group shrink-0"
+              className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-full border border-[#CBD5E1] bg-white px-2 sm:px-3 shadow-xs hover:border-[#A7F3D0] hover:bg-[#ECFDF5] transition-all duration-200 cursor-pointer active:scale-95 group shrink-0"
             >
-              <FiRotateCcw className="text-sm sm:text-base text-[#2563EB] group-hover:rotate-45 transition-transform" />
+              <FiRotateCcw className="text-sm sm:text-base text-[#059669] group-hover:rotate-45 transition-transform" />
               <span className="hidden lg:inline text-[10px] font-bold text-[#475569]">Admin view</span>
             </button>
 

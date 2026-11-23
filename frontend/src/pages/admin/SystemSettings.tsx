@@ -80,7 +80,7 @@ export const SystemSettings: React.FC = () => {
     <div className="space-y-5 sm:space-y-8 max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiSettings />
             <span>Dynamic Business Engine Controls</span>
           </div>
@@ -108,9 +108,9 @@ export const SystemSettings: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] text-xs flex items-center gap-2 font-bold shadow-xs"
+          className="p-4 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs flex items-center gap-2 font-bold shadow-xs"
         >
-          <FiCheckCircle className="text-base text-[#2563EB]" />
+          <FiCheckCircle className="text-base text-[#059669]" />
           <span>System parameters saved and recorded in the audit trail.</span>
         </motion.div>
       )}
@@ -118,7 +118,7 @@ export const SystemSettings: React.FC = () => {
       <form onSubmit={handleSave} className="space-y-6">
         <div className="glass-panel rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
-            <FiDollarSign className="text-[#2563EB]" />
+            <FiDollarSign className="text-[#059669]" />
             <span>Financial Business Sharing Defaults</span>
           </div>
 
@@ -133,9 +133,9 @@ export const SystemSettings: React.FC = () => {
                 max="100"
                 value={companySharePct}
                 onChange={(e) => setCompanySharePct(clamp(Number(e.target.value), 0, 100))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
-              <p className="text-[11px] text-[#2563EB] mt-1 font-semibold">
+              <p className="text-[11px] text-[#059669] mt-1 font-semibold">
                 Remaining partner/operations share: {100 - companySharePct}%
               </p>
             </div>
@@ -150,9 +150,9 @@ export const SystemSettings: React.FC = () => {
                 max="100"
                 value={profitSharePct}
                 onChange={(e) => setProfitSharePct(clamp(Number(e.target.value), 0, 100))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
-              <p className="text-[11px] text-[#2563EB] mt-1 font-semibold">
+              <p className="text-[11px] text-[#059669] mt-1 font-semibold">
                 Remaining partner profit share: {100 - profitSharePct}%
               </p>
             </div>
@@ -167,7 +167,7 @@ export const SystemSettings: React.FC = () => {
                 max="100"
                 value={monthlyConversionTarget}
                 onChange={(e) => setMonthlyConversionTarget(clamp(Number(e.target.value), 0, 100))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
               <p className="text-[11px] text-[#64748B] mt-1">
                 Used to color-code conversion health across teams
@@ -178,7 +178,7 @@ export const SystemSettings: React.FC = () => {
 
         <div className="glass-panel rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
-            <FiClock className="text-[#2563EB]" />
+            <FiClock className="text-[#059669]" />
             <span>Attendance & Shift Configuration</span>
           </div>
 
@@ -189,7 +189,7 @@ export const SystemSettings: React.FC = () => {
                 type="time"
                 value={shiftStart}
                 onChange={(e) => setShiftStart(e.target.value)}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
 
@@ -199,7 +199,7 @@ export const SystemSettings: React.FC = () => {
                 type="time"
                 value={shiftEnd}
                 onChange={(e) => setShiftEnd(e.target.value)}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
 
@@ -213,7 +213,7 @@ export const SystemSettings: React.FC = () => {
                 max="60"
                 value={gracePeriod}
                 onChange={(e) => setGracePeriod(clamp(Number(e.target.value), 0, 60))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
 
@@ -227,7 +227,7 @@ export const SystemSettings: React.FC = () => {
                 max="240"
                 value={earlyExitGrace}
                 onChange={(e) => setEarlyExitGrace(clamp(Number(e.target.value), 0, 240))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
 
@@ -242,7 +242,7 @@ export const SystemSettings: React.FC = () => {
                 step="0.5"
                 value={halfDayThreshold}
                 onChange={(e) => setHalfDayThreshold(clamp(Number(e.target.value), 0, 24))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
 
@@ -257,7 +257,7 @@ export const SystemSettings: React.FC = () => {
                 step="0.5"
                 value={fullDayThreshold}
                 onChange={(e) => setFullDayThreshold(clamp(Number(e.target.value), 0, 24))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
               <p className="text-[11px] text-[#64748B] mt-1">
                 Must be greater than the half-day threshold
@@ -268,7 +268,7 @@ export const SystemSettings: React.FC = () => {
 
         <div className="glass-panel rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
-            <FiUsers className="text-[#2563EB]" />
+            <FiUsers className="text-[#059669]" />
             <span>Workload & Allocation Safeguards</span>
           </div>
 
@@ -283,7 +283,7 @@ export const SystemSettings: React.FC = () => {
                 max="200"
                 value={maxBdeWorkload}
                 onChange={(e) => setMaxBdeWorkload(clamp(Number(e.target.value), 0, 500))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
               <p className="text-[11px] text-[#64748B] mt-1">
                 Prevents overloading BDEs beyond capacity during Stage 2
@@ -295,7 +295,7 @@ export const SystemSettings: React.FC = () => {
               <select
                 value={allocationMethod}
                 onChange={(e) => setAllocationMethod(e.target.value as typeof allocationMethod)}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               >
                 <option value="EQUAL">Equal distribution</option>
                 <option value="WORKLOAD_BASED">Workload based</option>
@@ -313,7 +313,7 @@ export const SystemSettings: React.FC = () => {
                 max="240"
                 value={reminderMinutes}
                 onChange={(e) => setReminderMinutes(clamp(Number(e.target.value), 0, 1440))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
           </div>
@@ -321,7 +321,7 @@ export const SystemSettings: React.FC = () => {
 
         <div className="glass-panel rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
-            <FiAward className="text-[#2563EB]" />
+            <FiAward className="text-[#059669]" />
             <span>Volume Targets</span>
           </div>
 
@@ -333,7 +333,7 @@ export const SystemSettings: React.FC = () => {
                 min="0"
                 value={dailyTargetLeads}
                 onChange={(e) => setDailyTargetLeads(clamp(Number(e.target.value), 0, 10000))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
 
@@ -344,7 +344,7 @@ export const SystemSettings: React.FC = () => {
                 min="0"
                 value={weeklyTargetLeads}
                 onChange={(e) => setWeeklyTargetLeads(clamp(Number(e.target.value), 0, 10000))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
 
@@ -355,7 +355,7 @@ export const SystemSettings: React.FC = () => {
                 min="0"
                 value={monthlyTargetLeads}
                 onChange={(e) => setMonthlyTargetLeads(clamp(Number(e.target.value), 0, 100000))}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
           </div>
@@ -363,7 +363,7 @@ export const SystemSettings: React.FC = () => {
 
         <div className="glass-panel rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
-            <FiGitBranch className="text-[#2563EB]" />
+            <FiGitBranch className="text-[#059669]" />
             <span>Configured Status Transitions</span>
           </div>
           <p className="text-[11px] text-[#64748B]">

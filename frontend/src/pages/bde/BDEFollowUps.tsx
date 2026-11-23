@@ -9,7 +9,7 @@ const FOLLOW_UP_STATUS_CONFIG: Record<
 > = {
   PENDING: {
     label: 'Pending',
-    className: 'bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE]',
+    className: 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]',
     actionable: true,
   },
   OVERDUE: {
@@ -92,7 +92,7 @@ export const BDEFollowUps: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black text-[#0F172A] tracking-tight flex items-center gap-2">
-            <FiCalendar className="text-[#2563EB]" />
+            <FiCalendar className="text-[#059669]" />
             <span>Follow-up Calendar & Callback Agenda</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#64748B] font-medium mt-0.5">
@@ -101,7 +101,7 @@ export const BDEFollowUps: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#2563EB] bg-[#EFF6FF] px-3.5 py-1.5 rounded-xl border border-[#BFDBFE] font-bold">
+          <span className="text-xs text-[#059669] bg-[#ECFDF5] px-3.5 py-1.5 rounded-xl border border-[#A7F3D0] font-bold">
             {statusCounts.PENDING} Pending · {statusCounts.OVERDUE} Overdue
           </span>
         </div>
@@ -133,14 +133,14 @@ export const BDEFollowUps: React.FC = () => {
                 key={fol.id}
                 className={`p-4 rounded-2xl border flex flex-col justify-between text-xs transition-all ${
                   statusConfig.actionable
-                    ? 'bg-white border-[#E2E8F0] shadow-xs hover:border-[#BFDBFE]'
+                    ? 'bg-white border-[#E2E8F0] shadow-xs hover:border-[#A7F3D0]'
                     : 'bg-[#F8FAFC]/60 border-[#E2E8F0] opacity-70'
                 }`}
               >
                 <div className="space-y-2">
                   <div className="flex justify-between items-start gap-2">
                     <span className="font-bold text-[#0F172A] text-sm">{fol.candidateName}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE] font-bold shrink-0">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] font-bold shrink-0">
                       {formatScheduledTime(fol.scheduledTime)}
                     </span>
                   </div>
@@ -156,7 +156,7 @@ export const BDEFollowUps: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <a
                       href={`tel:${fol.candidatePhone.replace(/\s+/g, '')}`}
-                      className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB] hover:bg-[#E0E7FF] border border-[#BFDBFE]"
+                      className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669] hover:bg-[#D1FAE5] border border-[#A7F3D0]"
                       title="Direct Call Candidate"
                     >
                       <FiPhone className="text-xs" />
@@ -165,7 +165,7 @@ export const BDEFollowUps: React.FC = () => {
                     {statusConfig.actionable ? (
                       <button
                         onClick={() => handleComplete(fol)}
-                        className="flex-1 py-2 rounded-xl bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] border border-[#BFDBFE] font-bold text-[11px] cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
+                        className="flex-1 py-2 rounded-xl bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] font-bold text-[11px] cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
                       >
                         <FiCheck />
                         <span>

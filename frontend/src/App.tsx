@@ -2,6 +2,7 @@ import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import AppRoutes from './routes/AppRoutes';
+import ScrollToTop from './components/common/ScrollToTop';
 
 interface ErrorBoundaryState {
   error: Error | null;
@@ -29,7 +30,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryS
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="mt-5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-bold text-white cursor-pointer"
+            className="mt-5 rounded-xl bg-[#10B981] px-4 py-2 text-xs font-bold text-white cursor-pointer hover:bg-[#059669]"
           >
             Reload application
           </button>
@@ -44,6 +45,7 @@ export const App: React.FC = () => {
     <AppErrorBoundary>
       <AppProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <AppRoutes />
         </BrowserRouter>
       </AppProvider>

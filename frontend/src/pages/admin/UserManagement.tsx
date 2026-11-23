@@ -113,7 +113,7 @@ export const UserManagement: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUserCheck />
             <span>Workforce Directory (Demo)</span>
           </div>
@@ -142,13 +142,13 @@ export const UserManagement: React.FC = () => {
           className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs ${
             toast.type === 'error'
               ? 'bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626]'
-              : 'bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF]'
+              : 'bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46]'
           }`}
         >
           {toast.type === 'error' ? (
             <FiAlertCircle className="text-base shrink-0" />
           ) : (
-            <FiCheckCircle className="text-base text-[#2563EB] shrink-0" />
+            <FiCheckCircle className="text-base text-[#059669] shrink-0" />
           )}
           <span>{toast.message}</span>
           <button
@@ -166,11 +166,11 @@ export const UserManagement: React.FC = () => {
         <div className="glass-panel p-4 rounded-2xl">
           <div className="text-[11px] font-bold text-[#64748B]">Total Workforce</div>
           <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-1">{users.length}</div>
-          <div className="text-[11px] text-[#2563EB] font-semibold mt-1">{activeCount} Currently Active</div>
+          <div className="text-[11px] text-[#059669] font-semibold mt-1">{activeCount} Currently Active</div>
         </div>
         <div className="glass-panel p-4 rounded-2xl">
           <div className="text-[11px] font-bold text-[#64748B]">Business Executives (BDE)</div>
-          <div className="text-2xl sm:text-3xl font-black text-[#2563EB] mt-1">{bdeCount}</div>
+          <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-1">{bdeCount}</div>
           <div className="text-[11px] text-[#64748B] mt-1">Frontline Calling Agents</div>
         </div>
         <div className="glass-panel p-4 rounded-2xl">
@@ -180,7 +180,7 @@ export const UserManagement: React.FC = () => {
         </div>
         <div className="glass-panel p-4 rounded-2xl">
           <div className="text-[11px] font-bold text-[#64748B]">System Administrators</div>
-          <div className="text-2xl sm:text-3xl font-black text-[#2563EB] mt-1">{adminCount}</div>
+          <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-1">{adminCount}</div>
           <div className="text-[11px] text-[#64748B] mt-1">Demo role only</div>
         </div>
       </div>
@@ -196,7 +196,7 @@ export const UserManagement: React.FC = () => {
               placeholder="Search by employee name, email address, or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2 text-xs font-semibold text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:border-[#2563EB]"
+              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2 text-xs font-semibold text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:border-[#10B981]"
             />
           </div>
 
@@ -205,7 +205,7 @@ export const UserManagement: React.FC = () => {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as any)}
-              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#10B981]"
             >
               <option value="ALL">All Roles</option>
               <option value="BDE">BDE Only</option>
@@ -216,7 +216,7 @@ export const UserManagement: React.FC = () => {
             <select
               value={teamFilter}
               onChange={(e) => setTeamFilter(e.target.value)}
-              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#10B981]"
             >
               <option value="ALL">All Teams</option>
               {teams.map((t) => (
@@ -229,7 +229,7 @@ export const UserManagement: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+              className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#10B981]"
             >
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active Only</option>
@@ -253,7 +253,7 @@ export const UserManagement: React.FC = () => {
               <div>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center text-sm font-black text-[#2563EB] shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-[#ECFDF5] border border-[#A7F3D0] flex items-center justify-center text-sm font-black text-[#059669] shrink-0">
                       {u.name
                         .replace(/[^a-zA-Z\s]/g, '')
                         .trim()
@@ -268,10 +268,10 @@ export const UserManagement: React.FC = () => {
                       <span
                         className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           u.role === 'ADMIN'
-                            ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
+                            ? 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]'
                             : u.role === 'TEAM_LEAD'
                             ? 'bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1]'
-                            : 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
+                            : 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]'
                         }`}
                       >
                         {u.role === 'ADMIN' ? 'Administrator' : u.role === 'TEAM_LEAD' ? 'Team Lead' : 'BDE Executive'}
@@ -282,7 +282,7 @@ export const UserManagement: React.FC = () => {
                   <span
                     className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                       u.status === 'ACTIVE'
-                        ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
+                        ? 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]'
                         : u.status === 'SUSPENDED'
                         ? 'bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]'
                         : 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
@@ -291,7 +291,7 @@ export const UserManagement: React.FC = () => {
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
                         u.status === 'ACTIVE'
-                          ? 'bg-[#2563EB]'
+                          ? 'bg-[#10B981]'
                           : u.status === 'SUSPENDED'
                           ? 'bg-[#D97706]'
                           : 'bg-[#DC2626]'
@@ -303,16 +303,16 @@ export const UserManagement: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-[#E2E8F0] space-y-1.5 text-xs">
                   <div className="flex items-center gap-2 text-[#475569]">
-                    <FiMail className="text-[#2563EB] shrink-0" />
+                    <FiMail className="text-[#059669] shrink-0" />
                     <span className="truncate">{u.email}</span>
                   </div>
                   <div className="flex items-center gap-2 text-[#475569]">
-                    <FiPhone className="text-[#2563EB] shrink-0" />
+                    <FiPhone className="text-[#059669] shrink-0" />
                     <span>{u.phone || '+91 98765 00000'}</span>
                   </div>
                   {userTeam && (
                     <div className="flex items-center gap-2 text-[#475569]">
-                      <FiUsers className="text-[#2563EB] shrink-0" />
+                      <FiUsers className="text-[#059669] shrink-0" />
                       <span>{userTeam.name}</span>
                     </div>
                   )}
@@ -327,7 +327,7 @@ export const UserManagement: React.FC = () => {
                       aria-label={`Reassign ${u.name} to a team`}
                       value={u.teamId || ''}
                       onChange={(e) => handleReassignTeam(u, e.target.value)}
-                      className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2 py-1.5 text-[11px] font-semibold text-[#475569] focus:outline-none focus:border-[#2563EB]"
+                      className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2 py-1.5 text-[11px] font-semibold text-[#475569] focus:outline-none focus:border-[#10B981]"
                     >
                       <option value="">Unassigned</option>
                       {teams.map((team) => (
@@ -353,7 +353,7 @@ export const UserManagement: React.FC = () => {
                           ? 'bg-[#F1F5F9] text-[#94A3B8] border border-[#E2E8F0] cursor-not-allowed'
                           : u.status === 'ACTIVE'
                           ? 'bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA] cursor-pointer'
-                          : 'bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] border border-[#BFDBFE] cursor-pointer'
+                          : 'bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] cursor-pointer'
                       }`}
                     >
                       {u.status === 'ACTIVE' ? 'Deactivate User' : 'Activate User'}
@@ -368,7 +368,7 @@ export const UserManagement: React.FC = () => {
 
       {filteredUsers.length === 0 && (
         <div className="glass-panel p-12 text-center rounded-2xl text-[#64748B]">
-          <FiUserX className="text-4xl mx-auto mb-2 text-[#2563EB]" />
+          <FiUserX className="text-4xl mx-auto mb-2 text-[#059669]" />
           <h3 className="text-base font-bold text-[#0F172A]">No Employees Found</h3>
           <p className="text-xs mt-1">No employees matched your search query or filter parameters.</p>
         </div>
@@ -384,7 +384,7 @@ export const UserManagement: React.FC = () => {
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiUserPlus className="text-[#2563EB]" />
+                <FiUserPlus className="text-[#059669]" />
                 <span>Add New Employee</span>
               </h3>
               <button
@@ -408,7 +408,7 @@ export const UserManagement: React.FC = () => {
                   placeholder="e.g. Rahul Sharma"
                   value={newUserName}
                   onChange={(e) => setNewUserName(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 
@@ -420,7 +420,7 @@ export const UserManagement: React.FC = () => {
                   placeholder="e.g. rahul@leadflow.internal"
                   value={newUserEmail}
                   onChange={(e) => setNewUserEmail(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 
@@ -431,7 +431,7 @@ export const UserManagement: React.FC = () => {
                   placeholder="e.g. +91 98765 43210"
                   value={newUserPhone}
                   onChange={(e) => setNewUserPhone(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 
@@ -441,7 +441,7 @@ export const UserManagement: React.FC = () => {
                   <select
                     value={newUserRole}
                     onChange={(e) => setNewUserRole(e.target.value as UserRole)}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                   >
                     <option value="BDE">BDE Executive</option>
                     <option value="TEAM_LEAD">Team Lead</option>
@@ -455,7 +455,7 @@ export const UserManagement: React.FC = () => {
                     <select
                       value={newUserTeam}
                       onChange={(e) => setNewUserTeam(e.target.value)}
-                      className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                      className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                     >
                       {teams.map((t) => (
                         <option key={t.id} value={t.id}>

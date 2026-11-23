@@ -16,7 +16,7 @@ import { APP_ROUTES, ROLE_HOME_ROUTES } from '../utils/constants';
 import type { UserRole } from '../types';
 
 const roleOptions: Array<{ role: UserRole; label: string; icon: React.ReactNode; accent: string }> = [
-  { role: 'ADMIN', label: 'Admin', icon: <FiShield />, accent: '#2563EB' },
+  { role: 'ADMIN', label: 'Admin', icon: <FiShield />, accent: '#10B981' },
   { role: 'TEAM_LEAD', label: 'Team Lead', icon: <FiUsers />, accent: '#7C3AED' },
   { role: 'BDE', label: 'BDE', icon: <FiUserCheck />, accent: '#0F766E' },
 ];
@@ -56,7 +56,7 @@ export const Login: React.FC = () => {
       return;
     }
     if (!password.trim()) {
-      setError('Enter the demo access code.');
+      setError('Enter your password.');
       return;
     }
 
@@ -76,7 +76,7 @@ export const Login: React.FC = () => {
     <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A]">
       <div className="pointer-events-none absolute inset-0">
         <motion.div
-          className="absolute -left-28 -top-28 h-96 w-96 rounded-full bg-[#2563EB]/15 blur-3xl"
+          className="absolute -left-28 -top-28 h-96 w-96 rounded-full bg-[#10B981]/15 blur-3xl"
           animate={{ x: [0, 60, 0], y: [0, 35, 0], scale: [1, 1.15, 1] }}
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
@@ -101,7 +101,7 @@ export const Login: React.FC = () => {
         >
           <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="mb-8 flex items-center gap-3">
             <motion.div
-              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2563EB] text-white shadow-xl"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#10B981] text-white shadow-xl"
               animate={{ rotate: [0, 8, 0, -8, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             >
@@ -121,7 +121,7 @@ export const Login: React.FC = () => {
             className="max-w-xl text-5xl font-black leading-[1.05] tracking-tight text-[#0F172A]"
           >
             Every lead, every follow-up,{' '}
-            <span className="bg-gradient-to-r from-[#2563EB] to-[#7C3AED] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#10B981] to-[#7C3AED] bg-clip-text text-transparent">
               in perfect motion.
             </span>
           </motion.h1>
@@ -146,7 +146,7 @@ export const Login: React.FC = () => {
                 whileHover={{ y: -5 }}
                 className="rounded-2xl border border-white bg-white/70 p-4 shadow-lg backdrop-blur"
               >
-                <div className="text-2xl font-black text-[#2563EB]">{stat.value}</div>
+                <div className="text-2xl font-black text-[#059669]">{stat.value}</div>
                 <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-[#64748B]">{stat.label}</div>
               </motion.div>
             ))}
@@ -166,7 +166,7 @@ export const Login: React.FC = () => {
               variants={{ visible: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } } }}
             >
               <motion.div variants={fadeUp} transition={{ duration: 0.4 }} className="mb-2 flex items-center gap-2 lg:hidden">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] text-white">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#10B981] text-white">
                   <FiZap />
                 </div>
                 <span className="text-lg font-black">Enabler</span>
@@ -191,7 +191,7 @@ export const Login: React.FC = () => {
                     className={`relative flex flex-col items-center gap-1.5 rounded-2xl border px-2 py-3 text-[10px] font-bold transition-colors cursor-pointer ${
                       selectedRole === option.role
                         ? 'border-transparent text-white'
-                        : 'border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B] hover:border-[#BFDBFE]'
+                        : 'border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B] hover:border-[#A7F3D0]'
                     }`}
                   >
                     {selectedRole === option.role && (
@@ -211,7 +211,7 @@ export const Login: React.FC = () => {
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <motion.div variants={fadeUp} transition={{ duration: 0.4 }}>
                   <label className="mb-1.5 block text-[11px] font-bold text-[#475569]">Email address</label>
-                  <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 focus-within:border-[#2563EB] focus-within:bg-white">
+                  <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 focus-within:border-[#10B981] focus-within:bg-white">
                     <FiMail className="text-[#94A3B8]" />
                     <input
                       type="email"
@@ -229,7 +229,7 @@ export const Login: React.FC = () => {
 
                 <motion.div variants={fadeUp} transition={{ duration: 0.4 }}>
                   <label className="mb-1.5 block text-[11px] font-bold text-[#475569]">Password (demo)</label>
-                  <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 focus-within:border-[#2563EB] focus-within:bg-white">
+                  <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 focus-within:border-[#10B981] focus-within:bg-white">
                     <FiLock className="text-[#94A3B8]" />
                     <input
                       type="password"
@@ -269,7 +269,7 @@ export const Login: React.FC = () => {
                   disabled={submitting}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-3 text-xs font-black text-white shadow-lg shadow-[#2563EB]/25 transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#10B981] px-4 py-3 text-xs font-black text-white shadow-lg shadow-[#10B981]/25 transition-colors hover:bg-[#047857] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {submitting ? 'Signing in…' : 'Sign in to workspace'}
                   {!submitting && <FiArrowRight />}
@@ -291,7 +291,7 @@ export const Login: React.FC = () => {
                         setSelectedRole(account.role);
                         setError('');
                       }}
-                      className="flex w-full items-center justify-between rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-left transition-colors hover:border-[#BFDBFE] hover:bg-[#EFF6FF] cursor-pointer"
+                      className="flex w-full items-center justify-between rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-left transition-colors hover:border-[#A7F3D0] hover:bg-[#ECFDF5] cursor-pointer"
                     >
                       <span>
                         <span className="block text-[11px] font-bold text-[#0F172A]">{account.name}</span>

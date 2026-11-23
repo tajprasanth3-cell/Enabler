@@ -29,7 +29,7 @@ const FeedbackBanner: React.FC<{ feedback: Feedback }> = ({ feedback }) => (
 const statusClass = (status: AttendanceRecord['status']): string => {
   switch (status) {
     case 'PRESENT':
-      return 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]';
+      return 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]';
     case 'LATE':
       return 'bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]';
     case 'HALF_DAY':
@@ -83,7 +83,7 @@ export const AttendanceOverview: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiClock />
             <span>Attendance & Timesheet Governance</span>
           </div>
@@ -104,7 +104,7 @@ export const AttendanceOverview: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
           <div className="text-xs text-[#64748B] font-bold">Punched In On-Time (Present)</div>
-          <div className="text-3xl font-black text-[#2563EB] mt-2">{presentCount}</div>
+          <div className="text-3xl font-black text-[#059669] mt-2">{presentCount}</div>
           <div className="text-xs text-[#64748B] mt-1 font-medium">Within configured grace window</div>
         </div>
 
@@ -134,14 +134,14 @@ export const AttendanceOverview: React.FC = () => {
         <div className="p-5 border-b border-[#E2E8F0] flex flex-wrap items-center justify-between gap-3 bg-white">
           <div>
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-              <FiCalendar className="text-[#2563EB]" />
+              <FiCalendar className="text-[#059669]" />
               <span>Daily Attendance Register & Punch Timesheets</span>
             </h3>
             <p className="text-xs text-[#64748B] mt-0.5">
               Automated punch audit with late arrival computation (09:00 AM + {systemSettings.lateGracePeriodMinutes}m grace).
             </p>
           </div>
-          <span className="text-xs text-[#2563EB] font-bold bg-[#EFF6FF] px-3.5 py-1 rounded-full border border-[#BFDBFE]">
+          <span className="text-xs text-[#059669] font-bold bg-[#ECFDF5] px-3.5 py-1 rounded-full border border-[#A7F3D0]">
             Corrections require audit justification
           </span>
         </div>
@@ -167,7 +167,7 @@ export const AttendanceOverview: React.FC = () => {
                 <tr key={att.id} className="hover:bg-[#F8FAFC] transition-colors">
                   <td className="py-3.5 px-4 font-mono text-[#64748B] font-semibold">{att.date}</td>
                   <td className="py-3.5 px-4 font-bold text-[#0F172A]">{att.userName}</td>
-                  <td className="py-3.5 px-4 text-[#2563EB] font-mono font-bold">
+                  <td className="py-3.5 px-4 text-[#059669] font-mono font-bold">
                     {formatClock(att.punchInTime) || '—'}
                   </td>
                   <td
@@ -218,7 +218,7 @@ export const AttendanceOverview: React.FC = () => {
                         setRevisedPunchOut(att.punchOutTime ? toDateTimeLocalValue(att.punchOutTime) : '');
                         setFeedback(null);
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#2563EB] border border-[#BFDBFE] text-xs font-bold inline-flex items-center gap-1.5 ml-auto cursor-pointer transition-colors shadow-xs"
+                      className="px-3 py-1.5 rounded-lg bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] text-xs font-bold inline-flex items-center gap-1.5 ml-auto cursor-pointer transition-colors shadow-xs"
                     >
                       <FiEdit3 />
                       <span>Adjust</span>
@@ -259,7 +259,7 @@ export const AttendanceOverview: React.FC = () => {
                 <select
                   value={revisedStatus}
                   onChange={(e) => setRevisedStatus(e.target.value as AttendanceRecord['status'])}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="PRESENT">PRESENT (Full Day)</option>
                   <option value="LATE">LATE (Grace Exceeded)</option>
@@ -275,7 +275,7 @@ export const AttendanceOverview: React.FC = () => {
                   type="datetime-local"
                   value={revisedPunchOut}
                   onChange={(e) => setRevisedPunchOut(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                 />
                 <p className="text-[10px] text-[#64748B] mt-1">
                   Leave blank to keep the recorded punch-out. Current:{' '}
@@ -291,7 +291,7 @@ export const AttendanceOverview: React.FC = () => {
                   value={adjustmentReason}
                   onChange={(e) => setAdjustmentReason(e.target.value)}
                   placeholder="State authorized justification for timesheet override..."
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 

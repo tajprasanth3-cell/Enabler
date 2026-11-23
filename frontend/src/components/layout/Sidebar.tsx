@@ -80,8 +80,8 @@ export const Sidebar: React.FC = () => {
             path: APP_ROUTES.ADMIN.LEADS,
             icon: <FiUploadCloud />,
             badge: unassignedAdminLeadsCount > 0 ? `${unassignedAdminLeadsCount} in pool` : undefined,
-            badgeColor: 'bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]',
-            badgeDotColor: 'bg-[#2563EB]',
+            badgeColor: 'bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]',
+            badgeDotColor: 'bg-[#10B981]',
           },
           {
             label: 'Financial Management',
@@ -158,19 +158,19 @@ export const Sidebar: React.FC = () => {
           className={({ isActive }) =>
             `relative flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-200 ${
               isActive
-                ? 'bg-[#EFF6FF] text-[#1D4ED8] ring-1 ring-[#BFDBFE] shadow-xs'
-                : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#2563EB]'
+                ? 'bg-[#ECFDF5] text-[#047857] ring-1 ring-[#A7F3D0] shadow-xs'
+                : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#059669]'
             }`
           }
         >
           {({ isActive }) => (
             <>
               {isActive && (
-                <span className="absolute -left-3 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-[#2563EB]" />
+                <span className="absolute -left-3 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-[#10B981]" />
               )}
               <span className="text-lg shrink-0">{item.icon}</span>
               {item.badge && (
-                <span className={`absolute right-1 top-1 h-2 w-2 rounded-full ${item.badgeDotColor || 'bg-[#2563EB]'} ring-2 ring-white`} />
+                <span className={`absolute right-1 top-1 h-2 w-2 rounded-full ${item.badgeDotColor || 'bg-[#10B981]'} ring-2 ring-white`} />
               )}
             </>
           )}
@@ -187,7 +187,7 @@ export const Sidebar: React.FC = () => {
           aria-label={item.label}
           className={({ isActive }) =>
             `relative flex min-w-[4.5rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl px-2.5 py-2 text-[10px] font-bold transition-all duration-200 ${
-              isActive ? 'text-[#2563EB]' : 'text-[#64748B] hover:text-[#0F172A]'
+              isActive ? 'text-[#059669]' : 'text-[#64748B] hover:text-[#0F172A]'
             }`
           }
         >
@@ -198,10 +198,10 @@ export const Sidebar: React.FC = () => {
                 {getShortLabel(item.label)}
               </span>
               {isActive && (
-                <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-[#2563EB]" />
+                <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-[#10B981]" />
               )}
               {item.badge && (
-                <span className={`absolute right-2 top-1 h-2 w-2 rounded-full ${item.badgeDotColor || 'bg-[#2563EB]'} ring-2 ring-white`} />
+                <span className={`absolute right-2 top-1 h-2 w-2 rounded-full ${item.badgeDotColor || 'bg-[#10B981]'} ring-2 ring-white`} />
               )}
             </>
           )}
@@ -218,13 +218,13 @@ export const Sidebar: React.FC = () => {
         className={({ isActive }) =>
           `flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
             isActive
-              ? 'bg-[#EFF6FF] text-[#1D4ED8] border-l-4 border-l-[#2563EB] border-y border-r border-[#BFDBFE] font-bold shadow-xs'
+              ? 'bg-[#ECFDF5] text-[#047857] border-l-4 border-l-[#10B981] border-y border-r border-[#A7F3D0] font-bold shadow-xs'
               : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
           }`
         }
       >
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-base text-[#64748B] group-hover:text-[#2563EB] transition-colors shrink-0">
+          <span className="text-base text-[#64748B] group-hover:text-[#059669] transition-colors shrink-0">
             {item.icon}
           </span>
           <span className="truncate">{item.label}</span>
@@ -233,7 +233,7 @@ export const Sidebar: React.FC = () => {
         {item.badge && (
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse shrink-0 ${
-              item.badgeColor || 'bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE]'
+              item.badgeColor || 'bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]'
             }`}
           >
             {item.badge}
@@ -241,7 +241,7 @@ export const Sidebar: React.FC = () => {
         )}
 
         {item.highlight && !item.badge && (
-          <span className="text-[9px] uppercase px-2 py-0.5 rounded-full text-white font-extrabold shadow-xs shrink-0 bg-gradient-to-r from-[#1D4ED8] to-[#2563EB]">
+          <span className="text-[9px] uppercase px-2 py-0.5 rounded-full text-white font-extrabold shadow-xs shrink-0 bg-gradient-to-r from-[#047857] to-[#10B981]">
             Suite
           </span>
         )}
@@ -255,7 +255,7 @@ export const Sidebar: React.FC = () => {
         <div className="space-y-1 min-w-0">
           <div className="px-3 py-2 text-[11px] font-bold text-[#64748B] uppercase tracking-wider flex items-center justify-between gap-2 min-w-0">
             <span className="truncate">Navigation</span>
-            <span className="text-[10px] text-[#1D4ED8] bg-[#EFF6FF] px-2.5 py-0.5 rounded-full border border-[#BFDBFE] font-mono font-bold shrink-0 max-w-[7rem] truncate">
+            <span className="text-[10px] text-[#047857] bg-[#ECFDF5] px-2.5 py-0.5 rounded-full border border-[#A7F3D0] font-mono font-bold shrink-0 max-w-[7rem] truncate">
               {currentRole}
             </span>
           </div>
@@ -272,7 +272,7 @@ export const Sidebar: React.FC = () => {
           onClick={() => setTabletNavPath(location.pathname)}
           title="Expand navigation"
           aria-label="Expand navigation"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:border-[#A7F3D0] hover:bg-[#ECFDF5] hover:text-[#059669]"
         >
           <FiChevronsRight className="text-base" />
         </button>
@@ -295,7 +295,7 @@ export const Sidebar: React.FC = () => {
                 <span className="truncate text-[11px] font-bold text-[#64748B] uppercase tracking-wider">
                   Navigation
                 </span>
-                <span className="max-w-[7rem] shrink-0 truncate rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#1D4ED8]">
+                <span className="max-w-[7rem] shrink-0 truncate rounded-full border border-[#A7F3D0] bg-[#ECFDF5] px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#047857]">
                   {currentRole}
                 </span>
               </div>
@@ -304,7 +304,7 @@ export const Sidebar: React.FC = () => {
                 onClick={() => setTabletNavPath(null)}
                 title="Collapse navigation"
                 aria-label="Collapse navigation"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:border-[#A7F3D0] hover:bg-[#ECFDF5] hover:text-[#059669]"
               >
                 <FiX className="text-base" />
               </button>

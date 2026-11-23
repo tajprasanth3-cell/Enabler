@@ -64,7 +64,7 @@ const StatusBadge: React.FC<{ status: string | null }> = ({ status }) => {
 
 const PlainBadge: React.FC<{ label: string; tone?: 'teal' | 'amber' | 'slate' | 'cobalt' }> = ({ label, tone = 'slate' }) => {
   const tones = {
-    cobalt: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]',
+    cobalt: 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]',
     teal: 'bg-[#ECFDF5] text-[#047857] border-[#A7F3D0]',
     amber: 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]',
     slate: 'bg-[#F8FAFC] text-[#475569] border-[#E2E8F0]',
@@ -81,7 +81,7 @@ const ActorCell: React.FC<{ id: string; name: string; meta?: string; users: User
   return (
     <div>
       <div className="font-bold text-[#0F172A] whitespace-nowrap">{resolvedName}</div>
-      <div className="text-[10px] text-[#2563EB] font-mono font-semibold whitespace-nowrap">{meta || id || '—'}</div>
+      <div className="text-[10px] text-[#059669] font-mono font-semibold whitespace-nowrap">{meta || id || '—'}</div>
     </div>
   );
 };
@@ -209,7 +209,7 @@ export const AuditTrail: React.FC = () => {
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiShield />
             <span>Enterprise Compliance & Governance</span>
           </div>
@@ -225,10 +225,10 @@ export const AuditTrail: React.FC = () => {
             disabled={loadingBackendLogs}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] text-xs font-bold shadow-xs cursor-pointer transition-colors"
           >
-            <FiRefreshCw className={loadingBackendLogs ? 'animate-spin text-[#2563EB]' : 'text-[#2563EB]'} />
+            <FiRefreshCw className={loadingBackendLogs ? 'animate-spin text-[#059669]' : 'text-[#059669]'} />
             <span>Refresh Audit Logs</span>
           </button>
-          <span className="inline-flex items-center gap-2 text-xs font-bold text-[#2563EB] bg-[#EFF6FF] border border-[#BFDBFE] px-3.5 py-2 rounded-xl shadow-xs">
+          <span className="inline-flex items-center gap-2 text-xs font-bold text-[#059669] bg-[#ECFDF5] border border-[#A7F3D0] px-3.5 py-2 rounded-xl shadow-xs">
             <FiShield />
             <span>Immutable & Verified</span>
           </span>
@@ -242,7 +242,7 @@ export const AuditTrail: React.FC = () => {
             <motion.div key={kpi.label} whileHover={{ y: -2 }} className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
               <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
                 <span>{kpi.label}</span>
-                <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+                <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
                   <Icon className="text-base" />
                 </div>
               </div>
@@ -286,7 +286,7 @@ export const AuditTrail: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <h3 className={sectionTitleClass}>
-                <FiActivity className="text-[#2563EB]" />
+                <FiActivity className="text-[#059669]" />
                 <span>System Activity Log</span>
               </h3>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -297,13 +297,13 @@ export const AuditTrail: React.FC = () => {
                     value={activitySearch}
                     onChange={(event) => setActivitySearch(event.target.value)}
                     placeholder="Search action, entity or actor..."
-                    className="w-full sm:w-64 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                    className="w-full sm:w-64 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#10B981] focus:bg-white"
                   />
                 </div>
                 <select
                   value={actionFilter}
                   onChange={(event) => setActionFilter(event.target.value)}
-                  className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 px-3 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:bg-white cursor-pointer"
+                  className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 px-3 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#10B981] focus:bg-white cursor-pointer"
                 >
                   <option value="ALL">All action types</option>
                   {actionOptions.map((action) => (
@@ -336,7 +336,7 @@ export const AuditTrail: React.FC = () => {
                           <div className="text-[10px] text-[#94A3B8]">{event.id}</div>
                         </td>
                         <td className={cellClass}>
-                          <div className="font-bold text-[#2563EB] whitespace-nowrap">{String(event.action).replaceAll('_', ' ')}</div>
+                          <div className="font-bold text-[#059669] whitespace-nowrap">{String(event.action).replaceAll('_', ' ')}</div>
                           <div className="text-[10px] text-[#64748B] font-mono whitespace-nowrap">
                             {event.entityType} · {event.entityId}
                           </div>
@@ -359,7 +359,7 @@ export const AuditTrail: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <h3 className={sectionTitleClass}>
-                <FiGitBranch className="text-[#2563EB]" />
+                <FiGitBranch className="text-[#059669]" />
                 <span>Lead Status Change History</span>
               </h3>
               <div className="relative">
@@ -369,7 +369,7 @@ export const AuditTrail: React.FC = () => {
                   value={statusSearch}
                   onChange={(event) => setStatusSearch(event.target.value)}
                   placeholder="Search lead, status, remarks or actor..."
-                  className="w-full sm:w-72 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                  className="w-full sm:w-72 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#10B981] focus:bg-white"
                 />
               </div>
             </div>
@@ -422,7 +422,7 @@ export const AuditTrail: React.FC = () => {
         {activeTab === 'ASSIGNMENT' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <h3 className={sectionTitleClass}>
-              <FiUserCheck className="text-[#2563EB]" />
+              <FiUserCheck className="text-[#059669]" />
               <span>Lead Assignment History</span>
             </h3>
             <div className="overflow-x-auto">
@@ -452,7 +452,7 @@ export const AuditTrail: React.FC = () => {
                           <div className="text-[10px] text-[#64748B] font-mono whitespace-nowrap">{entry.leadId}</div>
                         </td>
                         <td className={cellClass}>
-                          <div className="font-bold text-[#2563EB] whitespace-nowrap">
+                          <div className="font-bold text-[#059669] whitespace-nowrap">
                             {entry.assignedToBdeName || entry.assignedToTeamName || '—'}
                           </div>
                           <div className="text-[10px] text-[#64748B] font-mono whitespace-nowrap">
@@ -475,7 +475,7 @@ export const AuditTrail: React.FC = () => {
         {activeTab === 'CORRECTION' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <h3 className={sectionTitleClass}>
-              <FiEdit3 className="text-[#2563EB]" />
+              <FiEdit3 className="text-[#059669]" />
               <span>Attendance Correction Log</span>
             </h3>
             <div className="overflow-x-auto">
@@ -544,7 +544,7 @@ export const AuditTrail: React.FC = () => {
         {activeTab === 'CALCULATION' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <h3 className={sectionTitleClass}>
-              <FiDollarSign className="text-[#2563EB]" />
+              <FiDollarSign className="text-[#059669]" />
               <span>Financial Calculation Log</span>
             </h3>
             <div className="overflow-x-auto">
@@ -569,11 +569,11 @@ export const AuditTrail: React.FC = () => {
                           <div>{formatTimestamp(log.createdAt)}</div>
                           <div className="text-[10px] text-[#94A3B8]">{log.id}</div>
                         </td>
-                        <td className={`${cellClass} font-bold text-[#2563EB] whitespace-nowrap`}>
+                        <td className={`${cellClass} font-bold text-[#059669] whitespace-nowrap`}>
                           {String(log.calcType).replaceAll('_', ' ')}
                         </td>
                         <td className={`${cellClass} ${jsonClass} text-[#475569]`}>{formatJson(log.inputValues)}</td>
-                        <td className={`${cellClass} ${jsonClass} text-[#2563EB] font-bold`}>{formatJson(log.resultValues)}</td>
+                        <td className={`${cellClass} ${jsonClass} text-[#059669] font-bold`}>{formatJson(log.resultValues)}</td>
                         <td className={cellClass}>
                           <ActorCell id={log.calculatedById} name={log.calculatedByName} users={users} />
                         </td>
@@ -589,7 +589,7 @@ export const AuditTrail: React.FC = () => {
       </div>
 
       <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white p-5 flex items-start gap-3 shadow-xs">
-        <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB] shrink-0">
+        <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0">
           <FiCalendar />
         </div>
         <div>

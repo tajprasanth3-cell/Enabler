@@ -42,7 +42,7 @@ export const BDEPerformance: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black text-[#0F172A] tracking-tight flex items-center gap-2">
-            <FiTrendingUp className="text-[#2563EB]" />
+            <FiTrendingUp className="text-[#059669]" />
             <span>My Performance</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#64748B] font-medium mt-0.5">
@@ -51,7 +51,7 @@ export const BDEPerformance: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-[#2563EB] bg-[#EFF6FF] px-3.5 py-1.5 rounded-xl border border-[#BFDBFE]">
+          <span className="text-xs font-bold text-[#059669] bg-[#ECFDF5] px-3.5 py-1.5 rounded-xl border border-[#A7F3D0]">
             Monthly Win Rate: {monthlyConversionRate}%
           </span>
         </div>
@@ -69,11 +69,11 @@ export const BDEPerformance: React.FC = () => {
         </div>
         <div className="glass-panel p-4 rounded-2xl text-center">
           <div className="text-xs text-[#64748B] font-semibold">Interested Leads</div>
-          <div className="text-2xl font-black text-[#2563EB] mt-1">{interestedLeads.length}</div>
+          <div className="text-2xl font-black text-[#059669] mt-1">{interestedLeads.length}</div>
         </div>
         <div className="glass-panel p-4 rounded-2xl text-center">
           <div className="text-xs text-[#64748B] font-semibold">Closed Deals</div>
-          <div className="text-2xl font-black text-[#2563EB] mt-1">{convertedLeads.length}</div>
+          <div className="text-2xl font-black text-[#059669] mt-1">{convertedLeads.length}</div>
         </div>
       </div>
 
@@ -81,22 +81,22 @@ export const BDEPerformance: React.FC = () => {
       <div className="glass-panel p-5 sm:p-6 rounded-2xl space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2E8F0] pb-3">
           <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-            <FiTarget className="text-[#2563EB]" />
+            <FiTarget className="text-[#059669]" />
             <span>Monthly Conversion Quota Benchmark</span>
           </h3>
-          <span className="text-xs font-mono font-bold text-[#2563EB]">Target: {conversionTarget}%</span>
+          <span className="text-xs font-mono font-bold text-[#059669]">Target: {conversionTarget}%</span>
         </div>
 
         <div className="space-y-2">
           <div className="flex justify-between text-xs font-semibold">
             <span className="text-[#64748B]">Monthly Performance Threshold</span>
-            <span className="text-[#2563EB] font-bold">
+            <span className="text-[#059669] font-bold">
               {monthlyConversionRate}% / {conversionTarget}% Target
             </span>
           </div>
           <div className="h-3 w-full bg-[#E2E8F0] rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-full transition-all duration-500"
               style={{ width: `${quotaProgress}%` }}
             />
           </div>

@@ -59,7 +59,7 @@ export const TeamManagement: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUsers />
             <span>Hierarchy & Organizational Structure</span>
           </div>
@@ -111,11 +111,11 @@ export const TeamManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-bold text-[#0F172A]">{t.name}</h3>
-                  <div className="text-xs text-[#2563EB] font-bold">
+                  <div className="text-xs text-[#059669] font-bold">
                     Team Lead: {t.teamLeadName || 'Unassigned'}
                   </div>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
                   {t.status}
                 </span>
               </div>
@@ -127,7 +127,7 @@ export const TeamManagement: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-[#64748B]">
                   <span>Active Capacity:</span>
-                  <span className="text-[#2563EB] font-bold">
+                  <span className="text-[#059669] font-bold">
                     {members.filter((m) => m.role === 'BDE' && m.status === 'ACTIVE').length} Active
                   </span>
                 </div>
@@ -147,14 +147,14 @@ export const TeamManagement: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <span
-                          className={`w-2 h-2 rounded-full ${m.status === 'ACTIVE' ? 'bg-[#2563EB]' : 'bg-[#94A3B8]'
+                          className={`w-2 h-2 rounded-full ${m.status === 'ACTIVE' ? 'bg-[#10B981]' : 'bg-[#94A3B8]'
                             }`}
                         />
                         <button
                           onClick={() => handleToggleStatus(m.id, m.name, m.status === 'ACTIVE')}
                           className={`px-2 py-0.5 rounded-lg text-[10px] font-bold cursor-pointer transition-colors ${m.status === 'ACTIVE'
                               ? 'bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEE2E2]'
-                              : 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#E0E7FF]'
+                              : 'bg-[#ECFDF5] text-[#059669] hover:bg-[#D1FAE5]'
                             }`}
                         >
                           {m.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
@@ -179,7 +179,7 @@ export const TeamManagement: React.FC = () => {
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiPlusCircle className="text-[#2563EB]" />
+                <FiPlusCircle className="text-[#059669]" />
                 <span>Create New Operational Team</span>
               </h3>
               <button
@@ -199,7 +199,7 @@ export const TeamManagement: React.FC = () => {
                   placeholder="e.g. Team Gamma"
                   value={newTeamName}
                   onChange={(e) => setNewTeamName(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 
@@ -210,7 +210,7 @@ export const TeamManagement: React.FC = () => {
                   value={selectedTLId}
                   onChange={(e) => setSelectedTLId(e.target.value)}
                   disabled={!eligibleTeamLeads.length}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {eligibleTeamLeads.map((tl) => (
                     <option key={tl.id} value={tl.id}>

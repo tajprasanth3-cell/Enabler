@@ -152,7 +152,7 @@ export const TLPool: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div className="max-w-2xl min-w-0">
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiLayers />
             <span>Lead Inventory & Pool Governance</span>
           </div>
@@ -206,7 +206,7 @@ export const TLPool: React.FC = () => {
             placeholder="Search candidate name, phone, email, city..."
             value={poolSearch}
             onChange={(e) => setPoolSearch(e.target.value)}
-            className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:border-[#2563EB]"
+            className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:border-[#10B981]"
           />
         </div>
 
@@ -215,7 +215,7 @@ export const TLPool: React.FC = () => {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+            className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#10B981]"
           >
             <option value="ALL">All Marketing Channels</option>
             {sourceOptions.map((source) => (
@@ -231,7 +231,7 @@ export const TLPool: React.FC = () => {
       <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white overflow-hidden shadow-xs">
         <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
           <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-            <FiLayers className="text-[#2563EB]" />
+            <FiLayers className="text-[#059669]" />
             <span>Unassigned Pool Candidates ({filteredPoolLeads.length} Leads)</span>
           </h3>
           <span className="text-xs text-[#64748B] font-medium">
@@ -261,7 +261,7 @@ export const TLPool: React.FC = () => {
                   <td className="py-3 px-4 text-[#64748B]">{lead.city || 'India'}</td>
                   <td className="py-3 px-4 font-medium text-[#0F172A]">{lead.education || 'Graduate'}</td>
                   <td className="py-3 px-4">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
                       {lead.source || 'Website'}
                     </span>
                   </td>
@@ -293,7 +293,7 @@ export const TLPool: React.FC = () => {
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiSend className="text-[#2563EB]" />
+                <FiSend className="text-[#059669]" />
                 <span>Distribute Leads to Team BDEs</span>
               </h3>
               <button
@@ -305,7 +305,7 @@ export const TLPool: React.FC = () => {
             </div>
 
             <form onSubmit={handleExecuteStage2} className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] font-semibold">
+              <div className="p-3.5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] font-semibold">
                 Available in Pool: <strong>{teamPoolLeads.length} leads</strong>
               </div>
 
@@ -317,7 +317,7 @@ export const TLPool: React.FC = () => {
                     setAllocationMethod(e.target.value as AllocationMethod);
                     setAllocationError('');
                   }}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="EQUAL">Equal Distribution</option>
                   <option value="WORKLOAD_BASED">Workload-Based (Free Capacity)</option>
@@ -352,10 +352,10 @@ export const TLPool: React.FC = () => {
                               setSelectedBdes((prev) => prev.filter((id) => id !== b.id));
                             }
                           }}
-                          className="accent-[#2563EB]"
+                          className="accent-[#10B981]"
                         />
                         <span className="font-bold text-[#0F172A]">{b.name}</span>
-                        <span className="text-[#2563EB] text-[10px] font-semibold">
+                        <span className="text-[#059669] text-[10px] font-semibold">
                           {b.status} · {openLeadsForBde(b.id)}/{maxLeadsPerBde} open
                         </span>
                         {reason && <span className="text-[10px] font-bold text-[#DC2626]">({reason})</span>}
@@ -374,7 +374,7 @@ export const TLPool: React.FC = () => {
                     max={maxBatchCeiling}
                     value={countPerBde}
                     onChange={(e) => setCountPerBde(clampBatch(Number(e.target.value), maxBatchCeiling) || 1)}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
                   />
                   <p className="text-[10px] text-[#64748B] mt-1 font-medium">Max ceiling: {maxBatchCeiling}</p>
                 </div>
@@ -407,7 +407,7 @@ export const TLPool: React.FC = () => {
                               [id]: clampBatch(Number(e.target.value), cap),
                             }))
                           }
-                          className="w-20 bg-white border border-[#E2E8F0] rounded-xl p-2 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
+                          className="w-20 bg-white border border-[#E2E8F0] rounded-xl p-2 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
                         />
                       </div>
                     );

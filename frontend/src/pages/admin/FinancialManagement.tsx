@@ -179,7 +179,7 @@ export const FinancialManagement: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiDollarSign />
             <span>Admin Executive Financial Suite</span>
           </div>
@@ -225,14 +225,14 @@ export const FinancialManagement: React.FC = () => {
         <motion.div whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0">
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span>Total Confirmed Revenue</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiDollarSign className="text-base" />
             </div>
           </div>
           <div className="text-3xl font-black text-[#0F172A] mt-2 truncate">
             ₹{totalRecordedRevenue.toLocaleString('en-IN')}
           </div>
-          <div className="text-xs text-[#2563EB] mt-1 flex items-center gap-1 font-semibold">
+          <div className="text-xs text-[#059669] mt-1 flex items-center gap-1 font-semibold">
             <FiCheckCircle />
             <span>{confirmedTransactions.length} Confirmed Transactions</span>
           </div>
@@ -241,11 +241,11 @@ export const FinancialManagement: React.FC = () => {
         <motion.div whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0">
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span>Company Share (stored: {ratioText(storedCompanyRatios)})</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiPieChart className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#2563EB] mt-2 truncate">
+          <div className="text-3xl font-black text-[#059669] mt-2 truncate">
             ₹{totalCompanyShare.toLocaleString('en-IN')}
           </div>
           <div className="text-xs text-[#64748B] mt-1 font-medium">Ratio recorded on each confirmed transaction</div>
@@ -254,7 +254,7 @@ export const FinancialManagement: React.FC = () => {
         <motion.div whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0">
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span>Remaining Share (stored: {ratioText(storedRemainingRatios)})</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiLayers className="text-base" />
             </div>
           </div>
@@ -267,11 +267,11 @@ export const FinancialManagement: React.FC = () => {
         <motion.div whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0">
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
             <span>Calculated Net Profit</span>
-            <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
               <FiTrendingUp className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#2563EB] mt-2 truncate">
+          <div className="text-3xl font-black text-[#059669] mt-2 truncate">
             ₹{totalCalculatedProfit.toLocaleString('en-IN')}
           </div>
           <div className="text-xs text-[#64748B] mt-1 font-medium">Revenue minus Direct Investment</div>
@@ -328,12 +328,12 @@ export const FinancialManagement: React.FC = () => {
                   Total Gross Revenue (₹)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-3 text-[#2563EB] font-bold">₹</span>
+                  <span className="absolute left-3.5 top-3 text-[#059669] font-bold">₹</span>
                   <input
                     type="number"
                     value={revInput}
                     onChange={(e) => setRevInput(Math.max(0, Number(e.target.value)))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2.5 pl-8 pr-4 text-[#0F172A] font-bold text-lg focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2.5 pl-8 pr-4 text-[#0F172A] font-bold text-lg focus:outline-none focus:border-[#10B981] focus:bg-white"
                     placeholder="Enter revenue amount..."
                   />
                 </div>
@@ -344,7 +344,7 @@ export const FinancialManagement: React.FC = () => {
                   <label className="text-xs font-bold text-[#0F172A]">
                     Company Share Ratio ({calcCompanySharePct}%)
                   </label>
-                  <span className="text-xs text-[#2563EB] font-mono font-bold">
+                  <span className="text-xs text-[#059669] font-mono font-bold">
                     Remaining: {100 - calcCompanySharePct}%
                   </span>
                 </div>
@@ -354,14 +354,14 @@ export const FinancialManagement: React.FC = () => {
                   max="95"
                   value={calcCompanySharePct}
                   onChange={(e) => setCalcCompanySharePct(Math.min(95, Math.max(5, Number(e.target.value))))}
-                  className="w-full accent-[#2563EB] cursor-pointer"
+                  className="w-full accent-[#10B981] cursor-pointer"
                 />
                 <div className="flex items-center justify-between gap-2 mt-2">
                   <span className="text-[10px] text-[#64748B]">Configured default: {companySharePct}%</span>
                   <button
                     type="button"
                     onClick={handleSaveDefaultRatio}
-                    className="px-3 py-1.5 rounded-lg bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] border border-[#BFDBFE] text-[11px] font-bold cursor-pointer transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] text-[11px] font-bold cursor-pointer transition-colors"
                   >
                     Save as default ratio
                   </button>
@@ -372,12 +372,12 @@ export const FinancialManagement: React.FC = () => {
             {/* Split Visual Meter */}
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-[#64748B] font-bold">
-                <span className="text-[#2563EB]">Company Share: {revResult.companyPercentage}%</span>
+                <span className="text-[#059669]">Company Share: {revResult.companyPercentage}%</span>
                 <span className="text-[#64748B]">Remaining Partner Share: {revResult.remainingPercentage}%</span>
               </div>
               <div className="h-4 w-full bg-[#F8FAFC] rounded-full overflow-hidden flex shadow-inner border border-[#E2E8F0]">
                 <motion.div
-                  className="bg-gradient-to-r from-[#1D4ED8] to-[#2563EB] h-full"
+                  className="bg-gradient-to-r from-[#047857] to-[#10B981] h-full"
                   animate={{ width: `${revResult.companyPercentage}%` }}
                   transition={{ duration: 0.4 }}
                 />
@@ -391,8 +391,8 @@ export const FinancialManagement: React.FC = () => {
 
             {/* Output Calculation Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE]">
-                <div className="text-xs text-[#2563EB] font-bold uppercase tracking-wider">
+              <div className="p-5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0]">
+                <div className="text-xs text-[#059669] font-bold uppercase tracking-wider">
                   Company Share ({revResult.companyPercentage}%)
                 </div>
                 <div className="text-3xl font-black text-[#0F172A] mt-2">
@@ -421,7 +421,7 @@ export const FinancialManagement: React.FC = () => {
                 onClick={handleSaveRevCalculation}
                 className="px-4 py-2.5 rounded-xl bg-[#F8FAFC] hover:bg-white text-[#0F172A] text-xs font-bold flex items-center gap-2 border border-[#E2E8F0] transition-all cursor-pointer shadow-xs"
               >
-                <FiFileText className="text-[#2563EB]" />
+                <FiFileText className="text-[#059669]" />
                 <span>Save Calculation to Audit Log</span>
               </button>
             </div>
@@ -437,12 +437,12 @@ export const FinancialManagement: React.FC = () => {
                   Total Direct Investment / Cost (₹)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-[#2563EB] font-bold">₹</span>
+                  <span className="absolute left-3 top-2.5 text-[#059669] font-bold">₹</span>
                   <input
                     type="number"
                     value={profitInvInput}
                     onChange={(e) => setProfitInvInput(Math.max(0, Number(e.target.value)))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-7 pr-3 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-7 pr-3 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
                   />
                 </div>
               </div>
@@ -452,12 +452,12 @@ export const FinancialManagement: React.FC = () => {
                   Total Revenue (₹)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-[#2563EB] font-bold">₹</span>
+                  <span className="absolute left-3 top-2.5 text-[#059669] font-bold">₹</span>
                   <input
                     type="number"
                     value={profitRevInput}
                     onChange={(e) => setProfitRevInput(Math.max(0, Number(e.target.value)))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-7 pr-3 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-7 pr-3 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
                   />
                 </div>
               </div>
@@ -472,7 +472,7 @@ export const FinancialManagement: React.FC = () => {
                   max="100"
                   value={profitSharePct}
                   onChange={(e) => setProfitSharePct(Math.min(100, Math.max(0, Number(e.target.value))))}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 px-3 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 px-3 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
                 />
               </div>
             </div>
@@ -482,7 +482,7 @@ export const FinancialManagement: React.FC = () => {
               <div
                 className={`p-5 rounded-xl border ${
                   profitResult.isProfitable
-                    ? 'bg-[#EFF6FF] border-[#BFDBFE] text-[#1E40AF]'
+                    ? 'bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46]'
                     : 'bg-[#FEF2F2] border-[#FECACA] text-[#DC2626]'
                 }`}
               >
@@ -498,7 +498,7 @@ export const FinancialManagement: React.FC = () => {
               </div>
 
               <div className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-                <div className="text-xs text-[#2563EB] font-bold uppercase tracking-wider">
+                <div className="text-xs text-[#059669] font-bold uppercase tracking-wider">
                   Company Profit Share ({profitSharePct}%)
                 </div>
                 <div className="text-2xl font-black text-[#0F172A] mt-1">
@@ -527,7 +527,7 @@ export const FinancialManagement: React.FC = () => {
                 onClick={handleSaveProfitCalculation}
                 className="px-4 py-2.5 rounded-xl bg-[#F8FAFC] hover:bg-white text-[#0F172A] text-xs font-bold flex items-center gap-2 border border-[#E2E8F0] transition-all cursor-pointer shadow-xs"
               >
-                <FiFileText className="text-[#2563EB]" />
+                <FiFileText className="text-[#059669]" />
                 <span>Save Profit Split to Audit Log</span>
               </button>
             </div>
@@ -539,7 +539,7 @@ export const FinancialManagement: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Discount Calculator */}
             <div className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-4">
-              <div className="flex items-center gap-2 text-[#2563EB] font-bold text-sm">
+              <div className="flex items-center gap-2 text-[#059669] font-bold text-sm">
                 <FiPercent />
                 <span>Discount & Net Pricing Calculator</span>
               </div>
@@ -550,7 +550,7 @@ export const FinancialManagement: React.FC = () => {
                     type="number"
                     value={discPrice}
                     onChange={(e) => setDiscPrice(Number(e.target.value))}
-                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
                   />
                 </div>
                 <div>
@@ -559,14 +559,14 @@ export const FinancialManagement: React.FC = () => {
                     type="number"
                     value={discPct}
                     onChange={(e) => setDiscPct(Number(e.target.value))}
-                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
                   />
                 </div>
               </div>
               <div className="p-3 bg-white rounded-lg border border-[#E2E8F0] flex justify-between items-center text-xs shadow-xs">
                 <div>
                   <div className="text-[#64748B] font-medium">Discount Amount:</div>
-                  <div className="text-[#2563EB] font-bold text-sm">
+                  <div className="text-[#059669] font-bold text-sm">
                     ₹{discResult.discountAmount.toLocaleString()}
                   </div>
                 </div>
@@ -580,16 +580,16 @@ export const FinancialManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={handleSaveDiscountCalculation}
-                className="w-full px-4 py-2.5 rounded-xl bg-white hover:bg-[#EFF6FF] text-[#0F172A] text-xs font-bold flex items-center justify-center gap-2 border border-[#E2E8F0] transition-all cursor-pointer shadow-xs"
+                className="w-full px-4 py-2.5 rounded-xl bg-white hover:bg-[#ECFDF5] text-[#0F172A] text-xs font-bold flex items-center justify-center gap-2 border border-[#E2E8F0] transition-all cursor-pointer shadow-xs"
               >
-                <FiFileText className="text-[#2563EB]" />
+                <FiFileText className="text-[#059669]" />
                 <span>Save Discount to Audit Log</span>
               </button>
             </div>
 
             {/* Sales Growth Calculator */}
             <div className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-4">
-              <div className="flex items-center gap-2 text-[#2563EB] font-bold text-sm">
+              <div className="flex items-center gap-2 text-[#059669] font-bold text-sm">
                 <FiTrendingUp />
                 <span>Revenue Growth & Variance</span>
               </div>
@@ -600,7 +600,7 @@ export const FinancialManagement: React.FC = () => {
                     type="number"
                     value={growthPrev}
                     onChange={(e) => setGrowthPrev(Number(e.target.value))}
-                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
                   />
                 </div>
                 <div>
@@ -609,7 +609,7 @@ export const FinancialManagement: React.FC = () => {
                     type="number"
                     value={growthCurr}
                     onChange={(e) => setGrowthCurr(Number(e.target.value))}
-                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
+                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
                   />
                 </div>
               </div>
@@ -624,7 +624,7 @@ export const FinancialManagement: React.FC = () => {
                   <div className="text-[#64748B] font-medium">Growth Rate:</div>
                   <div
                     className={`font-bold text-sm ${
-                      growthResult.growthPercentage >= 0 ? 'text-[#2563EB]' : 'text-[#DC2626]'
+                      growthResult.growthPercentage >= 0 ? 'text-[#059669]' : 'text-[#DC2626]'
                     }`}
                   >
                     {growthResult.growthPercentage >= 0 ? '+' : ''}
@@ -635,9 +635,9 @@ export const FinancialManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={handleSaveGrowthCalculation}
-                className="w-full px-4 py-2.5 rounded-xl bg-white hover:bg-[#EFF6FF] text-[#0F172A] text-xs font-bold flex items-center justify-center gap-2 border border-[#E2E8F0] transition-all cursor-pointer shadow-xs"
+                className="w-full px-4 py-2.5 rounded-xl bg-white hover:bg-[#ECFDF5] text-[#0F172A] text-xs font-bold flex items-center justify-center gap-2 border border-[#E2E8F0] transition-all cursor-pointer shadow-xs"
               >
-                <FiFileText className="text-[#2563EB]" />
+                <FiFileText className="text-[#059669]" />
                 <span>Save Growth to Audit Log</span>
               </button>
             </div>
@@ -649,10 +649,10 @@ export const FinancialManagement: React.FC = () => {
       <div className="glass-panel rounded-2xl p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-base">
-            <FiCheckCircle className="text-[#2563EB]" />
+            <FiCheckCircle className="text-[#059669]" />
             <span>Confirmed Financial Transactions Ledger (Lead Conversions)</span>
           </div>
-          <span className="text-xs text-[#2563EB] font-medium bg-[#EFF6FF] px-2.5 py-1 rounded-full border border-[#BFDBFE]">
+          <span className="text-xs text-[#059669] font-medium bg-[#ECFDF5] px-2.5 py-1 rounded-full border border-[#A7F3D0]">
             {confirmedTransactions.length} Confirmed Inflows
           </span>
         </div>
@@ -683,19 +683,19 @@ export const FinancialManagement: React.FC = () => {
                     <div className="font-semibold text-[#0F172A]">{tx.bdeName}</div>
                     <div className="text-[10px] text-[#64748B]">{tx.teamName}</div>
                   </td>
-                  <td className="py-3.5 px-3 font-bold text-[#2563EB]">
+                  <td className="py-3.5 px-3 font-bold text-[#059669]">
                     ₹{tx.grossAmount.toLocaleString()}
                   </td>
                   <td className="py-3.5 px-3 font-bold text-[#0F172A]">
                     ₹{tx.netProfit.toLocaleString()}
                   </td>
-                  <td className="py-3.5 px-3 font-bold text-[#2563EB]">
+                  <td className="py-3.5 px-3 font-bold text-[#059669]">
                     ₹{tx.companyShareAmount.toLocaleString()} ({tx.companySharePercentage}%)
                   </td>
                   <td className="py-3.5 px-3 font-bold text-[#64748B]">
                     ₹{tx.remainingShareAmount.toLocaleString()} ({tx.remainingSharePercentage}%)
                   </td>
-                  <td className="py-3.5 px-3 font-bold text-[#2563EB]">
+                  <td className="py-3.5 px-3 font-bold text-[#059669]">
                     {tx.companyProfitShareAmount != null
                       ? `₹${tx.companyProfitShareAmount.toLocaleString()} (${tx.profitSharePercentage ?? 0}%)`
                       : '—'}
@@ -710,7 +710,7 @@ export const FinancialManagement: React.FC = () => {
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                         tx.status === 'CONFIRMED'
-                          ? 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
+                          ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]'
                           : 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]'
                       }`}
                     >
@@ -728,7 +728,7 @@ export const FinancialManagement: React.FC = () => {
       <div className="glass-panel rounded-2xl p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-base">
-            <FiClock className="text-[#2563EB]" />
+            <FiClock className="text-[#059669]" />
             <span>Calculation Audit Trail & Saved Projections</span>
           </div>
           <span className="text-xs text-[#64748B]">Stored history with actor & timestamps</span>
@@ -750,11 +750,11 @@ export const FinancialManagement: React.FC = () => {
               {calculationLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-[#F8FAFC] text-[#475569]">
                   <td className="py-2.5 px-3 text-[#64748B] font-mono">{log.createdAt}</td>
-                  <td className="py-2.5 px-3 font-mono text-[#2563EB] font-bold">{log.calcType}</td>
+                  <td className="py-2.5 px-3 font-mono text-[#059669] font-bold">{log.calcType}</td>
                   <td className="py-2.5 px-3 text-[11px] font-mono text-[#475569]">
                     {JSON.stringify(log.inputValues)}
                   </td>
-                  <td className="py-2.5 px-3 text-[11px] font-mono text-[#2563EB] font-bold">
+                  <td className="py-2.5 px-3 text-[11px] font-mono text-[#059669] font-bold">
                     {JSON.stringify(log.resultValues)}
                   </td>
                   <td className="py-2.5 px-3 font-semibold text-[#0F172A]">{log.calculatedByName}</td>
@@ -776,7 +776,7 @@ export const FinancialManagement: React.FC = () => {
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiDollarSign className="text-[#2563EB]" />
+                <FiDollarSign className="text-[#059669]" />
                 <span>Confirm Payment for Converted Lead</span>
               </h3>
               <button
@@ -801,7 +801,7 @@ export const FinancialManagement: React.FC = () => {
                 <select
                   value={selectedLeadId}
                   onChange={(e) => setSelectedLeadId(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-semibold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-semibold focus:outline-none focus:border-[#10B981] focus:bg-white"
                 >
                   {convertedLeads.map((lead) => (
                     <option key={lead.id} value={lead.id}>
@@ -818,7 +818,7 @@ export const FinancialManagement: React.FC = () => {
                     type="number"
                     value={txGrossAmount}
                     onChange={(e) => setTxGrossAmount(Number(e.target.value))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
                   />
                 </div>
                 <div>
@@ -827,7 +827,7 @@ export const FinancialManagement: React.FC = () => {
                     type="number"
                     value={txInvestmentCost}
                     onChange={(e) => setTxInvestmentCost(Number(e.target.value))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
                   />
                 </div>
               </div>
@@ -839,7 +839,7 @@ export const FinancialManagement: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-[#64748B]">
                   <span>Company Share ({txSharePreview.companyPercentage}%):</span>
-                  <span className="text-[#2563EB] font-bold">₹{txSharePreview.companyShare.toLocaleString()}</span>
+                  <span className="text-[#059669] font-bold">₹{txSharePreview.companyShare.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[#64748B]">
                   <span>Remaining Share ({txSharePreview.remainingPercentage}%):</span>
@@ -849,7 +849,7 @@ export const FinancialManagement: React.FC = () => {
                   <>
                     <div className="flex justify-between text-[#64748B]">
                       <span>Profit Split - Company ({systemSettings.profitSharePercentage}%):</span>
-                      <span className="text-[#2563EB] font-bold">
+                      <span className="text-[#059669] font-bold">
                         ₹{txProfitPreview.companyProfitShare.toLocaleString()}
                       </span>
                     </div>
@@ -870,7 +870,7 @@ export const FinancialManagement: React.FC = () => {
                   value={txNotes}
                   onChange={(e) => setTxNotes(e.target.value)}
                   placeholder="e.g. UPI Ref / Bank wire confirmed"
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981] focus:bg-white"
                 />
               </div>
 

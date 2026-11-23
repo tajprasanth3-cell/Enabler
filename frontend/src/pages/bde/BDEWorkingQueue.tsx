@@ -139,7 +139,7 @@ export const BDEWorkingQueue: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black text-[#0F172A] tracking-tight flex items-center gap-2">
-            <FiPhoneCall className="text-[#2563EB]" />
+            <FiPhoneCall className="text-[#059669]" />
             <span>Assigned Working Queue</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#64748B] font-medium mt-0.5">
@@ -148,7 +148,7 @@ export const BDEWorkingQueue: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-[#2563EB] bg-[#EFF6FF] px-3 py-1.5 rounded-xl border border-[#BFDBFE]">
+          <span className="text-xs font-bold text-[#059669] bg-[#ECFDF5] px-3 py-1.5 rounded-xl border border-[#A7F3D0]">
             {filteredLeads.length} of {openLeads.length} Open Leads
           </span>
         </div>
@@ -201,7 +201,7 @@ export const BDEWorkingQueue: React.FC = () => {
                 placeholder="Search candidate, phone, city..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-8 pr-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-8 pr-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#10B981] focus:bg-white"
               />
             </div>
 
@@ -211,7 +211,7 @@ export const BDEWorkingQueue: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs text-[#0F172A] font-medium focus:outline-none focus:border-[#2563EB]"
+                className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981]"
               >
                 <option value="OPEN">Open Queue ({openLeads.length})</option>
                 <option value="ALL">All Leads ({myLeads.length})</option>
@@ -234,7 +234,7 @@ export const BDEWorkingQueue: React.FC = () => {
               onClick={() => setViewMode('CARDS')}
               className={`p-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 viewMode === 'CARDS'
-                  ? 'bg-white text-[#2563EB] shadow-xs'
+                  ? 'bg-white text-[#059669] shadow-xs'
                   : 'text-[#64748B] hover:text-[#0F172A]'
               }`}
               title="Card View (Optimized for Mobile)"
@@ -246,7 +246,7 @@ export const BDEWorkingQueue: React.FC = () => {
               onClick={() => setViewMode('TABLE')}
               className={`p-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 viewMode === 'TABLE'
-                  ? 'bg-white text-[#2563EB] shadow-xs'
+                  ? 'bg-white text-[#059669] shadow-xs'
                   : 'text-[#64748B] hover:text-[#0F172A]'
               }`}
               title="Table View (Optimized for Desktop/Tablet)"
@@ -259,7 +259,7 @@ export const BDEWorkingQueue: React.FC = () => {
         {/* Empty State */}
         {filteredLeads.length === 0 && (
           <div className="py-12 text-center text-xs text-[#64748B] space-y-2">
-            <FiPhoneCall className="mx-auto text-3xl text-[#2563EB] opacity-60" />
+            <FiPhoneCall className="mx-auto text-3xl text-[#059669] opacity-60" />
             <div className="font-bold text-sm text-[#0F172A]">No candidates found</div>
             <p>Try resetting search filters or requesting additional leads from your Team Lead.</p>
           </div>
@@ -272,7 +272,7 @@ export const BDEWorkingQueue: React.FC = () => {
               <motion.div
                 key={lead.id}
                 whileHover={{ y: -2 }}
-                className="p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-xs hover:border-[#BFDBFE] transition-all flex flex-col justify-between space-y-3"
+                className="p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-xs hover:border-[#A7F3D0] transition-all flex flex-col justify-between space-y-3"
               >
                 <div className="space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -294,7 +294,7 @@ export const BDEWorkingQueue: React.FC = () => {
                   </div>
 
                   {lead.nextFollowUpDate && (
-                    <div className="p-2 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[11px] text-[#1E40AF] flex items-center justify-between font-semibold">
+                    <div className="p-2 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[11px] text-[#065F46] flex items-center justify-between font-semibold">
                       <span>Follow-up:</span>
                       <span className="font-bold">{formatFollowUpDate(lead.nextFollowUpDate)}</span>
                     </div>
@@ -305,7 +305,7 @@ export const BDEWorkingQueue: React.FC = () => {
                 <div className="flex items-center gap-2 pt-2 border-t border-[#F1F5F9]">
                   <a
                     href={`tel:${lead.phone.replace(/\s+/g, '')}`}
-                    className="p-2.5 rounded-xl bg-[#EFF6FF] text-[#2563EB] hover:bg-[#E0E7FF] border border-[#BFDBFE] text-xs font-bold transition-colors"
+                    className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] hover:bg-[#D1FAE5] border border-[#A7F3D0] text-xs font-bold transition-colors"
                     title="Direct Call Candidate"
                   >
                     <FiPhone />
@@ -366,7 +366,7 @@ export const BDEWorkingQueue: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-3 text-[#475569]">
                       {lead.nextFollowUpDate ? (
-                        <span className="text-[#1E40AF] font-bold bg-[#EFF6FF] px-2 py-0.5 rounded-full border border-[#BFDBFE]">
+                        <span className="text-[#065F46] font-bold bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]">
                           {formatFollowUpDate(lead.nextFollowUpDate)}
                         </span>
                       ) : (
@@ -377,7 +377,7 @@ export const BDEWorkingQueue: React.FC = () => {
                       <div className="inline-flex items-center gap-1.5 justify-end">
                         <a
                           href={`tel:${lead.phone.replace(/\s+/g, '')}`}
-                          className="p-1.5 rounded-lg bg-[#EFF6FF] text-[#2563EB] hover:bg-[#E0E7FF] border border-[#BFDBFE]"
+                          className="p-1.5 rounded-lg bg-[#ECFDF5] text-[#059669] hover:bg-[#D1FAE5] border border-[#A7F3D0]"
                           title="Direct Call"
                         >
                           <FiPhone className="text-xs" />
@@ -418,7 +418,7 @@ export const BDEWorkingQueue: React.FC = () => {
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <div>
                 <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                  <FiPhoneCall className="text-[#2563EB]" />
+                  <FiPhoneCall className="text-[#059669]" />
                   <span>Call Disposition: {selectedLead.candidateName}</span>
                 </h3>
                 <div className="text-xs text-[#64748B] font-mono mt-0.5">
@@ -445,7 +445,7 @@ export const BDEWorkingQueue: React.FC = () => {
                     setNewStatus(e.target.value as LeadStatus);
                     setFormError('');
                   }}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
                 >
                   {allowedStatuses.map((status) => (
                     <option key={status} value={status}>
@@ -478,14 +478,14 @@ export const BDEWorkingQueue: React.FC = () => {
                     setFormError('');
                   }}
                   placeholder="Detail conversation points, student queries, course preferences, or reasons for follow-up..."
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-medium focus:outline-none focus:border-[#2563EB] focus:bg-white"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
                 />
               </div>
 
               {/* Schedule Follow-up section */}
               {['FOLLOW_UP_REQUIRED', 'INTERESTED', 'CONTACTED'].includes(newStatus) && (
-                <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] space-y-3">
-                  <div className="flex items-center gap-1.5 text-[#1E40AF] font-bold">
+                <div className="p-3.5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] space-y-3">
+                  <div className="flex items-center gap-1.5 text-[#065F46] font-bold">
                     <FiClock />
                     <span>Schedule Callback / Follow-up Slot</span>
                   </div>
@@ -503,7 +503,7 @@ export const BDEWorkingQueue: React.FC = () => {
                           setScheduleFollowUpTime(e.target.value);
                           setFormError('');
                         }}
-                        className="w-full bg-white border border-[#BFDBFE] rounded-lg p-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+                        className="w-full bg-white border border-[#A7F3D0] rounded-lg p-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#10B981]"
                       />
                     </div>
                     <div>
@@ -518,7 +518,7 @@ export const BDEWorkingQueue: React.FC = () => {
                           setFormError('');
                         }}
                         placeholder="e.g. Discuss fee structure with parents"
-                        className="w-full bg-white border border-[#BFDBFE] rounded-lg p-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
+                        className="w-full bg-white border border-[#A7F3D0] rounded-lg p-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#10B981]"
                       />
                     </div>
                   </div>
