@@ -72,6 +72,30 @@ export interface LeadStatusHistory {
   timestamp: string;
 }
 
+export interface FollowUpItem {
+  id: string;
+  leadId: string;
+  candidateName: string;
+  candidatePhone: string;
+  bdeId: string;
+  bdeName?: string;
+  scheduledTime: string;
+  status: 'PENDING' | 'COMPLETED' | 'OVERDUE';
+  remarks?: string;
+  createdAt: string;
+}
+
+export interface ReplenishmentAlert {
+  id: string;
+  bdeId: string;
+  bdeName: string;
+  teamId: string;
+  teamName: string;
+  reason: string;
+  status: 'ACTIVE' | 'RESOLVED';
+  timestamp: string;
+}
+
 export interface AttendanceRecord {
   id: string;
   userId: string;
@@ -84,6 +108,7 @@ export interface AttendanceRecord {
   status: 'PRESENT' | 'LATE' | 'HALF_DAY' | 'ABSENT';
   isModified: boolean;
   modifiedBy?: string;
+  modifiedByName?: string;
   modifiedReason?: string;
   createdAt: string;
   updatedAt: string;
@@ -111,6 +136,17 @@ export interface FinancialTransaction {
   createdAt: string;
 }
 
+export interface FinancialCalculationLog {
+  id: string;
+  calcType: 'REVENUE_SPLIT' | 'PROFIT_SHARE' | 'CUSTOM_PERCENT' | 'DISCOUNT_NET';
+  inputValues: Record<string, any>;
+  resultValues: Record<string, any>;
+  calculatedById: string;
+  calculatedByName: string;
+  notes?: string;
+  timestamp: string;
+}
+
 export interface SystemSettings {
   companySharePercentage: number;
   remainingSharePercentage: number;
@@ -120,4 +156,55 @@ export interface SystemSettings {
   weeklyTargetLeads: number;
   monthlyTargetLeads: number;
   maxLeadsPerBde: number;
+  shiftStartTime: string;
+  gracePeriodMinutes: number;
+}
+
+export type AuditAction =
+  | 'LEAD_INGESTED'
+  | 'LEAD_ALLOCATED_STAGE1'
+  | 'LEAD_ALLOCATED_STAGE2'
+  | 'LEAD_STATUS_CHANGED'
+  | 'LEAD_REASSIGNED'
+  | 'ATTENDANCE_PUNCH_IN'
+  | 'ATTENDANCE_PUNCH_OUT'
+  | 'ATTENDANCE_MODIFIED'
+  | 'FINANCIAL_CALCULATION'
+  | 'TRANSACTION_CONFIRMED'
+  | 'TRANSACTION_REJECTED'
+  | 'REPLENISHMENT_REQUESTED'
+  | 'REPLENISHMENT_RESOLVED'
+  | 'USER_CREATED'
+  | 'USER_STATUS_TOGGLED'
+  | 'TEAM_CREATED'
+  | 'SETTINGS_UPDATED'
+  | 'USER_LOGIN'
+  | 'USER_LOGOUT'
+  | 'FOLLOWUP_CREATED'
+  | 'FOLLOWUP_UPDATED'
+  | 'FOLLOWUP_COMPLETED'
+  | 'FOLLOWUP_CANCELLED';
+
+export type AuditCategory =
+  | 'LEAD'
+  | 'ALLOCATION'
+  | 'ATTENDANCE'
+  | 'FINANCE'
+  | 'USER'
+  | 'AUTH'
+  | 'SYSTEM';
+
+export interface AuditLogEntry {
+  id: string;
+  action: AuditAction;
+  category: AuditCategory;
+  actorId: string;
+  actorName: string;
+  actorRole: UserRole;
+  targetId?: string;
+  targetType?: string;
+  summary: string;
+  details?: Record<string, any>;
+  ipAddress?: string;
+  timestamp: string;
 }

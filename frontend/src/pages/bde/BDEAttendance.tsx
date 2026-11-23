@@ -1,8 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiClock, FiCalendar } from 'react-icons/fi';
+import { FiClock } from 'react-icons/fi';
 import { useApp } from '../../context/useApp';
 import type { AttendanceRecord } from '../../types';
+import { formatClock, parseClockToMinutes } from '../../utils/calculations';
+
+const formatClockTime = (date: Date): string => {
+  const pad = (value: number) => value.toString().padStart(2, '0');
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
+
+const formatLiveDuration = (totalSeconds: number): string => {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const pad = (value: number) => value.toString().padStart(2, '0');
+  return `${pad(Math.floor(safe / 3600))}h ${pad(Math.floor((safe % 3600) / 60))}m ${pad(safe % 60)}s`;
+};
+
+const formatDuration = (minutes: number): string => {
+  const safe = Math.max(0, Math.floor(minutes));
+  return `${String(Math.floor(safe / 60)).padStart(2, '0')}h ${String(safe % 60).padStart(2, '0')}m`;
+};
+
+const getRecordMinutes = (record: AttendanceRecord): number => {
+  const start = parseClockToMinutes(record.punchInTime);
+  const end = parseClockToMinutes(record.punchOutTime);
+  if (start !== null && end !== null && end >= start) return end - start;
+  return record.workingMinutes;
+};
+
+const getStatusClass = (status: AttendanceRecord['status']): string => {
+  if (status === 'MISSING_PUNCH_OUT') return 'bg-[#FEF2F2] text-[#B91C1C] border-[#FECACA]';
+  if (status === 'HALF_DAY') return 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]';
+  if (status === 'LATE') return 'bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE]';
+  return 'bg-[#F0FDF4] text-[#15803D] border-[#BBF7D0]';
+};
 
 export const BDEAttendance: React.FC = () => {
   const {
@@ -12,96 +43,102 @@ export const BDEAttendance: React.FC = () => {
     punchIn,
     punchOut,
     attendanceRecords,
+    systemSettings,
+    submitLeaveRequest,
   } = useApp();
 
-  const [currentClockTime, setCurrentClockTime] = useState<string>(() => {
-    const d = new Date();
-    const h = d.getHours().toString().padStart(2, '0');
-    const m = d.getMinutes().toString().padStart(2, '0');
-    const s = d.getSeconds().toString().padStart(2, '0');
-    return `${h}:${m}:${s}`;
-  });
-
-  const currentFormattedDate = new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date());
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      const d = new Date();
-      const h = d.getHours().toString().padStart(2, '0');
-      const m = d.getMinutes().toString().padStart(2, '0');
-      const s = d.getSeconds().toString().padStart(2, '0');
-      setCurrentClockTime(`${h}:${m}:${s}`);
-    }, 1000);
+    const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const [liveDuration, setLiveDuration] = useState<string>('00h 00m 00s');
+  const currentClockTime = useMemo(() => formatClockTime(now), [now]);
+  const currentFormattedDate = useMemo(
+    () =>
+      new Intl.DateTimeFormat('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(now),
+    [now]
+  );
+  const todayKey = useMemo(() => now.toISOString().slice(0, 10), [now]);
+  const todayRecord = attendanceRecords.find(
+    (rec: AttendanceRecord) => rec.userId === currentUser.id && rec.date === todayKey
+  );
 
-  useEffect(() => {
-    if (punchState !== 'PUNCHED_IN' || !punchInTime) {
-      setLiveDuration('00h 00m 00s');
-      return;
-    }
+  const liveDuration = useMemo(() => {
+    if (punchState !== 'PUNCHED_IN' || !todayRecord?.punchInTime) return '00h 00m 00s';
+    const startMinutes = parseClockToMinutes(todayRecord.punchInTime);
+    const nowMinutes = parseClockToMinutes(now.toISOString());
+    if (startMinutes === null || nowMinutes === null) return '00h 00m 00s';
+    const inSeconds = new Date(todayRecord.punchInTime).getSeconds();
+    const startSeconds = startMinutes * 60 + (Number.isNaN(inSeconds) ? 0 : inSeconds);
+    const nowSeconds = nowMinutes * 60 + now.getSeconds();
+    return formatLiveDuration(nowSeconds - startSeconds);
+  }, [now, punchState, todayRecord]);
 
-    const calculateElapsed = () => {
-      const now = new Date();
-      const [hours, minutes] = punchInTime.split(':').map(Number);
-      const punchDate = new Date();
-      punchDate.setHours(hours, minutes, 0, 0);
+  const [punchFeedback, setPunchFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-      let diffMs = now.getTime() - punchDate.getTime();
-      if (diffMs < 0) diffMs = 0;
-
-      const diffSec = Math.floor(diffMs / 1000);
-      const h = Math.floor(diffSec / 3600);
-      const m = Math.floor((diffSec % 3600) / 60);
-      const s = diffSec % 60;
-
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      setLiveDuration(`${pad(h)}h ${pad(m)}m ${pad(s)}s`);
-    };
-
-    calculateElapsed();
-    const interval = setInterval(calculateElapsed, 1000);
-    return () => clearInterval(interval);
-  }, [punchState, punchInTime]);
+  const handlePunchOut = () => {
+    const succeeded = punchOut();
+    setPunchFeedback(
+      succeeded
+        ? { type: 'success', message: 'Punched out successfully.' }
+        : { type: 'error', message: 'No open shift was found to punch out from.' }
+    );
+  };
 
   // Leave Modal State
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [leaveSuccessToast, setLeaveSuccessToast] = useState(false);
   const [leaveType, setLeaveType] = useState('Casual Leave');
   const [leaveFrom, setLeaveFrom] = useState('');
   const [leaveTo, setLeaveTo] = useState('');
   const [leaveReason, setLeaveReason] = useState('');
+  const [leaveError, setLeaveError] = useState('');
+  const [leaveSuccess, setLeaveSuccess] = useState('');
 
   const handleLeaveSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowLeaveModal(false);
-    setLeaveSuccessToast(true);
-    setTimeout(() => setLeaveSuccessToast(false), 3500);
+    setLeaveError('');
+    setLeaveSuccess('');
+    if (!leaveReason.trim()) {
+      setLeaveError('State a reason for your leave request.');
+      return;
+    }
+    if (!leaveFrom || !leaveTo) {
+      setLeaveError('Select both a from date and a to date.');
+      return;
+    }
+    if (leaveTo < leaveFrom) {
+      setLeaveError('The to date cannot be earlier than the from date.');
+      return;
+    }
+    if (!submitLeaveRequest(`${leaveType}: ${leaveReason.trim()}`, leaveFrom, leaveTo)) {
+      setLeaveError('Could not submit your leave request. Check the dates and reason.');
+      return;
+    }
+    setLeaveFrom('');
+    setLeaveTo('');
+    setLeaveReason('');
+    setLeaveSuccess('Leave request submitted for Team Lead review.');
   };
 
-  const myRecords = attendanceRecords.filter((r: AttendanceRecord) => r.userId === currentUser.id);
+  const myRecords = attendanceRecords
+    .filter((rec: AttendanceRecord) => rec.userId === currentUser.id)
+    .sort((a: AttendanceRecord, b: AttendanceRecord) => b.date.localeCompare(a.date));
+
+  const shiftStart = formatClock(systemSettings.workdayStartTime) || systemSettings.workdayStartTime;
+  const shiftEnd = formatClock(systemSettings.workdayEndTime) || systemSettings.workdayEndTime;
+  const displayPunchIn = formatClock(todayRecord?.punchInTime) || punchInTime || '—';
+  const displayStatus =
+    todayRecord?.status || (punchState === 'PUNCHED_IN' ? 'PRESENT' : punchState === 'PUNCHED_OUT' ? 'OFF SHIFT' : 'NOT PUNCHED');
 
   return (
     <div className="space-y-6">
-      {/* Toast Alert */}
-      {leaveSuccessToast && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-2xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] text-xs sm:text-sm font-bold flex items-center gap-3 shadow-md"
-        >
-          <FiCalendar className="text-xl shrink-0 text-[#2563EB]" />
-          <span>Leave Request submitted successfully to Team Lead for review and approval!</span>
-        </motion.div>
-      )}
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -115,7 +152,11 @@ export const BDEAttendance: React.FC = () => {
         </div>
 
         <button
-          onClick={() => setShowLeaveModal(true)}
+          onClick={() => {
+            setLeaveError('');
+            setLeaveSuccess('');
+            setShowLeaveModal(true);
+          }}
           className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E2E8F0] text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95 self-start sm:self-auto"
         >
           <span>📅</span>
@@ -153,7 +194,7 @@ export const BDEAttendance: React.FC = () => {
             </button>
 
             <button
-              onClick={punchOut}
+              onClick={handlePunchOut}
               disabled={punchState !== 'PUNCHED_IN'}
               className={`px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all border ${
                 punchState === 'PUNCHED_IN'
@@ -168,11 +209,18 @@ export const BDEAttendance: React.FC = () => {
 
           <div className="text-xs sm:text-sm text-[#94A3B8] font-normal pt-0.5">
             {punchState === 'PUNCHED_IN' ? (
-              <span>Punched in at {punchInTime || '13:43'} · Currently working ({liveDuration})</span>
+              <span>Punched in at {displayPunchIn} · Currently working ({liveDuration})</span>
+            ) : punchState === 'PUNCHED_OUT' ? (
+              <span>Punched out at {formatClock(todayRecord?.punchOutTime) || '—'} · Shift ended</span>
             ) : (
-              <span>Punched out · Shift ended · Click "Punch In" to start working</span>
+              <span>Not punched in yet · Click "Punch In" to start working</span>
             )}
           </div>
+          {punchFeedback && (
+            <p className={`text-xs font-semibold ${punchFeedback.type === 'error' ? 'text-[#FCA5A5]' : 'text-[#BFDBFE]'}`}>
+              {punchFeedback.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -180,23 +228,27 @@ export const BDEAttendance: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="glass-panel p-5 rounded-2xl">
           <div className="text-xs text-[#64748B] font-semibold">Today's Punch In</div>
-          <div className="text-2xl font-black text-[#0F172A] mt-1">{punchInTime || '—'}</div>
-          <div className="text-[11px] text-[#64748B] mt-1">Official Shift: 09:30 AM</div>
+          <div className="text-2xl font-black text-[#0F172A] mt-1">{displayPunchIn}</div>
+          <div className="text-[11px] text-[#64748B] mt-1">Official Shift: {shiftStart} – {shiftEnd}</div>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl">
           <div className="text-xs text-[#64748B] font-semibold">Active Shift Duration</div>
-          <div className="text-2xl font-black text-[#2563EB] font-mono mt-1">{liveDuration}</div>
-          <div className="text-[11px] text-[#64748B] mt-1">Target: 8.0 hours/day</div>
+          <div className="text-2xl font-black text-[#2563EB] font-mono mt-1">
+            {punchState === 'PUNCHED_IN' ? liveDuration : todayRecord ? formatDuration(getRecordMinutes(todayRecord)) : '00h 00m 00s'}
+          </div>
+          <div className="text-[11px] text-[#64748B] mt-1">Full-day target: {systemSettings.fullDayThresholdHours} hours</div>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl">
           <div className="text-xs text-[#64748B] font-semibold">Attendance Status</div>
-          <div className="text-2xl font-black text-[#2563EB] mt-1">
-            {punchState === 'PUNCHED_IN' ? 'PRESENT' : 'OFF SHIFT'}
-          </div>
+          <div className="text-2xl font-black text-[#2563EB] mt-1">{displayStatus}</div>
           <div className="text-[11px] text-[#64748B] mt-1">
-            {punchState === 'PUNCHED_IN' ? 'Logged in & active' : 'Session closed'}
+            {todayRecord?.earlyDeparture
+              ? 'Early departure recorded'
+              : todayRecord
+                ? `Logged: ${formatDuration(getRecordMinutes(todayRecord))}`
+                : 'No attendance record for today'}
           </div>
         </div>
       </div>
@@ -219,16 +271,30 @@ export const BDEAttendance: React.FC = () => {
               {myRecords.map((rec: AttendanceRecord) => (
                 <tr key={rec.id} className="hover:bg-[#F8FAFC]">
                   <td className="py-2.5 px-3 font-semibold text-[#0F172A]">{rec.date}</td>
-                  <td className="py-2.5 px-3 font-mono text-[#2563EB] font-bold">{rec.punchInTime || '—'}</td>
-                  <td className="py-2.5 px-3 font-mono text-[#64748B]">{rec.punchOutTime || '—'}</td>
-                  <td className="py-2.5 px-3 text-[#475569]">{rec.workingMinutes} mins</td>
+                  <td className="py-2.5 px-3 font-mono text-[#2563EB] font-bold">{formatClock(rec.punchInTime) || '—'}</td>
+                  <td className="py-2.5 px-3 font-mono text-[#64748B]">{formatClock(rec.punchOutTime) || '—'}</td>
+                  <td className="py-2.5 px-3 text-[#475569]">
+                    {rec.punchInTime ? formatDuration(getRecordMinutes(rec)) : '—'}
+                  </td>
                   <td className="py-2.5 px-3">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusClass(rec.status)}`}>
                       {rec.status}
                     </span>
+                    {rec.earlyDeparture && (
+                      <span className="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]">
+                        EARLY EXIT
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
+              {myRecords.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-10 text-center text-xs text-[#64748B]">
+                    No attendance records found for your account yet.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -238,8 +304,13 @@ export const BDEAttendance: React.FC = () => {
       <div className="glass-panel p-5 rounded-2xl text-xs text-[#475569] space-y-2">
         <h4 className="font-bold text-[#0F172A]">Company Shift Attendance Guidelines:</h4>
         <ul className="list-disc list-inside space-y-1 text-[11px] text-[#64748B]">
-          <li>Daily shift window is 09:30 AM to 06:30 PM with standard 15-minute grace period.</li>
-          <li>Punching out before completing 4.5 hours is automatically audited as Half-Day.</li>
+          <li>
+            Daily shift window is {shiftStart} to {shiftEnd} with a {systemSettings.lateGracePeriodMinutes}-minute late grace period and a{' '}
+            {systemSettings.earlyExitGracePeriodMinutes}-minute early-exit grace period.
+          </li>
+          <li>
+            Punching out before {systemSettings.halfDayThresholdHours} hours is audited as Half-Day; {systemSettings.fullDayThresholdHours} hours counts as a full day.
+          </li>
           <li>All attendance timestamps are system-logged with tamper-proof security auditing.</li>
         </ul>
       </div>
@@ -287,7 +358,11 @@ export const BDEAttendance: React.FC = () => {
                     type="date"
                     required
                     value={leaveFrom}
-                    onChange={(e) => setLeaveFrom(e.target.value)}
+                    onChange={(e) => {
+                      setLeaveFrom(e.target.value);
+                      setLeaveError('');
+                      setLeaveSuccess('');
+                    }}
                     className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
                   />
                 </div>
@@ -297,7 +372,11 @@ export const BDEAttendance: React.FC = () => {
                     type="date"
                     required
                     value={leaveTo}
-                    onChange={(e) => setLeaveTo(e.target.value)}
+                    onChange={(e) => {
+                      setLeaveTo(e.target.value);
+                      setLeaveError('');
+                      setLeaveSuccess('');
+                    }}
                     className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
                   />
                 </div>
@@ -309,11 +388,26 @@ export const BDEAttendance: React.FC = () => {
                   required
                   rows={3}
                   value={leaveReason}
-                  onChange={(e) => setLeaveReason(e.target.value)}
+                  onChange={(e) => {
+                    setLeaveReason(e.target.value);
+                    setLeaveError('');
+                    setLeaveSuccess('');
+                  }}
                   placeholder="State the reason for leave request..."
                   className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
                 />
               </div>
+
+              {leaveError && (
+                <p className="text-[11px] font-semibold text-[#B91C1C] bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-2.5">
+                  {leaveError}
+                </p>
+              )}
+              {leaveSuccess && (
+                <p className="text-[11px] font-semibold text-[#15803D] bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl p-2.5">
+                  {leaveSuccess}
+                </p>
+              )}
 
               <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
                 <button

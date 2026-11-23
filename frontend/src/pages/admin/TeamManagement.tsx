@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import {
   FiUsers,
   FiPlusCircle,
+  FiAlertCircle,
 } from 'react-icons/fi';
 
 export const TeamManagement: React.FC = () => {
@@ -12,16 +13,42 @@ export const TeamManagement: React.FC = () => {
   const [showAddTeamModal, setShowAddTeamModal] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
   const [selectedTLId, setSelectedTLId] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const teamLeads = users.filter((u) => u.role === 'TEAM_LEAD');
+  const ledTeamIds = new Set(teams.map((t) => t.teamLeadId).filter(Boolean));
+  const eligibleTeamLeads = users.filter(
+    (u) => u.role === 'TEAM_LEAD' && u.status === 'ACTIVE' && !ledTeamIds.has(u.id)
+  );
 
   const handleCreateTeamSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTeamName.trim() || !selectedTLId) return;
-    createTeam(newTeamName, selectedTLId);
+    if (!createTeam(newTeamName.trim(), selectedTLId)) {
+      setFormError('Could not create the team. The selected team lead may already lead a team.');
+      return;
+    }
+    setFormError(null);
     setShowAddTeamModal(false);
     setNewTeamName('');
     setSelectedTLId('');
+  };
+
+  const handleToggleStatus = (memberId: string, name: string, isActive: boolean) => {
+    if (!toggleUserStatus(memberId)) {
+      setFormError(`Could not ${isActive ? 'deactivate' : 'activate'} ${name}. The last active admin cannot be deactivated.`);
+      return;
+    }
+    setFormError(null);
+  };
+
+  const handleOpenCreateTeam = () => {
+    if (!eligibleTeamLeads.length) {
+      setFormError('No eligible team leads are available. Add a new team lead before creating another team.');
+      return;
+    }
+    setFormError(null);
+    setSelectedTLId(eligibleTeamLeads[0].id);
+    setShowAddTeamModal(true);
   };
 
   return (
@@ -42,16 +69,31 @@ export const TeamManagement: React.FC = () => {
         </div>
 
         <button
-          onClick={() => {
-            if (teamLeads.length > 0) setSelectedTLId(teamLeads[0].id);
-            setShowAddTeamModal(true);
-          }}
+          onClick={handleOpenCreateTeam}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl shimmer-button text-white font-bold text-xs shadow-md transition-all cursor-pointer"
         >
           <FiPlusCircle />
           <span>Create New Team</span>
         </button>
       </div>
+
+      {formError && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-3.5 rounded-xl bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] text-xs font-bold flex items-center gap-2"
+        >
+          <FiAlertCircle className="text-base shrink-0" />
+          <span>{formError}</span>
+          <button
+            onClick={() => setFormError(null)}
+            className="ml-auto font-bold cursor-pointer"
+            aria-label="Dismiss message"
+          >
+            ✕
+          </button>
+        </motion.div>
+      )}
 
       {/* Teams Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -66,7 +108,9 @@ export const TeamManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-bold text-[#0F172A]">{t.name}</h3>
-                  <div className="text-xs text-[#2563EB] font-bold">Team Lead: {t.teamLeadName}</div>
+                  <div className="text-xs text-[#2563EB] font-bold">
+                    Team Lead: {t.teamLeadName || 'Unassigned'}
+                  </div>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
                   {t.status}
@@ -104,7 +148,7 @@ export const TeamManagement: React.FC = () => {
                             }`}
                         />
                         <button
-                          onClick={() => toggleUserStatus(m.id)}
+                          onClick={() => handleToggleStatus(m.id, m.name, m.status === 'ACTIVE')}
                           className={`px-2 py-0.5 rounded-lg text-[10px] font-bold cursor-pointer transition-colors ${m.status === 'ACTIVE'
                               ? 'bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEE2E2]'
                               : 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#E0E7FF]'
@@ -162,14 +206,20 @@ export const TeamManagement: React.FC = () => {
                   required
                   value={selectedTLId}
                   onChange={(e) => setSelectedTLId(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                  disabled={!eligibleTeamLeads.length}
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {teamLeads.map((tl) => (
+                  {eligibleTeamLeads.map((tl) => (
                     <option key={tl.id} value={tl.id}>
                       {tl.name} ({tl.email})
                     </option>
                   ))}
                 </select>
+                {!eligibleTeamLeads.length && (
+                  <p className="mt-2 text-[11px] font-semibold text-[#DC2626]">
+                    No eligible team leads. Every active team lead already leads a team.
+                  </p>
+                )}
               </div>
 
               <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
@@ -182,7 +232,12 @@ export const TeamManagement: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl shimmer-button text-white text-xs font-bold shadow-md cursor-pointer"
+                  disabled={!eligibleTeamLeads.length}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold shadow-md ${
+                    eligibleTeamLeads.length
+                      ? 'shimmer-button text-white cursor-pointer'
+                      : 'bg-[#F1F5F9] text-[#94A3B8] cursor-not-allowed'
+                  }`}
                 >
                   Create Team
                 </button>

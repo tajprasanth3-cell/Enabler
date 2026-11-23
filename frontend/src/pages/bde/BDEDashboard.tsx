@@ -15,10 +15,9 @@ import {
   FiMaximize2,
   FiMinimize2,
 } from 'react-icons/fi';
-import confetti from 'canvas-confetti';
 import { useApp } from '../../context/useApp';
 import type { Lead, LeadStatus, FollowUpItem } from '../../types';
-import { APP_ROUTES, LEAD_STATUS_CONFIG } from '../../utils/constants';
+import { APP_ROUTES, LEAD_STATUS_CONFIG, OPEN_LEAD_STATUSES } from '../../utils/constants';
 import { calculateConversionRate } from '../../utils/calculations';
 import StatusBadge from '../../components/common/Badge';
 
@@ -34,6 +33,10 @@ export const BDEDashboard: React.FC = () => {
     punchOut,
     updateLeadStatus,
     getAllowedStatuses,
+    leadStatusHistory,
+    systemSettings,
+    submitReport,
+    submitLeaveRequest,
   } = useApp();
 
   // Workbench Collapse States
@@ -77,107 +80,152 @@ export const BDEDashboard: React.FC = () => {
 
   // Modals for Top Action Buttons
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportSuccessToast, setReportSuccessToast] = useState(false);
-  const [todayCallsDone, setTodayCallsDone] = useState(18);
-  const [todayPitched, setTodayPitched] = useState(12);
-  const [todayConversions, setTodayConversions] = useState(2);
-  const [todayNotes, setTodayNotes] = useState('');
+  const [reportMessage, setReportMessage] = useState('');
+  const [reportError, setReportError] = useState('');
+  const [reportSuccess, setReportSuccess] = useState('');
 
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [leaveSuccessToast, setLeaveSuccessToast] = useState(false);
   const [leaveType, setLeaveType] = useState('Casual Leave');
   const [leaveFrom, setLeaveFrom] = useState('');
   const [leaveTo, setLeaveTo] = useState('');
   const [leaveReason, setLeaveReason] = useState('');
+  const [leaveError, setLeaveError] = useState('');
+  const [leaveSuccess, setLeaveSuccess] = useState('');
+
+  const [punchFeedback, setPunchFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const handlePunchOut = () => {
+    const succeeded = punchOut();
+    setPunchFeedback(
+      succeeded
+        ? { type: 'success', message: 'Punched out successfully.' }
+        : { type: 'error', message: 'No open shift was found to punch out from.' }
+    );
+  };
 
   const handleReportSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowReportModal(false);
-    setReportSuccessToast(true);
-    setTimeout(() => setReportSuccessToast(false), 3500);
+    setReportError('');
+    setReportSuccess('');
+    if (!reportMessage.trim()) {
+      setReportError('Write a short report before submitting.');
+      return;
+    }
+    if (!submitReport(reportMessage.trim())) {
+      setReportError('Could not submit your report. Please try again.');
+      return;
+    }
+    setReportMessage('');
+    setReportSuccess('Report submitted to your Team Lead.');
   };
 
   const handleLeaveSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowLeaveModal(false);
-    setLeaveSuccessToast(true);
-    setTimeout(() => setLeaveSuccessToast(false), 3500);
+    setLeaveError('');
+    setLeaveSuccess('');
+    if (!leaveReason.trim()) {
+      setLeaveError('State a reason for your leave request.');
+      return;
+    }
+    if (!leaveFrom || !leaveTo) {
+      setLeaveError('Select both a from date and a to date.');
+      return;
+    }
+    if (leaveTo < leaveFrom) {
+      setLeaveError('The to date cannot be earlier than the from date.');
+      return;
+    }
+    if (!submitLeaveRequest(`${leaveType}: ${leaveReason.trim()}`, leaveFrom, leaveTo)) {
+      setLeaveError('Could not submit your leave request. Check the dates and reason.');
+      return;
+    }
+    setLeaveFrom('');
+    setLeaveTo('');
+    setLeaveReason('');
+    setLeaveSuccess('Leave request submitted for Team Lead review.');
   };
 
   // Lead metrics for BDE
   const myLeads = leads.filter((l: Lead) => l.currentBdeId === currentUser.id);
-  const pendingLeads = myLeads.filter((l: Lead) =>
-    ['NEW', 'CONTACTED', 'FOLLOW_UP_REQUIRED'].includes(l.status)
-  );
+  const pendingLeads = myLeads.filter((l: Lead) => OPEN_LEAD_STATUSES.includes(l.status));
   const convertedLeads = myLeads.filter((l: Lead) => l.status === 'CONVERTED');
   const myConversionRate = calculateConversionRate(convertedLeads.length, myLeads.length);
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const myHistoryToday = leadStatusHistory.filter((entry) => {
+    if (entry.changedById !== currentUser.id) return false;
+    const timestamp = new Date(entry.timestamp).getTime();
+    return !Number.isNaN(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === todayKey;
+  });
+  const dispositionsToday = myHistoryToday.length;
+  const conversionsToday = myHistoryToday.filter((entry) => entry.newStatus === 'CONVERTED').length;
+  const dailyTarget = Math.max(0, systemSettings.dailyTargetLeads);
+  const conversionTarget = Math.max(0, systemSettings.conversionTargetPercentage);
+  const conversionTargetCount = Math.ceil((dailyTarget * conversionTarget) / 100);
+  const dailyGoalPercent = dailyTarget > 0 ? Math.min(100, Math.round((dispositionsToday / dailyTarget) * 100)) : 0;
+  const conversionGoalPercent =
+    conversionTargetCount > 0 ? Math.min(100, Math.round((conversionsToday / conversionTargetCount) * 100)) : 0;
+
+  const myFollowUps = followUps.filter((fol: FollowUpItem) => fol.bdeId === currentUser.id);
+  const endOfToday = new Date();
+  endOfToday.setHours(23, 59, 59, 999);
+  const dueFollowUps = myFollowUps.filter((fol: FollowUpItem) => {
+    if (fol.status !== 'PENDING' && fol.status !== 'OVERDUE') return false;
+    const scheduled = new Date(fol.scheduledTime).getTime();
+    return !Number.isNaN(scheduled) && scheduled <= endOfToday.getTime();
+  });
 
   // Quick Call Disposition Modal for Priority Leads
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [newStatus, setNewStatus] = useState<LeadStatus>('CONTACTED');
   const [callRemarks, setCallRemarks] = useState('');
   const [showDispositionModal, setShowDispositionModal] = useState(false);
-  const allowedStatuses = selectedLead ? getAllowedStatuses(selectedLead.status) : [];
+  const [dispositionError, setDispositionError] = useState('');
+  const allowedStatuses = selectedLead
+    ? getAllowedStatuses(selectedLead.status).filter((status) => status !== 'FOLLOW_UP_REQUIRED')
+    : [];
+  const priorityLeads = pendingLeads.filter((lead: Lead) =>
+    getAllowedStatuses(lead.status).some((status) => status !== 'FOLLOW_UP_REQUIRED')
+  );
 
   const handleOpenDisposition = (lead: Lead) => {
-    const allowedStatuses = getAllowedStatuses(lead.status);
+    const statuses = getAllowedStatuses(lead.status).filter((status) => status !== 'FOLLOW_UP_REQUIRED');
     setSelectedLead(lead);
-    setNewStatus(allowedStatuses[0] || lead.status);
+    setNewStatus(statuses[0] || lead.status);
     setCallRemarks('');
+    setDispositionError('');
     setShowDispositionModal(true);
   };
 
   const handleSaveDisposition = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLead || !callRemarks.trim()) return;
-
-    if (newStatus === 'CONVERTED') {
-      confetti({
-        particleCount: 110,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#2563EB', '#3B82F6', '#818CF8', '#1D4ED8'],
-      });
+    if (!selectedLead || !callRemarks.trim()) {
+      setDispositionError('Call remarks are required before saving a disposition.');
+      return;
     }
-
-    updateLeadStatus(selectedLead.id, newStatus, callRemarks);
+    if (newStatus === 'FOLLOW_UP_REQUIRED') {
+      setDispositionError('Schedule follow-ups from the working queue with a date and time.');
+      return;
+    }
+    const succeeded = updateLeadStatus(selectedLead.id, newStatus, callRemarks.trim());
+    if (!succeeded) {
+      setDispositionError('Could not update this lead. Check the status transition and your assignment.');
+      return;
+    }
     setShowDispositionModal(false);
     setSelectedLead(null);
+    setDispositionError('');
   };
 
   return (
     <div className="space-y-6 sm:space-y-7">
-      {/* Toast Alert for Daily Report Submission */}
-      {reportSuccessToast && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-2xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] text-xs sm:text-sm font-bold flex items-center gap-3 shadow-md"
-        >
-          <FiCheckCircle className="text-xl shrink-0 text-[#2563EB]" />
-          <span>Daily Work Report submitted successfully to Team Lead! Great progress today.</span>
-        </motion.div>
-      )}
-
-      {/* Toast Alert for Leave Request */}
-      {leaveSuccessToast && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-2xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] text-xs sm:text-sm font-bold flex items-center gap-3 shadow-md"
-        >
-          <FiCalendar className="text-xl shrink-0 text-[#2563EB]" />
-          <span>Leave Request submitted successfully to Team Lead for review and approval!</span>
-        </motion.div>
-      )}
-
       {/* =========================================================================
           1. HEADER & GREETING BAR (Exact match to user screenshot)
           ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight flex items-center gap-2">
-            <span>{getGreeting()}, {currentUser.name.split(' ')[0] || 'Prasanth'}!</span>
+            <span>{getGreeting()}, {currentUser.name.split(' ')[0]}!</span>
             <span className="text-2xl sm:text-3xl">👋</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#64748B] font-medium mt-0.5">
@@ -188,7 +236,11 @@ export const BDEDashboard: React.FC = () => {
         {/* Top Right Action Buttons */}
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           <button
-            onClick={() => setShowReportModal(true)}
+            onClick={() => {
+              setReportError('');
+              setReportSuccess('');
+              setShowReportModal(true);
+            }}
             className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#3B82F6] hover:from-[#1D4ED8] hover:to-[#2563EB] text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
           >
             <span>📊</span>
@@ -196,7 +248,11 @@ export const BDEDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setShowLeaveModal(true)}
+            onClick={() => {
+              setLeaveError('');
+              setLeaveSuccess('');
+              setShowLeaveModal(true);
+            }}
             className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E2E8F0] text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
           >
             <span>📅</span>
@@ -239,7 +295,7 @@ export const BDEDashboard: React.FC = () => {
             </button>
 
             <button
-              onClick={punchOut}
+              onClick={handlePunchOut}
               disabled={punchState !== 'PUNCHED_IN'}
               className={`px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all border ${punchState === 'PUNCHED_IN'
                 ? 'bg-[#0B1120]/90 hover:bg-[#252830] text-slate-100 border-[#353A47] shadow-xs cursor-pointer hover:scale-105 active:scale-95'
@@ -254,11 +310,18 @@ export const BDEDashboard: React.FC = () => {
           {/* Punch Status Line */}
           <div className="text-xs sm:text-sm text-[#94A3B8] font-normal pt-0.5">
             {punchState === 'PUNCHED_IN' ? (
-              <span>Punched in at {punchInTime || '13:43'} · Currently working</span>
-            ) : (
+              <span>Punched in at {punchInTime || '—'} · Currently working</span>
+            ) : punchState === 'PUNCHED_OUT' ? (
               <span>Punched out · Shift ended · Click "Punch In" to start working</span>
+            ) : (
+              <span>Not punched in yet · Click "Punch In" to start working</span>
             )}
           </div>
+          {punchFeedback && (
+            <p className={`text-xs font-semibold ${punchFeedback.type === 'error' ? 'text-[#FCA5A5]' : 'text-[#BFDBFE]'}`}>
+              {punchFeedback.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -272,7 +335,7 @@ export const BDEDashboard: React.FC = () => {
           className="glass-panel p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#BFDBFE] transition-all min-w-0"
         >
           <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span className="truncate">Total Assigned Leads</span>
+            <span className="truncate">Lifetime Assigned Leads</span>
             <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
               <FiPhoneCall className="text-base" />
             </div>
@@ -280,7 +343,7 @@ export const BDEDashboard: React.FC = () => {
           <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-2">{myLeads.length}</div>
           <div className="text-xs text-[#2563EB] mt-1 font-semibold flex items-center gap-1">
             <FiLayers />
-            <span>Active Queue</span>
+            <span>All assignments</span>
           </div>
         </motion.div>
 
@@ -302,7 +365,7 @@ export const BDEDashboard: React.FC = () => {
             {pendingLeads.length}
           </div>
           <div className="text-xs text-[#64748B] mt-1">
-            {pendingLeads.length === 0 ? 'Queue Done' : 'Awaiting Outreach Today'}
+            {pendingLeads.length === 0 ? 'Queue Done' : 'Open leads in queue'}
           </div>
         </motion.div>
 
@@ -336,7 +399,7 @@ export const BDEDashboard: React.FC = () => {
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-black text-[#2563EB] mt-2">{myConversionRate}%</div>
-          <div className="text-xs text-[#64748B] mt-1 font-medium">Monthly Win Rate</div>
+          <div className="text-xs text-[#64748B] mt-1 font-medium">Lifetime win rate</div>
         </motion.div>
       </div>
 
@@ -402,7 +465,7 @@ export const BDEDashboard: React.FC = () => {
                 </div>
 
                 <span className="text-xs font-mono font-bold text-[#2563EB] bg-[#EFF6FF] px-3 py-1 rounded-full border border-[#BFDBFE]">
-                  72% Goal Completed
+                  {dailyGoalPercent}% Daily Goal
                 </span>
               </div>
 
@@ -410,21 +473,31 @@ export const BDEDashboard: React.FC = () => {
                 <div className="space-y-3 pt-1">
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span className="text-[#64748B]">Daily Candidate Call Target (18 of 25 calls made)</span>
-                      <span className="font-mono text-[#2563EB] font-bold">72%</span>
+                      <span className="text-[#64748B]">
+                        Daily Lead Target ({dispositionsToday} of {dailyTarget} dispositions logged)
+                      </span>
+                      <span className="font-mono text-[#2563EB] font-bold">{dailyGoalPercent}%</span>
                     </div>
                     <div className="w-full bg-[#E2E8F0] h-2.5 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-full w-[72%]" />
+                      <div
+                        className="h-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-full transition-all duration-500"
+                        style={{ width: `${dailyGoalPercent}%` }}
+                      />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span className="text-[#64748B]">Closed Enrollment Target (2 of 3 conversions)</span>
-                      <span className="font-mono text-[#2563EB] font-bold">66%</span>
+                      <span className="text-[#64748B]">
+                        Conversion Target ({conversionsToday} of {conversionTargetCount} today · {conversionTarget}% rate)
+                      </span>
+                      <span className="font-mono text-[#2563EB] font-bold">{conversionGoalPercent}%</span>
                     </div>
                     <div className="w-full bg-[#E2E8F0] h-2.5 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-[#2563EB] to-[#818CF8] rounded-full w-[66%]" />
+                      <div
+                        className="h-full bg-gradient-to-r from-[#2563EB] to-[#818CF8] rounded-full transition-all duration-500"
+                        style={{ width: `${conversionGoalPercent}%` }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -467,7 +540,7 @@ export const BDEDashboard: React.FC = () => {
                 </div>
                 <h4 className="text-sm font-bold text-[#0F172A] mt-3">Follow-up Calendar</h4>
                 <p className="text-xs text-[#64748B] mt-1">
-                  {followUps.filter((f: FollowUpItem) => f.status === 'PENDING').length} scheduled callbacks requiring call today.
+                  {dueFollowUps.length} callbacks due today or overdue.
                 </p>
                 <div className="mt-3 text-xs font-bold text-[#2563EB] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                   <span>Open Follow-ups</span>
@@ -546,7 +619,7 @@ export const BDEDashboard: React.FC = () => {
 
               {!isPriorityCallsCollapsed && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
-                  {pendingLeads.slice(0, 3).map((lead: Lead) => (
+                  {priorityLeads.slice(0, 3).map((lead: Lead) => (
                     <div
                       key={lead.id}
                       className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-2 flex flex-col justify-between"
@@ -579,9 +652,9 @@ export const BDEDashboard: React.FC = () => {
                       </div>
                     </div>
                   ))}
-                  {pendingLeads.length === 0 && (
+                  {priorityLeads.length === 0 && (
                     <div className="col-span-3 text-center py-6 text-xs text-[#64748B]">
-                      All priority leads have been called today! 🎉
+                      No leads are available for a quick disposition right now.
                     </div>
                   )}
                 </div>
@@ -615,46 +688,35 @@ export const BDEDashboard: React.FC = () => {
             </div>
 
             <form onSubmit={handleReportSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[#0F172A] font-bold mb-1">Calls Done</label>
-                  <input
-                    type="number"
-                    value={todayCallsDone}
-                    onChange={(e) => setTodayCallsDone(Number(e.target.value))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold text-center focus:outline-none focus:border-[#2563EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[#0F172A] font-bold mb-1">Leads Pitched</label>
-                  <input
-                    type="number"
-                    value={todayPitched}
-                    onChange={(e) => setTodayPitched(Number(e.target.value))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold text-center focus:outline-none focus:border-[#2563EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[#0F172A] font-bold mb-1">Conversions</label>
-                  <input
-                    type="number"
-                    value={todayConversions}
-                    onChange={(e) => setTodayConversions(Number(e.target.value))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#2563EB] font-bold text-center focus:outline-none focus:border-[#2563EB]"
-                  />
-                </div>
-              </div>
+              <p className="text-[11px] text-[#64748B]">
+                Logged today: {dispositionsToday} dispositions · {conversionsToday} conversions
+              </p>
 
               <div>
-                <label className="block text-[#0F172A] font-bold mb-1">Daily Highlights / Notes</label>
+                <label className="block text-[#0F172A] font-bold mb-1">Daily Highlights / Notes *</label>
                 <textarea
-                  rows={3}
-                  value={todayNotes}
-                  onChange={(e) => setTodayNotes(e.target.value)}
+                  rows={4}
+                  value={reportMessage}
+                  onChange={(e) => {
+                    setReportMessage(e.target.value);
+                    setReportError('');
+                    setReportSuccess('');
+                  }}
                   placeholder="Summary of today's key candidate discussions..."
                   className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
                 />
               </div>
+
+              {reportError && (
+                <p className="text-[11px] font-semibold text-[#B91C1C] bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-2.5">
+                  {reportError}
+                </p>
+              )}
+              {reportSuccess && (
+                <p className="text-[11px] font-semibold text-[#15803D] bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl p-2.5">
+                  {reportSuccess}
+                </p>
+              )}
 
               <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
                 <button
@@ -743,11 +805,26 @@ export const BDEDashboard: React.FC = () => {
                   required
                   rows={3}
                   value={leaveReason}
-                  onChange={(e) => setLeaveReason(e.target.value)}
+                  onChange={(e) => {
+                    setLeaveReason(e.target.value);
+                    setLeaveError('');
+                    setLeaveSuccess('');
+                  }}
                   placeholder="State the reason for leave request..."
                   className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
                 />
               </div>
+
+              {leaveError && (
+                <p className="text-[11px] font-semibold text-[#B91C1C] bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-2.5">
+                  {leaveError}
+                </p>
+              )}
+              {leaveSuccess && (
+                <p className="text-[11px] font-semibold text-[#15803D] bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl p-2.5">
+                  {leaveSuccess}
+                </p>
+              )}
 
               <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
                 <button
@@ -798,7 +875,10 @@ export const BDEDashboard: React.FC = () => {
                 <label className="block text-[#0F172A] font-bold mb-1">Status *</label>
                 <select
                   value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value as LeadStatus)}
+                  onChange={(e) => {
+                    setNewStatus(e.target.value as LeadStatus);
+                    setDispositionError('');
+                  }}
                   className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
                 >
                   {allowedStatuses.map((status) => (
@@ -820,11 +900,20 @@ export const BDEDashboard: React.FC = () => {
                   required
                   rows={3}
                   value={callRemarks}
-                  onChange={(e) => setCallRemarks(e.target.value)}
+                  onChange={(e) => {
+                    setCallRemarks(e.target.value);
+                    setDispositionError('');
+                  }}
                   placeholder="Call remarks..."
                   className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
                 />
               </div>
+
+              {dispositionError && (
+                <p className="text-[11px] font-semibold text-[#B91C1C] bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-2.5">
+                  {dispositionError}
+                </p>
+              )}
 
               <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
                 <button

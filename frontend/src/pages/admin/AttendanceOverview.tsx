@@ -5,26 +5,78 @@ import {
   FiClock,
   FiCalendar,
   FiEdit3,
+  FiCheckCircle,
+  FiAlertCircle,
 } from 'react-icons/fi';
 import type { AttendanceRecord } from '../../types';
+import { formatClock, toDateTimeLocalValue } from '../../utils/calculations';
+
+type Feedback = { type: 'success' | 'error'; message: string };
+
+const FeedbackBanner: React.FC<{ feedback: Feedback }> = ({ feedback }) => (
+  <div
+    className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${
+      feedback.type === 'success'
+        ? 'bg-[#ECFDF5] border-[#A7F3D0] text-[#047857]'
+        : 'bg-[#FEF2F2] border-[#FECACA] text-[#DC2626]'
+    }`}
+  >
+    {feedback.type === 'success' ? <FiCheckCircle /> : <FiAlertCircle />}
+    <span>{feedback.message}</span>
+  </div>
+);
+
+const statusClass = (status: AttendanceRecord['status']): string => {
+  switch (status) {
+    case 'PRESENT':
+      return 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]';
+    case 'LATE':
+      return 'bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]';
+    case 'HALF_DAY':
+      return 'bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1]';
+    case 'MISSING_PUNCH_OUT':
+      return 'bg-[#FDF2F8] text-[#BE185D] border border-[#FBCFE8]';
+    default:
+      return 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]';
+  }
+};
 
 export const AttendanceOverview: React.FC = () => {
-  const { attendanceRecords, adjustAttendance } = useApp();
+  const { attendanceRecords, adjustAttendance, attendanceCorrections, systemSettings, currentRole, currentUser } =
+    useApp();
+
+  const isTeamLead = currentRole === 'TEAM_LEAD';
+  const scopedRecords = isTeamLead
+    ? attendanceRecords.filter((record) => record.teamId === (currentUser.teamId || ''))
+    : attendanceRecords;
+  const correctionFor = (recordId: string) => attendanceCorrections.find((item) => item.recordId === recordId);
 
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
   const [revisedStatus, setRevisedStatus] = useState<AttendanceRecord['status']>('PRESENT');
   const [adjustmentReason, setAdjustmentReason] = useState('');
+  const [revisedPunchOut, setRevisedPunchOut] = useState('');
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const handleExecuteAdjustment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRecord || !adjustmentReason.trim()) return;
-    adjustAttendance(selectedRecord.id, revisedStatus, adjustmentReason);
+    const newPunchOutTime = revisedPunchOut ? new Date(revisedPunchOut).toISOString() : undefined;
+    const adjusted = adjustAttendance(selectedRecord.id, revisedStatus, adjustmentReason, newPunchOutTime);
+    if (!adjusted) {
+      setFeedback({
+        type: 'error',
+        message: 'Correction was not applied. Check your permissions and provide a valid reason.',
+      });
+      return;
+    }
+    setFeedback({ type: 'success', message: 'Timesheet correction applied and logged locally.' });
     setSelectedRecord(null);
   };
 
-  const presentCount = attendanceRecords.filter((a) => a.status === 'PRESENT').length;
-  const lateCount = attendanceRecords.filter((a) => a.status === 'LATE').length;
-  const halfDayCount = attendanceRecords.filter((a) => a.status === 'HALF_DAY').length;
+  const presentCount = scopedRecords.filter((a) => a.status === 'PRESENT').length;
+  const lateCount = scopedRecords.filter((a) => a.status === 'LATE').length;
+  const halfDayCount = scopedRecords.filter((a) => a.status === 'HALF_DAY').length;
+  const missingPunchOutCount = scopedRecords.filter((a) => a.status === 'MISSING_PUNCH_OUT').length;
 
   return (
     <div className="space-y-5 sm:space-y-8">
@@ -36,7 +88,9 @@ export const AttendanceOverview: React.FC = () => {
             <span>Attendance & Timesheet Governance</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
-            Organization-Wide Attendance Monitoring
+            {isTeamLead
+              ? `${currentUser.teamName || 'Your Team'} Attendance Monitoring`
+              : 'Organization-Wide Attendance Monitoring'}
           </h1>
           <p className="text-[#64748B] text-sm mt-1">
             Track daily employee punch timings, detect tardiness and early exits, and audit manual adjustments.
@@ -44,8 +98,10 @@ export const AttendanceOverview: React.FC = () => {
         </div>
       </div>
 
+      {feedback && <FeedbackBanner feedback={feedback} />}
+
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="glass-panel p-5 rounded-2xl">
           <div className="text-xs text-[#64748B] font-bold">Punched In On-Time (Present)</div>
           <div className="text-3xl font-black text-[#2563EB] mt-2">{presentCount}</div>
@@ -61,7 +117,15 @@ export const AttendanceOverview: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl">
           <div className="text-xs text-[#64748B] font-bold">Half-Day Records</div>
           <div className="text-3xl font-black text-[#64748B] mt-2">{halfDayCount}</div>
-          <div className="text-xs text-[#64748B] mt-1">Under 8 hour threshold</div>
+          <div className="text-xs text-[#64748B] mt-1">
+            Under {systemSettings.halfDayThresholdHours} hour threshold
+          </div>
+        </div>
+
+        <div className="glass-panel p-5 rounded-2xl">
+          <div className="text-xs text-[#64748B] font-bold">Missing Punch-Out</div>
+          <div className="text-3xl font-black text-[#BE185D] mt-2">{missingPunchOutCount}</div>
+          <div className="text-xs text-[#64748B] mt-1">Past dates without a recorded punch-out</div>
         </div>
       </div>
 
@@ -73,7 +137,7 @@ export const AttendanceOverview: React.FC = () => {
             <span>Daily Attendance Register & Punch Timesheets</span>
           </h3>
           <span className="text-xs text-[#2563EB] font-semibold bg-[#EFF6FF] px-3 py-1 rounded-full border border-[#BFDBFE]">
-            Strict Tamper-Proof Audit Logging
+            Corrections are logged locally
           </span>
         </div>
 
@@ -92,36 +156,53 @@ export const AttendanceOverview: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
-              {attendanceRecords.map((att) => (
+              {scopedRecords.map((att) => {
+                const correction = correctionFor(att.id);
+                return (
                 <tr key={att.id} className="hover:bg-[#F8FAFC] transition-colors">
                   <td className="py-3.5 px-3 font-mono text-[#64748B]">{att.date}</td>
                   <td className="py-3.5 px-3 font-bold text-[#0F172A]">{att.userName}</td>
-                  <td className="py-3.5 px-3 text-[#2563EB] font-mono font-bold">{att.punchInTime || '—'}</td>
-                  <td className="py-3.5 px-3 text-[#64748B] font-mono">{att.punchOutTime || 'Active Shift'}</td>
+                  <td className="py-3.5 px-3 text-[#2563EB] font-mono font-bold">
+                    {formatClock(att.punchInTime) || '—'}
+                  </td>
+                  <td
+                    className={`py-3.5 px-3 font-mono ${
+                      att.status === 'MISSING_PUNCH_OUT' ? 'text-[#BE185D] font-bold' : 'text-[#64748B]'
+                    }`}
+                  >
+                    {formatClock(att.punchOutTime) ||
+                      (att.status === 'MISSING_PUNCH_OUT' ? 'MISSING_PUNCH_OUT' : 'Active Shift')}
+                  </td>
                   <td className="py-3.5 px-3 text-[#0F172A] font-medium">
                     {Math.floor(att.workingMinutes / 60)}h {att.workingMinutes % 60}m
                   </td>
                   <td className="py-3.5 px-3">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        att.status === 'PRESENT'
-                          ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
-                          : att.status === 'LATE'
-                          ? 'bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]'
-                          : 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
-                      }`}
-                    >
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusClass(att.status)}`}>
                       {att.status}
                     </span>
                   </td>
                   <td className="py-3.5 px-3 text-[#64748B]">
-                    {att.isModified ? (
-                      <span className="text-[#D97706] font-bold text-[10px]">
-                        Adjusted: {att.modificationReason}
-                      </span>
-                    ) : (
-                      <span className="text-[#94A3B8] text-[10px]">Punched via biometric/web</span>
-                    )}
+                    <div className="flex flex-col gap-1">
+                      {att.earlyDeparture && (
+                        <span className="text-[#D97706] font-bold text-[10px]">Early departure flagged</span>
+                      )}
+                      {att.isModified ? (
+                        <span className="text-[#D97706] font-bold text-[10px]">
+                          Adjusted: {att.modificationReason}
+                        </span>
+                      ) : (
+                        <span className="text-[#94A3B8] text-[10px]">Punched via biometric/web</span>
+                      )}
+                      {correction && (
+                        <span className="text-[#64748B] text-[10px] font-mono">
+                          {correction.correctedByName} · {correction.previousStatus} → {correction.newStatus}
+                          {(correction.previousPunchOutTime || correction.newPunchOutTime) &&
+                            ` · ${formatClock(correction.previousPunchOutTime) || '—'} → ${
+                              formatClock(correction.newPunchOutTime) || '—'
+                            }`}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3.5 px-3 text-right">
                     <button
@@ -129,6 +210,8 @@ export const AttendanceOverview: React.FC = () => {
                         setSelectedRecord(att);
                         setRevisedStatus(att.status);
                         setAdjustmentReason('');
+                        setRevisedPunchOut(att.punchOutTime ? toDateTimeLocalValue(att.punchOutTime) : '');
+                        setFeedback(null);
                       }}
                       className="px-2.5 py-1.5 rounded-lg bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] border border-[#BFDBFE] text-[11px] font-bold flex items-center gap-1.5 ml-auto cursor-pointer transition-colors"
                     >
@@ -137,7 +220,8 @@ export const AttendanceOverview: React.FC = () => {
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -164,18 +248,34 @@ export const AttendanceOverview: React.FC = () => {
             </div>
 
             <form onSubmit={handleExecuteAdjustment} className="space-y-4 text-xs">
+              {feedback?.type === 'error' && <FeedbackBanner feedback={feedback} />}
               <div>
                 <label className="block text-[#0F172A] font-bold mb-1">Revised Shift Status</label>
                 <select
                   value={revisedStatus}
-                  onChange={(e) => setRevisedStatus(e.target.value as any)}
+                  onChange={(e) => setRevisedStatus(e.target.value as AttendanceRecord['status'])}
                   className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
                 >
                   <option value="PRESENT">PRESENT (Full Day)</option>
                   <option value="LATE">LATE (Grace Exceeded)</option>
                   <option value="HALF_DAY">HALF_DAY (Partial Work)</option>
                   <option value="ABSENT">ABSENT</option>
+                  <option value="MISSING_PUNCH_OUT">MISSING_PUNCH_OUT</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-[#0F172A] font-bold mb-1">Revised Punch-Out Time (optional)</label>
+                <input
+                  type="datetime-local"
+                  value={revisedPunchOut}
+                  onChange={(e) => setRevisedPunchOut(e.target.value)}
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#2563EB]"
+                />
+                <p className="text-[10px] text-[#64748B] mt-1">
+                  Leave blank to keep the recorded punch-out. Current:{' '}
+                  {formatClock(selectedRecord.punchOutTime) || 'not recorded'}
+                </p>
               </div>
 
               <div>

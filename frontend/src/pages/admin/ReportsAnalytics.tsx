@@ -13,17 +13,75 @@ import {
   FiPrinter,
 } from 'react-icons/fi';
 import { calculateConversionRate, formatCurrency } from '../../utils/calculations';
+import { OPEN_LEAD_STATUSES } from '../../utils/constants';
+import type { LeadStatus } from '../../types';
+
+type DateRange = 'TODAY' | 'WEEK' | 'MONTH' | 'ALL';
+
+const TERMINAL_SUCCESS_STATUSES: LeadStatus[] = ['CONVERTED'];
+const TERMINAL_LOSS_STATUSES: LeadStatus[] = ['LOST', 'NOT_INTERESTED', 'NOT_REACHABLE'];
+const CONTACTED_STATUSES: LeadStatus[] = Array.from(
+  new Set<LeadStatus>([
+    ...OPEN_LEAD_STATUSES.filter((status) => status !== 'NEW'),
+    ...TERMINAL_SUCCESS_STATUSES,
+    ...TERMINAL_LOSS_STATUSES,
+  ])
+);
+const QUALIFIED_STATUSES: LeadStatus[] = [
+  'INTERESTED',
+  'FOLLOW_UP_REQUIRED',
+  'LOST',
+  ...TERMINAL_SUCCESS_STATUSES,
+];
+
+const parseReportDate = (value?: string | null): Date | null => {
+  if (!value) return null;
+  const dateOnly = value.trim().match(/^(\d{4}-\d{2}-\d{2})$/);
+  if (dateOnly) {
+    const [year, month, day] = dateOnly[1].split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  const match = value.trim().match(/^(\d{4}-\d{2}-\d{2})[ T](\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
+  if (match) {
+    const [year, month, day] = match[1].split('-').map(Number);
+    let hours = Number(match[2]);
+    const minutes = Number(match[3]);
+    const meridiem = match[4]?.toUpperCase();
+    if (meridiem === 'PM' && hours < 12) hours += 12;
+    if (meridiem === 'AM' && hours === 12) hours = 0;
+    const date = new Date(year, month - 1, day, hours, minutes);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const fallback = new Date(value);
+  return Number.isNaN(fallback.getTime()) ? null : fallback;
+};
+
+const getRangeStart = (range: DateRange): Date | null => {
+  const now = new Date();
+  if (range === 'ALL') return null;
+  if (range === 'TODAY') return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (range === 'WEEK') return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+};
 
 export const ReportsAnalytics: React.FC = () => {
   const { leads, users, teams, currentRole, currentUser, transactions } = useApp();
-  const [dateRange, setDateRange] = useState<'TODAY' | 'WEEK' | 'MONTH' | 'ALL'>('MONTH');
+  const [dateRange, setDateRange] = useState<DateRange>('ALL');
   const [teamFilter, setTeamFilter] = useState<string>(
     currentRole === 'TEAM_LEAD' ? currentUser.teamId || 'team-1' : 'ALL'
   );
   const [exportNotice, setExportNotice] = useState(false);
 
-  // Scoped leads based on role & team filter
+  const rangeStart = getRangeStart(dateRange);
+  const inDateRange = (value?: string | null): boolean => {
+    if (!rangeStart) return true;
+    const date = parseReportDate(value);
+    return !!date && date >= rangeStart;
+  };
+
+  // Scoped leads based on role, team filter and reporting period
   const relevantLeads = leads.filter((l) => {
+    if (!inDateRange(l.createdAt)) return false;
     if (currentRole === 'TEAM_LEAD') {
       return l.currentTeamId === (currentUser.teamId || 'team-1');
     }
@@ -33,24 +91,21 @@ export const ReportsAnalytics: React.FC = () => {
     return true;
   });
 
-  // Funnel calculations
-  const totalLeads = relevantLeads.length;
-  const contactedLeads = relevantLeads.filter((l) =>
-    ['CONTACTED', 'INTERESTED', 'FOLLOW_UP_REQUIRED', 'CONVERTED', 'LOST', 'NOT_INTERESTED'].includes(l.status)
-  ).length;
-  const interestedLeads = relevantLeads.filter((l) =>
-    ['INTERESTED', 'FOLLOW_UP_REQUIRED', 'CONVERTED'].includes(l.status)
-  ).length;
-  const convertedLeads = relevantLeads.filter((l) => l.status === 'CONVERTED').length;
-  const lostLeads = relevantLeads.filter((l) =>
-    ['LOST', 'NOT_INTERESTED', 'NOT_REACHABLE'].includes(l.status)
-  ).length;
+  // Funnel calculations use allocated leads and nested status sets
+  const allocatedLeads = relevantLeads.filter((l) => !!l.currentTeamId);
+  const totalLeads = allocatedLeads.length;
+  const contactedLeads = allocatedLeads.filter((l) => CONTACTED_STATUSES.includes(l.status)).length;
+  const interestedLeads = allocatedLeads.filter((l) => QUALIFIED_STATUSES.includes(l.status)).length;
+  const convertedLeads = allocatedLeads.filter((l) => TERMINAL_SUCCESS_STATUSES.includes(l.status)).length;
+  const lostLeads = allocatedLeads.filter((l) => TERMINAL_LOSS_STATUSES.includes(l.status)).length;
 
   const conversionPct = calculateConversionRate(convertedLeads, totalLeads);
   const contactRate = calculateConversionRate(contactedLeads, totalLeads);
 
   // Financial calculations
   const relevantTransactions = transactions.filter((t) => {
+    if (t.status !== 'CONFIRMED') return false;
+    if (!inDateRange(t.confirmedAt || t.createdAt)) return false;
     if (currentRole === 'TEAM_LEAD') {
       return t.teamId === (currentUser.teamId || 'team-1');
     }
@@ -66,17 +121,17 @@ export const ReportsAnalytics: React.FC = () => {
 
   // BDE Leaderboard
   const bdeUsers = users.filter((u) => {
-    if (u.role !== 'BDE') return false;
+    if (u.role !== 'BDE' || u.status !== 'ACTIVE') return false;
     if (currentRole === 'TEAM_LEAD') return u.teamId === (currentUser.teamId || 'team-1');
     if (teamFilter !== 'ALL') return u.teamId === teamFilter;
     return true;
   });
 
   const bdeLeaderboard = bdeUsers.map((bde) => {
-    const assigned = leads.filter((l) => l.currentBdeId === bde.id);
-    const converted = assigned.filter((l) => l.status === 'CONVERTED');
+    const assigned = relevantLeads.filter((l) => l.currentBdeId === bde.id);
+    const converted = assigned.filter((l) => TERMINAL_SUCCESS_STATUSES.includes(l.status));
     const rate = calculateConversionRate(converted.length, assigned.length);
-    const bdeTrans = transactions.filter((t) => t.bdeId === bde.id);
+    const bdeTrans = relevantTransactions.filter((t) => t.bdeId === bde.id);
     const revenue = bdeTrans.reduce((acc, t) => acc + t.grossAmount, 0);
     const commission = bdeTrans.reduce((acc, t) => acc + t.remainingShareAmount, 0);
 
@@ -97,13 +152,15 @@ export const ReportsAnalytics: React.FC = () => {
       : b.convertedCount - a.convertedCount || b.conversionRate - a.conversionRate
   );
 
-  // Source distribution
-  const sources = ['Meta Ads', 'Google Search', 'LinkedIn', 'Website Form', 'Direct Referral'];
-  const sourceStats = sources.map((src) => {
-    const srcLeads = relevantLeads.filter((l) => (l.source || '').toLowerCase().includes(src.toLowerCase().split(' ')[0]));
-    const srcConverted = srcLeads.filter((l) => l.status === 'CONVERTED').length;
+  // Source distribution from actual recorded sources
+  const sourceNames = Array.from(
+    new Set(allocatedLeads.map((lead) => (lead.source || '').trim()).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
+  const sourceStats = sourceNames.map((name) => {
+    const srcLeads = allocatedLeads.filter((l) => (l.source || '').trim() === name);
+    const srcConverted = srcLeads.filter((l) => TERMINAL_SUCCESS_STATUSES.includes(l.status)).length;
     return {
-      name: src,
+      name,
       count: srcLeads.length,
       converted: srcConverted,
       rate: calculateConversionRate(srcConverted, srcLeads.length),
@@ -113,7 +170,7 @@ export const ReportsAnalytics: React.FC = () => {
   const handleExportCSV = () => {
     const canViewFinance = currentRole === 'ADMIN';
     const header = canViewFinance
-      ? 'BDE Name,Assigned Leads,Conversions,Conversion Rate (%),Revenue Generated,Commission\n'
+      ? 'BDE Name,Assigned Leads,Conversions,Conversion Rate (%),Confirmed Revenue,Remaining Share\n'
       : 'BDE Name,Assigned Leads,Conversions,Conversion Rate (%)\n';
     const csvContent =
       'data:text/csv;charset=utf-8,' +
@@ -153,7 +210,7 @@ export const ReportsAnalytics: React.FC = () => {
             {currentRole === 'TEAM_LEAD' ? 'Team Alpha Calling & Conversion Audit' : 'Enterprise Performance Reports'}
           </h1>
           <p className="text-[#64748B] text-xs sm:text-sm mt-1">
-            Real-time pipeline funnel, team conversion benchmarks, calling productivity, and revenue generation.
+            Pipeline funnel, team conversion benchmarks and confirmed revenue for the selected period.
           </p>
         </div>
 
@@ -254,7 +311,7 @@ export const ReportsAnalytics: React.FC = () => {
           <>
             <motion.div whileHover={{ y: -2 }} className="glass-panel p-4 sm:p-5 rounded-2xl min-w-0">
               <div className="flex items-center justify-between text-xs font-bold text-[#64748B]">
-                <span>Gross Invoiced Revenue</span>
+                <span>Gross Confirmed Revenue</span>
                 <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
                   <FiDollarSign className="text-base" />
                 </div>
@@ -263,13 +320,13 @@ export const ReportsAnalytics: React.FC = () => {
                 {formatCurrency(totalGrossRevenue)}
               </div>
               <div className="text-xs text-[#64748B] mt-1 font-mono">
-                {relevantTransactions.length} Verified Collections
+                {relevantTransactions.length} Confirmed Collections
               </div>
             </motion.div>
 
             <motion.div whileHover={{ y: -2 }} className="glass-panel p-4 sm:p-5 rounded-2xl min-w-0">
               <div className="flex items-center justify-between text-xs font-bold text-[#64748B]">
-                <span>Net Organization Share</span>
+                <span>Confirmed Organization Share</span>
                 <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
                   <FiTrendingUp className="text-base" />
                 </div>
@@ -278,7 +335,7 @@ export const ReportsAnalytics: React.FC = () => {
                 {formatCurrency(totalNetProfit)}
               </div>
               <div className="text-xs text-[#64748B] mt-1 truncate">
-                BDE Commissions: <span className="font-bold text-[#2563EB]">{formatCurrency(totalBdeCommissions)}</span>
+                  Remaining Share: <span className="font-bold text-[#2563EB]">{formatCurrency(totalBdeCommissions)}</span>
               </div>
             </motion.div>
           </>
@@ -387,22 +444,26 @@ export const ReportsAnalytics: React.FC = () => {
         <div className="glass-panel p-6 rounded-2xl space-y-4">
           <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
             <FiAward className="text-[#2563EB]" />
-            <span>Campaign Source ROI</span>
+            <span>Conversion Rate By Source</span>
           </h3>
 
           <div className="space-y-3">
-            {sourceStats.map((src) => (
-              <div key={src.name} className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-[#0F172A]">{src.name}</span>
-                  <span className="font-bold text-[#2563EB]">{src.rate}% Conv.</span>
+            {sourceStats.length === 0 ? (
+              <p className="text-xs text-[#64748B]">No lead sources recorded for this period.</p>
+            ) : (
+              sourceStats.map((src) => (
+                <div key={src.name} className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-[#0F172A]">{src.name}</span>
+                    <span className="font-bold text-[#2563EB]">{src.rate}% Conv.</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#64748B] mt-1">
+                    <span>{src.count} total leads</span>
+                    <span>{src.converted} converted</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-[#64748B] mt-1">
-                  <span>{src.count} total leads</span>
-                  <span>{src.converted} converted</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -417,8 +478,8 @@ export const ReportsAnalytics: React.FC = () => {
             </h3>
             <p className="text-xs text-[#64748B] mt-0.5">
               {currentRole === 'ADMIN'
-                ? 'Ranked by verified deal conversions and revenue earned.'
-                : 'Ranked by verified deal conversions and win rate.'}
+                ? 'Ranked by confirmed deal conversions and confirmed revenue.'
+                : 'Ranked by confirmed deal conversions and win rate.'}
             </p>
           </div>
           <span className="text-xs text-[#2563EB] font-bold bg-[#EFF6FF] px-3 py-1 rounded-full border border-[#BFDBFE] self-start sm:self-auto">
@@ -437,8 +498,8 @@ export const ReportsAnalytics: React.FC = () => {
                 <th className="py-3 px-4 text-center">Win Rate</th>
                 {currentRole === 'ADMIN' && (
                   <>
-                    <th className="py-3 px-4 text-right">Revenue Closed</th>
-                    <th className="py-3 px-4 text-right">Commission</th>
+                    <th className="py-3 px-4 text-right">Confirmed Revenue</th>
+                    <th className="py-3 px-4 text-right">Remaining Share</th>
                   </>
                 )}
                 <th className="py-3 px-4 text-center">Status</th>

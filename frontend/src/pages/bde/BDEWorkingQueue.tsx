@@ -435,7 +435,10 @@ export const BDEWorkingQueue: React.FC = () => {
                 </label>
                 <select
                   value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value as LeadStatus)}
+                  onChange={(e) => {
+                    setNewStatus(e.target.value as LeadStatus);
+                    setFormError('');
+                  }}
                   className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
                 >
                   {allowedStatuses.map((status) => (
@@ -464,7 +467,10 @@ export const BDEWorkingQueue: React.FC = () => {
                   required
                   rows={3}
                   value={callRemarks}
-                  onChange={(e) => setCallRemarks(e.target.value)}
+                  onChange={(e) => {
+                    setCallRemarks(e.target.value);
+                    setFormError('');
+                  }}
                   placeholder="Detail conversation points, student queries, course preferences, or reasons for follow-up..."
                   className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-medium focus:outline-none focus:border-[#2563EB] focus:bg-white"
                 />
@@ -478,31 +484,19 @@ export const BDEWorkingQueue: React.FC = () => {
                     <span>Schedule Callback / Follow-up Slot</span>
                   </div>
 
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Today, 4:00 PM', 'Tomorrow, 11:00 AM', 'Tomorrow, 3:30 PM', 'In 2 Days'].map(
-                      (preset) => (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => handleApplyPresetFollowUp(preset)}
-                          className="px-2.5 py-1 rounded-lg bg-white border border-[#BFDBFE] text-[#2563EB] text-[10px] font-bold hover:bg-[#EFF6FF] cursor-pointer"
-                        >
-                          {preset}
-                        </button>
-                      )
-                    )}
-                  </div>
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <label className="block text-[#0F172A] font-semibold mb-1 text-[11px]">
-                        Follow-up Time Slot
+                        Follow-up Date &amp; Time {newStatus === 'FOLLOW_UP_REQUIRED' && <span className="text-[#B91C1C]">*</span>}
                       </label>
                       <input
-                        type="text"
+                        type="datetime-local"
+                        min={minFollowUpTime}
                         value={scheduleFollowUpTime}
-                        onChange={(e) => setScheduleFollowUpTime(e.target.value)}
-                        placeholder="e.g. Tomorrow 2:00 PM"
+                        onChange={(e) => {
+                          setScheduleFollowUpTime(e.target.value);
+                          setFormError('');
+                        }}
                         className="w-full bg-white border border-[#BFDBFE] rounded-lg p-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
                       />
                     </div>
@@ -513,13 +507,22 @@ export const BDEWorkingQueue: React.FC = () => {
                       <input
                         type="text"
                         value={scheduleFollowUpNote}
-                        onChange={(e) => setScheduleFollowUpNote(e.target.value)}
+                        onChange={(e) => {
+                          setScheduleFollowUpNote(e.target.value);
+                          setFormError('');
+                        }}
                         placeholder="e.g. Discuss fee structure with parents"
                         className="w-full bg-white border border-[#BFDBFE] rounded-lg p-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
                       />
                     </div>
                   </div>
                 </div>
+              )}
+
+              {formError && (
+                <p className="text-[11px] font-semibold text-[#B91C1C] bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-2.5">
+                  {formError}
+                </p>
               )}
 
               {/* Action buttons */}
@@ -540,9 +543,10 @@ export const BDEWorkingQueue: React.FC = () => {
                 </button>
               </div>
             </form>
+            </motion.div>
           </motion.div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };

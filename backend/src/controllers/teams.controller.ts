@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { db } from '../services/store';
 import { successResponse, errorResponse } from '../utils/response';
+import { AuditService } from '../services/audit.service';
+import { UserRole } from '../types';
 
 export const getTeams = (req: Request, res: Response) => {
   // Enrich teams with live lead counts
@@ -20,7 +22,7 @@ export const getTeams = (req: Request, res: Response) => {
 };
 
 export const createTeam = (req: Request, res: Response) => {
-  const { name, teamLeadId } = req.body;
+  const { name, teamLeadId, actor } = req.body;
 
   if (!name || !teamLeadId) {
     return errorResponse(res, 'Team name and teamLeadId are required', 400);
@@ -30,6 +32,8 @@ export const createTeam = (req: Request, res: Response) => {
   if (!teamLead) {
     return errorResponse(res, 'Team lead user not found', 404);
   }
+
+  const currentActor = actor || { id: 'usr-1', name: 'Vikram Sharma', role: 'ADMIN' as UserRole };
 
   const newTeam = {
     id: `team-${Date.now()}`,
@@ -47,6 +51,19 @@ export const createTeam = (req: Request, res: Response) => {
   db.teams.push(newTeam);
   teamLead.teamId = newTeam.id;
   teamLead.teamName = newTeam.name;
+
+  // Audit log team creation
+  AuditService.log(
+    'TEAM_CREATED',
+    'ALLOCATION',
+    currentActor,
+    `Created new operational team: ${name} (Team Lead: ${teamLead.name})`,
+    {
+      targetId: newTeam.id,
+      targetType: 'TEAM',
+      details: { teamName: name, teamLeadId, teamLeadName: teamLead.name },
+    }
+  );
 
   return successResponse(res, newTeam, 'Team created successfully', 201);
 };

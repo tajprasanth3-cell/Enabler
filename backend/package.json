@@ -1,5 +1,5 @@
 {
-  "name": "leadflow-backend",
+  "name": "enabler-backend",
   "version": "1.0.0",
   "description": "Enterprise Hierarchical Lead Management & Financial Engine API",
   "main": "dist/server.js",

@@ -12,12 +12,14 @@ import {
   FiLayers,
   FiUserCheck,
   FiArrowUpRight,
+  FiAlertCircle,
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { APP_ROUTES } from '../../utils/constants';
+import { APP_ROUTES, OPEN_LEAD_STATUSES } from '../../utils/constants';
 
 export const AdminDashboard: React.FC = () => {
-  const { leads, teams, users, transactions, companySharePct } = useApp();
+  const { leads, teams, users, transactions, companySharePct, poolEscalations, clearPoolEscalation } =
+    useApp();
 
   // Metrics calculation
   const totalUploaded = leads.length;
@@ -26,9 +28,10 @@ export const AdminDashboard: React.FC = () => {
   const overallConversionPct = calculateConversionRate(totalConverted, totalAllocated);
 
   const activeBdes = users.filter((u) => u.role === 'BDE' && u.status === 'ACTIVE').length;
-  const inactiveBdes = users.filter((u) => u.role === 'BDE' && u.status === 'INACTIVE').length;
+  const inactiveBdes = users.filter((u) => u.role === 'BDE' && u.status !== 'ACTIVE').length;
 
-  const totalRevenueConfirmed = transactions.reduce((sum, t) => sum + t.grossAmount, 0);
+  const confirmedTransactions = transactions.filter((t) => t.status === 'CONFIRMED');
+  const totalRevenueConfirmed = confirmedTransactions.reduce((sum, t) => sum + t.grossAmount, 0);
 
   return (
     <div className="space-y-5 sm:space-y-8">
@@ -64,6 +67,37 @@ export const AdminDashboard: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {poolEscalations.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel rounded-2xl p-4 border border-[#FDE68A] bg-[#FFFBEB]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+        >
+          <div className="flex items-start gap-2.5">
+            <FiAlertCircle className="text-lg text-[#D97706] shrink-0" />
+            <div>
+              <p className="text-xs font-bold text-[#92400E]">
+                Team pool empty — lead injection requested
+              </p>
+              <p className="text-[11px] text-[#B45309] mt-0.5">
+                {poolEscalations.map((item) => item.teamName).join(', ')} requested more leads in the admin pool.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {poolEscalations.map((item) => (
+              <button
+                key={item.teamId}
+                onClick={() => clearPoolEscalation(item.teamId)}
+                className="px-3 py-1.5 rounded-xl bg-white text-[#B45309] border border-[#FDE68A] hover:bg-[#FFFBEB] text-[11px] font-bold cursor-pointer"
+              >
+                Clear {item.teamName}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* KPI Cards Grid with Interactive Spring Hovers */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -130,7 +164,10 @@ export const AdminDashboard: React.FC = () => {
             ₹{totalRevenueConfirmed.toLocaleString('en-IN')}
           </div>
           <div className="text-xs text-[#2563EB] font-bold mt-1 truncate">
-            Company Share ({companySharePct}%): ₹{((totalRevenueConfirmed * companySharePct) / 100).toLocaleString('en-IN')}
+            Company Share at current configured ratio ({companySharePct}%): ₹{((totalRevenueConfirmed * companySharePct) / 100).toLocaleString('en-IN')}
+          </div>
+          <div className="text-[11px] text-[#64748B] mt-0.5">
+            Across {confirmedTransactions.length} confirmed transaction{confirmedTransactions.length === 1 ? '' : 's'}
           </div>
         </motion.div>
       </div>
@@ -159,8 +196,8 @@ export const AdminDashboard: React.FC = () => {
                 <th className="py-3 px-3">Team Name</th>
                 <th className="py-3 px-3">Team Lead</th>
                 <th className="py-3 px-3">Active BDEs</th>
-                <th className="py-3 px-3">Leads in Team Pool</th>
-                <th className="py-3 px-3">Distributed to BDEs</th>
+                <th className="py-3 px-3">Active Leads in Team Pool</th>
+                <th className="py-3 px-3">Active with BDEs</th>
                 <th className="py-3 px-3">Conversions</th>
                 <th className="py-3 px-3">Conversion %</th>
                 <th className="py-3 px-3">Status</th>
@@ -169,8 +206,9 @@ export const AdminDashboard: React.FC = () => {
             <tbody className="divide-y divide-[#E2E8F0]">
               {teams.map((t) => {
                 const teamLeads = leads.filter((l) => l.currentTeamId === t.id);
-                const teamPool = teamLeads.filter((l) => !l.currentBdeId).length;
-                const bdeAssigned = teamLeads.filter((l) => l.currentBdeId).length;
+                const activeTeamLeads = teamLeads.filter((l) => OPEN_LEAD_STATUSES.includes(l.status));
+                const teamPool = activeTeamLeads.filter((l) => !l.currentBdeId).length;
+                const bdeAssigned = activeTeamLeads.filter((l) => l.currentBdeId).length;
                 const conversions = teamLeads.filter((l) => l.status === 'CONVERTED').length;
                 const convPct = calculateConversionRate(conversions, teamLeads.length);
                 const bdeCount = users.filter((u) => u.teamId === t.id && u.role === 'BDE').length;
@@ -234,15 +272,23 @@ export const AdminDashboard: React.FC = () => {
           <div className="space-y-2 pt-1 text-xs">
             <div className="flex justify-between text-[#475569]">
               <span>Unallocated Admin Pool</span>
-              <span className="text-[#0F172A] font-bold">{leads.filter((l) => !l.currentTeamId).length}</span>
+              <span className="text-[#0F172A] font-bold">
+                {leads.filter((l) => !l.currentTeamId && OPEN_LEAD_STATUSES.includes(l.status)).length}
+              </span>
             </div>
             <div className="flex justify-between text-[#475569]">
               <span>Team Pool Pending Distribution</span>
-              <span className="text-[#D97706] font-bold">{leads.filter((l) => l.currentTeamId && !l.currentBdeId).length}</span>
+              <span className="text-[#D97706] font-bold">
+                {leads.filter(
+                  (l) => l.currentTeamId && !l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)
+                ).length}
+              </span>
             </div>
             <div className="flex justify-between text-[#475569]">
               <span>Active in BDE Call Queues</span>
-              <span className="text-[#2563EB] font-bold">{leads.filter((l) => l.currentBdeId && !['CONVERTED', 'LOST'].includes(l.status)).length}</span>
+              <span className="text-[#2563EB] font-bold">
+                {leads.filter((l) => l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)).length}
+              </span>
             </div>
           </div>
         </div>

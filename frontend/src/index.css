@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   LeadFlow ROYAL COBALT & MIDNIGHT NAVY PALETTE
+   Enabler ROYAL COBALT & MIDNIGHT NAVY PALETTE
    An ultra-modern, executive institutional aesthetic for Lead & Financial Engines
    - Primary Accent: Royal Cobalt Blue (#2563EB / #1D4ED8 / #3B82F6)
    - Dark Surface & Hero: Deep Midnight Navy (#0B1120 to #0F172A, border #1E293B)
@@ -113,33 +113,44 @@
    ========================================================================== */
 
 @keyframes floatOrb1 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(45px, -35px) scale(1.12);
   }
+
   66% {
     transform: translate(-30px, 40px) scale(0.95);
   }
 }
 
 @keyframes floatOrb2 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0px, 0px) scale(1);
   }
+
   40% {
     transform: translate(-50px, 45px) scale(1.15);
   }
+
   80% {
     transform: translate(30px, -20px) scale(0.92);
   }
 }
 
 @keyframes floatOrb3 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0px, 0px) scale(1);
   }
+
   50% {
     transform: translate(35px, 50px) scale(1.08);
   }
@@ -149,6 +160,7 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -352,6 +364,7 @@ body,
 }
 
 @media (max-width: 767px) {
+
   html,
   body,
   #root {
@@ -441,6 +454,7 @@ body,
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

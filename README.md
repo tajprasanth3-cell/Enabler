@@ -1,6 +1,6 @@
-# LeadFlow – Hierarchical BDE Lead Management & Intelligent Data Allocation Platform
+# Enabler – Hierarchical BDE Lead Management & Intelligent Data Allocation Platform
 
-LeadFlow is an enterprise-grade hierarchical lead management, intelligent allocation, attendance tracking, and financial analytics platform. It orchestrates lead distribution from top-level administration down to operational Business Development Executives (BDEs), while maintaining strict role-based access control (RBAC), comprehensive audit trails, and integrated financial performance calculations.
+Enabler is an enterprise-grade hierarchical lead management, intelligent allocation, attendance tracking, and financial analytics platform. It orchestrates lead distribution from top-level administration down to operational Business Development Executives (BDEs), while maintaining strict role-based access control (RBAC), comprehensive audit trails, and integrated financial performance calculations.
 
 ---
 

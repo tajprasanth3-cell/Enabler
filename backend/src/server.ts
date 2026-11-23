@@ -6,7 +6,7 @@ const app = createApp();
 
 const server = app.listen(ENV.PORT, () => {
   logger.info(`==================================================`);
-  logger.info(`🚀 LeadFlow Enterprise Backend API is live!`);
+  logger.info(`🚀 Enabler Enterprise Backend API is live!`);
   logger.info(`🌐 Local Server:  http://localhost:${ENV.PORT}`);
   logger.info(`🩺 Health Check:  http://localhost:${ENV.PORT}/api/health`);
   logger.info(`💻 Client Origin: ${ENV.CLIENT_URL}`);

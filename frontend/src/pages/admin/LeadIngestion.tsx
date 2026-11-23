@@ -260,7 +260,7 @@ export const LeadIngestion: React.FC = () => {
 
       {/* Upload & Duplicate Validation Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* CSV Ingestion Simulator */}
+        {/* CSV Ingestion */}
         <div className="lg:col-span-2 glass-panel rounded-2xl p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
@@ -575,9 +575,23 @@ export const LeadIngestion: React.FC = () => {
               </div>
 
               <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] text-[#64748B] text-[11px]">
-                Total allocation: <strong>{selectedTeams.length * leadsPerTeam}</strong> leads will be
-                distributed into team pools.
+                Total allocation: <strong className="text-[#0F172A]">{plannedAllocation}</strong> of{' '}
+                {unassignedCount} pooled leads will be distributed into {selectedTeams.length} team
+                pool{selectedTeams.length === 1 ? '' : 's'}.
               </div>
+
+              {maxPerTeam === 0 && (
+                <p className="text-[11px] font-semibold text-[#D97706]">
+                  Add more leads to the admin pool before allocating to the selected teams.
+                </p>
+              )}
+
+              {allocationError && (
+                <div className="p-3 rounded-xl bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] text-[11px] font-semibold flex items-start gap-2">
+                  <FiAlertCircle className="text-sm shrink-0" />
+                  <span>{allocationError}</span>
+                </div>
+              )}
 
               <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
                 <button

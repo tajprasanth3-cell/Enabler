@@ -20,7 +20,7 @@ export const createApp = (): Application => {
   // Root health check
   app.get('/', (req: Request, res: Response) => {
     res.json({
-      name: 'LeadFlow Enterprise API',
+      name: 'Enabler Enterprise API',
       version: '1.0.0',
       status: 'ONLINE',
       timestamp: new Date().toISOString(),

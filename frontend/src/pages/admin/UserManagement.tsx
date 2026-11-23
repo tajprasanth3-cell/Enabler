@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useApp } from '../../context/useApp';
 import { motion } from 'framer-motion';
 import {
@@ -8,17 +8,18 @@ import {
   FiSearch,
   FiUserPlus,
   FiCheckCircle,
+  FiAlertCircle,
   FiPhone,
   FiMail,
 } from 'react-icons/fi';
-import type { UserRole } from '../../types';
+import type { User, UserRole, UserStatus } from '../../types';
 
 export const UserManagement: React.FC = () => {
-  const { users, teams, toggleUserStatus, createUser, reassignUserTeam } = useApp();
+  const { currentUser, users, teams, toggleUserStatus, createUser, reassignUserTeam } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'ALL' | UserRole>('ALL');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | UserStatus>('ALL');
   const [teamFilter, setTeamFilter] = useState<string>('ALL');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
 
@@ -28,7 +29,14 @@ export const UserManagement: React.FC = () => {
   const [newUserPhone, setNewUserPhone] = useState('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('BDE');
   const [newUserTeam, setNewUserTeam] = useState<string>(teams[0]?.id || 'team-1');
-  const [addedToast, setAddedToast] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ type, message });
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  };
 
   // Filtered users
   const filteredUsers = users.filter((u) => {
@@ -49,17 +57,46 @@ export const UserManagement: React.FC = () => {
 
   const handleAddUserSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUserName.trim() || !newUserEmail.trim()) return;
+    const name = newUserName.trim();
+    const email = newUserEmail.trim();
+    if (!name || !email) return;
 
     const teamId = newUserRole === 'ADMIN' ? undefined : newUserTeam;
-    createUser(newUserName.trim(), newUserEmail.trim(), newUserRole, teamId, newUserPhone.trim() || undefined);
+    const created = createUser(name, email, newUserRole, teamId, newUserPhone.trim() || undefined);
+    if (!created) {
+      showToast('error', 'Could not add employee: an employee with this email already exists.');
+      return;
+    }
 
     setShowAddUserModal(false);
     setNewUserName('');
     setNewUserEmail('');
     setNewUserPhone('');
-    setAddedToast(true);
-    setTimeout(() => setAddedToast(false), 3000);
+    showToast('success', `${name} added to the directory. No login credentials or passwords are created in this demo.`);
+  };
+
+  const handleToggleStatus = (user: User) => {
+    if (user.id === currentUser?.id && user.status === 'ACTIVE') return;
+    if (!toggleUserStatus(user.id)) {
+      showToast(
+        'error',
+        user.status === 'ACTIVE'
+          ? 'Cannot deactivate the last active admin.'
+          : `Could not activate ${user.name}.`
+      );
+      return;
+    }
+    showToast('success', `${user.name} is now ${user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'}.`);
+  };
+
+  const handleReassignTeam = (user: User, teamId: string) => {
+    const team = teams.find((item) => item.id === teamId);
+    if (!team) return;
+    if (!reassignUserTeam(user.id, team.id, team.name)) {
+      showToast('error', `Could not move ${user.name} to ${team.name}.`);
+      return;
+    }
+    showToast('success', `${user.name} moved to ${team.name}.`);
   };
 
   return (
@@ -69,13 +106,13 @@ export const UserManagement: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUserCheck />
-            <span>Workforce & Access Management</span>
+            <span>Workforce Directory (Demo)</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight">
             Employee Directory
           </h1>
           <p className="text-[#64748B] text-xs sm:text-sm mt-1">
-            Manage organization accounts, credentials, hierarchical team placement, and operational states.
+            Manage the demo directory: team placement and operational states. No login credentials or passwords are created.
           </p>
         </div>
 
@@ -88,15 +125,30 @@ export const UserManagement: React.FC = () => {
         </button>
       </div>
 
-      {/* Success Toast */}
-      {addedToast && (
+      {/* Action Feedback */}
+      {toast && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] text-xs font-bold flex items-center gap-2 shadow-xs"
+          className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs ${
+            toast.type === 'error'
+              ? 'bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626]'
+              : 'bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF]'
+          }`}
         >
-          <FiCheckCircle className="text-base text-[#2563EB]" />
-          <span>New employee account successfully created and enrolled in workforce directory!</span>
+          {toast.type === 'error' ? (
+            <FiAlertCircle className="text-base shrink-0" />
+          ) : (
+            <FiCheckCircle className="text-base text-[#2563EB] shrink-0" />
+          )}
+          <span>{toast.message}</span>
+          <button
+            onClick={() => setToast(null)}
+            className="ml-auto font-bold cursor-pointer"
+            aria-label="Dismiss message"
+          >
+            ✕
+          </button>
         </motion.div>
       )}
 
@@ -120,7 +172,7 @@ export const UserManagement: React.FC = () => {
         <div className="glass-panel p-4 rounded-2xl">
           <div className="text-[11px] font-bold text-[#64748B]">System Administrators</div>
           <div className="text-2xl sm:text-3xl font-black text-[#2563EB] mt-1">{adminCount}</div>
-          <div className="text-[11px] text-[#64748B] mt-1">Full Root Privileges</div>
+          <div className="text-[11px] text-[#64748B] mt-1">Demo role only</div>
         </div>
       </div>
 
@@ -173,6 +225,7 @@ export const UserManagement: React.FC = () => {
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active Only</option>
               <option value="INACTIVE">Inactive Only</option>
+              <option value="SUSPENDED">Suspended Only</option>
             </select>
           </div>
         </div>
@@ -221,12 +274,18 @@ export const UserManagement: React.FC = () => {
                     className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                       u.status === 'ACTIVE'
                         ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
+                        : u.status === 'SUSPENDED'
+                        ? 'bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]'
                         : 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
                     }`}
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
-                        u.status === 'ACTIVE' ? 'bg-[#2563EB]' : 'bg-[#DC2626]'
+                        u.status === 'ACTIVE'
+                          ? 'bg-[#2563EB]'
+                          : u.status === 'SUSPENDED'
+                          ? 'bg-[#D97706]'
+                          : 'bg-[#DC2626]'
                       }`}
                     />
                     {u.status}
@@ -258,10 +317,7 @@ export const UserManagement: React.FC = () => {
                     <select
                       aria-label={`Reassign ${u.name} to a team`}
                       value={u.teamId || ''}
-                      onChange={(e) => {
-                        const team = teams.find((item) => item.id === e.target.value);
-                        if (team) reassignUserTeam(u.id, team.id, team.name);
-                      }}
+                      onChange={(e) => handleReassignTeam(u, e.target.value)}
                       className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2 py-1.5 text-[11px] font-semibold text-[#475569] focus:outline-none focus:border-[#2563EB]"
                     >
                       <option value="">Unassigned</option>
@@ -272,16 +328,28 @@ export const UserManagement: React.FC = () => {
                       ))}
                     </select>
                   )}
-                  <button
-                    onClick={() => toggleUserStatus(u.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      u.status === 'ACTIVE'
-                        ? 'bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA]'
-                        : 'bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] border border-[#BFDBFE]'
-                    }`}
+                  <span
+                    className="inline-flex"
+                    title={
+                      u.id === currentUser?.id && u.status === 'ACTIVE'
+                        ? 'You cannot deactivate the current demo user'
+                        : undefined
+                    }
                   >
-                    {u.status === 'ACTIVE' ? 'Deactivate User' : 'Activate User'}
-                  </button>
+                    <button
+                      onClick={() => handleToggleStatus(u)}
+                      disabled={u.id === currentUser?.id && u.status === 'ACTIVE'}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        u.id === currentUser?.id && u.status === 'ACTIVE'
+                          ? 'bg-[#F1F5F9] text-[#94A3B8] border border-[#E2E8F0] cursor-not-allowed'
+                          : u.status === 'ACTIVE'
+                          ? 'bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA] cursor-pointer'
+                          : 'bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] border border-[#BFDBFE] cursor-pointer'
+                      }`}
+                    >
+                      {u.status === 'ACTIVE' ? 'Deactivate User' : 'Activate User'}
+                    </button>
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -317,6 +385,10 @@ export const UserManagement: React.FC = () => {
                 ✕
               </button>
             </div>
+
+            <p className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[11px] text-[#64748B] font-medium">
+              This demo stores a directory record only — no login credentials or passwords are created.
+            </p>
 
             <form onSubmit={handleAddUserSubmit} className="space-y-3.5 text-xs">
               <div>
@@ -398,7 +470,7 @@ export const UserManagement: React.FC = () => {
                   type="submit"
                   className="px-4 py-2 rounded-xl shimmer-button text-white text-xs font-bold shadow-md cursor-pointer"
                 >
-                  Create Account
+                  Add Employee
                 </button>
               </div>
             </form>

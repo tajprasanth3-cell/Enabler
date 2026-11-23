@@ -1,6 +1,6 @@
-# LeadFlow Enterprise — Backend API
+# Enabler Enterprise — Backend API
 
-An enterprise-grade, modular Node.js & TypeScript REST API service for LeadFlow: hierarchical lead allocation, role-based governance, attendance auditing, and financial revenue calculations.
+An enterprise-grade, modular Node.js & TypeScript REST API service for Enabler: hierarchical lead allocation, role-based governance, attendance auditing, and financial revenue calculations.
 
 ---
 

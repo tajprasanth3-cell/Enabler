@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fi';
 import { useApp } from '../../context/useApp';
 import { LEAD_STATUS_CONFIG } from '../../utils/constants';
+import { formatClock } from '../../utils/calculations';
 import type {
   AttendanceCorrection,
   AuditEvent,
@@ -42,6 +43,8 @@ const formatJson = (value: unknown): string => {
     return String(value);
   }
 };
+
+const formatPunchOut = (value: string | null): string => (value ? formatClock(value) || value : '—');
 
 const StatusBadge: React.FC<{ status: string | null }> = ({ status }) => {
   if (!status) return <span className="text-[10px] font-bold text-[#94A3B8]">—</span>;
@@ -99,6 +102,7 @@ export const AuditTrail: React.FC = () => {
     leadStatusHistory,
     leadAssignmentHistory,
     attendanceCorrections,
+    attendanceRecords,
     calculationLogs,
     systemSettings,
     leads,
@@ -130,8 +134,14 @@ export const AuditTrail: React.FC = () => {
     if (!query) return leadStatusHistory;
     return leadStatusHistory.filter((entry) => {
       const lead = leads.find((item) => item.id === entry.leadId);
-      return [entry.leadId, lead?.candidateName ?? '', entry.changedByName, entry.newStatus]
-        .some((field) => String(field).toLowerCase().includes(query));
+      return [
+        entry.leadId,
+        lead?.candidateName ?? '',
+        entry.changedByName,
+        entry.previousStatus ?? '',
+        entry.newStatus,
+        entry.remarks ?? '',
+      ].some((field) => String(field).toLowerCase().includes(query));
     });
   }, [leadStatusHistory, leads, statusSearch]);
 
@@ -304,7 +314,7 @@ export const AuditTrail: React.FC = () => {
                   type="text"
                   value={statusSearch}
                   onChange={(event) => setStatusSearch(event.target.value)}
-                  placeholder="Search lead id or candidate name..."
+                  placeholder="Search lead, status, remarks or actor..."
                   className="w-full sm:w-72 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#047857] focus:bg-white"
                 />
               </div>
@@ -435,9 +445,15 @@ export const AuditTrail: React.FC = () => {
                         <td className={`${cellClass} font-mono text-[#64748B] whitespace-nowrap`}>
                           {formatTimestamp(entry.timestamp)}
                         </td>
-                        <td className={`${cellClass} font-mono text-[#475569] whitespace-nowrap`}>{entry.recordId}</td>
                         <td className={cellClass}>
-                          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="font-bold text-[#0F172A] whitespace-nowrap">
+                            {attendanceRecords.find((record) => record.id === entry.recordId)?.userName || 'Unknown record'}
+                          </div>
+                          <div className="text-[10px] text-[#64748B] font-mono whitespace-nowrap">{entry.recordId}</div>
+                        </td>
+                        <td className={cellClass}>
+                          <div className="text-[10px] text-[#94A3B8] font-bold">Original → revised status</div>
+                          <div className="flex items-center gap-2 flex-wrap mt-1">
                             <PlainBadge label={entry.previousStatus} />
                             <span className="text-[#94A3B8] font-bold">→</span>
                             <PlainBadge
@@ -447,12 +463,20 @@ export const AuditTrail: React.FC = () => {
                           </div>
                         </td>
                         <td className={`${cellClass} font-mono text-[#475569] whitespace-nowrap`}>
-                          {entry.previousPunchOutTime || '—'} <span className="text-[#94A3B8]">→</span>{' '}
-                          {entry.newPunchOutTime || '—'}
+                          <div className="text-[10px] text-[#94A3B8] font-bold">Original → revised punch-out</div>
+                          <div className="mt-1">
+                            {formatPunchOut(entry.previousPunchOutTime)}{' '}
+                            <span className="text-[#94A3B8]">→</span> {formatPunchOut(entry.newPunchOutTime)}
+                          </div>
                         </td>
                         <td className={`${cellClass} text-[#475569] max-w-xs font-medium`}>{entry.reason || '—'}</td>
                         <td className={cellClass}>
-                          <ActorCell id={entry.correctedById} name={entry.correctedByName} users={users} />
+                          <ActorCell
+                            id={entry.correctedById}
+                            name={entry.correctedByName}
+                            meta={entry.correctedById}
+                            users={users}
+                          />
                         </td>
                       </tr>
                     ))
