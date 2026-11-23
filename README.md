@@ -4,6 +4,25 @@ Enabler is an enterprise-grade hierarchical lead management, intelligent allocat
 
 ---
 
+## 🔑 Demo Login Credentials & Quick Start
+
+For testing and demonstration, use any of the pre-configured accounts below. The default password is **`demo1234`** (or any non-empty password in demo mode):
+
+| Role | Name | Email | Password | Scope & Dashboard Access |
+| :--- | :--- | :--- | :--- | :--- |
+| **Super Admin** | Vikram Sharma | `admin@leadflow.io` | `demo1234` | Full Org Governance, Ingestion, Finance, Settings |
+| **Team Lead** | Priya Patel | `priya.tl@leadflow.io` | `demo1234` | Team Alpha Workbench, Pool Governance, BDE Distribution |
+| **Team Lead** | Rajesh Verma | `rajesh.tl@leadflow.io` | `demo1234` | Team Beta Workbench, Pool Governance, BDE Distribution |
+| **BDE Executive** | Prasanth | `prasanth.bde@leadflow.io` | `demo1234` | Team Alpha BDE Working Queue, Follow-ups, Calls |
+| **BDE Executive** | Sneha Gupta | `sneha.bde@leadflow.io` | `demo1234` | Team Alpha BDE Working Queue, Follow-ups, Calls |
+| **BDE Executive** | Rohan Mehta | `rohan.bde@leadflow.io` | `demo1234` | Team Beta BDE Working Queue, Follow-ups, Calls |
+
+> **Local Ports**:
+> - **Frontend Web App**: [http://localhost:5173](http://localhost:5173)
+> - **Backend REST API**: [http://localhost:5000/api](http://localhost:5000/api)
+
+---
+
 ## 1. System Architecture & Hierarchy
 
 The application enforces a strict three-tier hierarchy at both the backend service layer and database query levels:
