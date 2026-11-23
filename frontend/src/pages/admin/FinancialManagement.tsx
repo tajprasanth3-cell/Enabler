@@ -335,20 +335,30 @@ export const FinancialManagement: React.FC = () => {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-xs font-bold text-[#0F172A]">
-                    Company Share Ratio ({companySharePct}%)
+                    Company Share Ratio ({calcCompanySharePct}%)
                   </label>
                   <span className="text-xs text-[#2563EB] font-mono font-bold">
-                    Remaining: {100 - companySharePct}%
+                    Remaining: {100 - calcCompanySharePct}%
                   </span>
                 </div>
                 <input
                   type="range"
                   min="5"
                   max="95"
-                  value={companySharePct}
-                  onChange={(e) => setCompanySharePct(Number(e.target.value))}
+                  value={calcCompanySharePct}
+                  onChange={(e) => setCalcCompanySharePct(Math.min(95, Math.max(5, Number(e.target.value))))}
                   className="w-full accent-[#2563EB] cursor-pointer"
                 />
+                <div className="flex items-center justify-between gap-2 mt-2">
+                  <span className="text-[10px] text-[#64748B]">Configured default: {companySharePct}%</span>
+                  <button
+                    type="button"
+                    onClick={handleSaveDefaultRatio}
+                    className="px-3 py-1.5 rounded-lg bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] border border-[#BFDBFE] text-[11px] font-bold cursor-pointer transition-colors"
+                  >
+                    Save as default ratio
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -636,7 +646,7 @@ export const FinancialManagement: React.FC = () => {
             <span>Confirmed Financial Transactions Ledger (Lead Conversions)</span>
           </div>
           <span className="text-xs text-[#2563EB] font-medium bg-[#EFF6FF] px-2.5 py-1 rounded-full border border-[#BFDBFE]">
-            Verified Converted Inflows
+            {confirmedTransactions.length} Confirmed Inflows
           </span>
         </div>
 
@@ -649,8 +659,10 @@ export const FinancialManagement: React.FC = () => {
                 <th className="py-3.5 px-3">BDE / Team</th>
                 <th className="py-3.5 px-3">Gross Revenue</th>
                 <th className="py-3.5 px-3">Net Profit</th>
-                <th className="py-3.5 px-3">Company Share ({companySharePct}%)</th>
+                <th className="py-3.5 px-3">Company Share (stored ratio)</th>
                 <th className="py-3.5 px-3">Remaining Share</th>
+                <th className="py-3.5 px-3">Company Profit Share</th>
+                <th className="py-3.5 px-3">Remaining Profit Share</th>
                 <th className="py-3.5 px-3">Confirmed Date</th>
                 <th className="py-3.5 px-3">Status</th>
               </tr>
@@ -671,14 +683,30 @@ export const FinancialManagement: React.FC = () => {
                     ₹{tx.netProfit.toLocaleString()}
                   </td>
                   <td className="py-3.5 px-3 font-bold text-[#2563EB]">
-                    ₹{tx.companyShareAmount.toLocaleString()}
+                    ₹{tx.companyShareAmount.toLocaleString()} ({tx.companySharePercentage}%)
                   </td>
                   <td className="py-3.5 px-3 font-bold text-[#64748B]">
-                    ₹{tx.remainingShareAmount.toLocaleString()}
+                    ₹{tx.remainingShareAmount.toLocaleString()} ({tx.remainingSharePercentage}%)
                   </td>
-                  <td className="py-3.5 px-3 text-[#64748B]">{tx.confirmedAt}</td>
+                  <td className="py-3.5 px-3 font-bold text-[#2563EB]">
+                    {tx.companyProfitShareAmount != null
+                      ? `₹${tx.companyProfitShareAmount.toLocaleString()} (${tx.profitSharePercentage ?? 0}%)`
+                      : '—'}
+                  </td>
+                  <td className="py-3.5 px-3 font-bold text-[#64748B]">
+                    {tx.remainingProfitShareAmount != null
+                      ? `₹${tx.remainingProfitShareAmount.toLocaleString()}`
+                      : '—'}
+                  </td>
+                  <td className="py-3.5 px-3 text-[#64748B]">{tx.confirmedAt || '—'}</td>
                   <td className="py-3.5 px-3">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                        tx.status === 'CONFIRMED'
+                          ? 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
+                          : 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]'
+                      }`}
+                    >
                       {tx.status}
                     </span>
                   </td>
@@ -753,6 +781,12 @@ export const FinancialManagement: React.FC = () => {
             </div>
 
             <form onSubmit={handleConfirmPayment} className="space-y-4 text-xs">
+              {feedback?.type === 'error' && (
+                <div className="p-3 rounded-xl bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] font-bold flex items-center gap-2">
+                  <FiAlertCircle />
+                  <span>{feedback.message}</span>
+                </div>
+              )}
               <div>
                 <label className="block text-[#0F172A] font-bold mb-1">
                   Select Converted Candidate

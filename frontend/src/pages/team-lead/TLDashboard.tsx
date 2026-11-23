@@ -191,14 +191,13 @@ export const TLDashboard: React.FC = () => {
     }
 
     const batch = clampBatch(countPerBde, maxBatchCeiling) || 1;
-    let manualQuotasForAllocation: Record<string, number> | undefined;
+    const manualBatchQuotas: Record<string, number> = {};
     if (allocationMethod === 'MANUAL') {
-      manualQuotasForAllocation = {};
       let remaining = teamPoolLeads.length;
       let total = 0;
       eligibleIds.forEach((id) => {
         const take = clampBatch(manualQuotas[id] ?? 0, Math.min(maxBatchForBde(id), remaining));
-        manualQuotasForAllocation![id] = take;
+        manualBatchQuotas[id] = take;
         remaining -= take;
         total += take;
       });
@@ -213,7 +212,7 @@ export const TLDashboard: React.FC = () => {
       eligibleIds,
       batch,
       allocationMethod,
-      manualQuotasForAllocation
+      allocationMethod === 'MANUAL' ? manualBatchQuotas : undefined
     );
     if (allocated > 0) {
       setActionStatus(`Distributed ${allocated} lead${allocated === 1 ? '' : 's'} in ${currentTeamName}.`);

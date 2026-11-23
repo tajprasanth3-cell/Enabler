@@ -103,7 +103,68 @@ export const LeadIngestion: React.FC = () => {
     setLeadsPerTeam((current) => Math.min(Math.max(0, current), cap));
   }, [unassignedCount, selectedTeams]);
 
-  const handleSimulateBulkUpload = () => {
+  const handleCsvFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setCsvError(null);
+    try {
+      const rows = parseCsvRows(await file.text());
+      if (rows.length < 2) {
+        setCsvError('The file has no data rows. Expected a header row followed by candidate rows.');
+        return;
+      }
+
+      const fields = rows[0].map((header) =>
+        CSV_HEADER_ALIASES[header.trim().toLowerCase().replace(/[^a-z0-9]/g, '')]
+      );
+      if (!fields.includes('candidateName') || !fields.includes('phone')) {
+        setCsvError("CSV must include 'candidateName' (or 'name') and 'phone' columns.");
+        return;
+      }
+
+      const candidates: Array<Partial<Lead>> = [];
+      const errors: string[] = [];
+      rows.slice(1).forEach((row, index) => {
+        const values: Partial<Record<CsvField, string>> = {};
+        fields.forEach((field, columnIndex) => {
+          if (field) values[field] = row[columnIndex] ?? '';
+        });
+        const candidateName = values.candidateName?.trim();
+        const phone = values.phone?.trim();
+        if (!candidateName || !phone) {
+          errors.push(`Row ${index + 2}: missing ${!candidateName ? 'candidateName' : 'phone'}`);
+          return;
+        }
+        candidates.push({
+          candidateName,
+          phone,
+          email: values.email?.trim() || '',
+          city: values.city?.trim() || '',
+          education: values.education?.trim() || '',
+          candidateId: values.candidateId?.trim() || undefined,
+        });
+      });
+
+      if (!candidates.length) {
+        setCsvError(errors.length ? errors.slice(0, 5).join('; ') : 'No valid candidate rows found.');
+        return;
+      }
+
+      setUploadResult(ingestLeads(candidates));
+      setFileName(file.name);
+      setCsvError(
+        errors.length
+          ? `${errors.slice(0, 5).join('; ')}${errors.length > 5 ? ` (+${errors.length - 5} more)` : ''}`
+          : null
+      );
+    } catch {
+      setCsvError(`Could not read "${file.name}". Please try another CSV file.`);
+    }
+  };
+
+  const handleLoadSampleBatch = () => {
     const sampleBatch = [
       { candidateName: 'Vikas Dubey', phone: '+91 98888 11111', email: 'vikas.d@gmail.com', city: 'Noida', education: 'B.Tech' },
       { candidateName: 'Megha Sharma', phone: '+91 98777 22222', email: 'megha.s@outlook.com', city: 'Delhi', education: 'BBA' },
@@ -115,6 +176,8 @@ export const LeadIngestion: React.FC = () => {
 
     const res = ingestLeads(sampleBatch);
     setUploadResult(res);
+    setCsvError(null);
+    setFileName('sample batch');
   };
 
   const handleManualAdd = (e: React.FormEvent) => {
@@ -140,8 +203,16 @@ export const LeadIngestion: React.FC = () => {
 
   const handleExecuteStage1Allocation = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedTeams.length === 0 || leadsPerTeam <= 0) return;
-    allocateStage1AdminToTeams(selectedTeams, leadsPerTeam, allocMethod);
+    if (!selectedTeams.length || leadsPerTeam <= 0) {
+      setAllocationError('Select at least one team and a per-team count above zero.');
+      return;
+    }
+    const allocated = allocateStage1AdminToTeams(selectedTeams, leadsPerTeam, allocMethod);
+    if (allocated <= 0) {
+      setAllocationError('Allocation failed. Check the admin pool and your selection, then try again.');
+      return;
+    }
+    setAllocationError(null);
     setShowAllocModal(false);
   };
 
@@ -164,13 +235,16 @@ export const LeadIngestion: React.FC = () => {
             Data Ingestion & Team Distribution
           </h1>
           <p className="text-[#64748B] text-sm mt-1">
-            Import candidate records from Excel/CSV, validate duplicates, and distribute to team pools.
+            Import candidate records from CSV, deduplicate against the pool and within the batch, and distribute to team pools.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <button
-            onClick={() => setShowAllocModal(true)}
+            onClick={() => {
+              setAllocationError(null);
+              setShowAllocModal(true);
+            }}
             disabled={unassignedCount === 0}
             className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer ${
               unassignedCount > 0
@@ -191,26 +265,67 @@ export const LeadIngestion: React.FC = () => {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
               <FiFileText className="text-[#2563EB]" />
-              <span>Bulk Data Upload (CSV / Excel Format)</span>
+              <span>Bulk Data Upload (CSV Only)</span>
             </h3>
             <span className="text-xs text-[#2563EB] font-semibold bg-[#EFF6FF] px-2.5 py-1 rounded-full border border-[#BFDBFE]">
-              Auto Deduplication Active
+              Dedupe: Pool + Batch + Candidate ID
             </span>
           </div>
 
           <div className="border-2 border-dashed border-[#CBD5E1] hover:border-[#2563EB] rounded-2xl p-6 text-center transition-all bg-[#F8FAFC]">
-            <FiUploadCloud className="mx-auto text-4xl text-[#2563EB] mb-2 animate-bounce" />
+            <FiUploadCloud className="mx-auto text-4xl text-[#2563EB] mb-2" />
             <h4 className="text-sm font-bold text-[#0F172A]">Import Candidate Master File</h4>
-            <p className="text-xs text-[#64748B] max-w-sm mx-auto mt-1 mb-4 font-medium">
-              Upload XLSX/CSV containing candidate names, contact numbers, and educational details.
+            <p className="text-xs text-[#64748B] max-w-md mx-auto mt-1 mb-1 font-medium">
+              Choose a .csv or .txt file with a header row. Columns: candidateName (or name), phone, email, city, education, candidateId.
             </p>
-            <button
-              onClick={handleSimulateBulkUpload}
-              className="w-full sm:w-auto whitespace-normal text-center px-5 py-2.5 rounded-xl shimmer-button text-white font-bold text-xs cursor-pointer shadow-md transition-all"
+            <p className="text-[10px] text-[#94A3B8] font-mono mb-4">
+              candidateName,phone,email,city,education,candidateId
+            </p>
+            <input
+              id="lead-csv-file"
+              type="file"
+              accept=".csv,.txt,text/csv,text/plain"
+              onChange={handleCsvFileChange}
+              className="hidden"
+            />
+            <label
+              htmlFor="lead-csv-file"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl shimmer-button text-white font-bold text-xs cursor-pointer shadow-md transition-all"
             >
-              Simulate Ingestion of 6 Records (with Duplication Detection)
-            </button>
+              <FiUploadCloud />
+              Choose CSV File
+            </label>
+            {fileName && (
+              <p className="text-[11px] text-[#64748B] font-semibold mt-2 truncate">Loaded: {fileName}</p>
+            )}
+            <div className="mt-4 pt-4 border-t border-[#E2E8F0]">
+              <button
+                type="button"
+                onClick={handleLoadSampleBatch}
+                className="px-5 py-2.5 rounded-xl bg-white text-[#2563EB] border border-[#BFDBFE] hover:bg-[#EFF6FF] font-bold text-xs cursor-pointer shadow-xs transition-all"
+              >
+                Load sample batch (6 records)
+              </button>
+            </div>
           </div>
+
+          {csvError && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-xl border bg-[#FEF2F2] border-[#FECACA] text-[#DC2626] text-xs font-medium flex items-start gap-2"
+            >
+              <FiAlertCircle className="text-base shrink-0" />
+              <span className="flex-1">{csvError}</span>
+              <button
+                onClick={() => setCsvError(null)}
+                className="font-bold cursor-pointer"
+                aria-label="Dismiss CSV errors"
+              >
+                ✕
+              </button>
+            </motion.div>
+          )}
 
           {/* Upload Status Banner */}
           {uploadResult && (

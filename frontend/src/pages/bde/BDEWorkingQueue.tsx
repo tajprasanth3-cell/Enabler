@@ -207,7 +207,8 @@ export const BDEWorkingQueue: React.FC = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs text-[#0F172A] font-medium focus:outline-none focus:border-[#2563EB]"
               >
-                <option value="ALL">All Statuses ({myLeads.length})</option>
+                <option value="OPEN">Open Queue ({openLeads.length})</option>
+                <option value="ALL">All Leads ({myLeads.length})</option>
                 <option value="NEW">New Leads</option>
                 <option value="CONTACTED">Contacted</option>
                 <option value="INTERESTED">Interested</option>
@@ -289,7 +290,7 @@ export const BDEWorkingQueue: React.FC = () => {
                   {lead.nextFollowUpDate && (
                     <div className="p-2 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[11px] text-[#1E40AF] flex items-center justify-between font-semibold">
                       <span>Follow-up:</span>
-                      <span className="font-bold">{lead.nextFollowUpDate}</span>
+                      <span className="font-bold">{formatFollowUpDate(lead.nextFollowUpDate)}</span>
                     </div>
                   )}
                 </div>
@@ -360,7 +361,7 @@ export const BDEWorkingQueue: React.FC = () => {
                     <td className="py-3.5 px-3 text-[#475569]">
                       {lead.nextFollowUpDate ? (
                         <span className="text-[#1E40AF] font-bold bg-[#EFF6FF] px-2 py-0.5 rounded-full border border-[#BFDBFE]">
-                          {lead.nextFollowUpDate}
+                          {formatFollowUpDate(lead.nextFollowUpDate)}
                         </span>
                       ) : (
                         <span className="text-[#64748B]">—</span>
@@ -392,14 +393,21 @@ export const BDEWorkingQueue: React.FC = () => {
       </div>
 
       {/* Disposition Modal */}
-      {showDispositionModal && selectedLead && (
-        <div className="fixed inset-0 bg-[#0F172A]/60 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <AnimatePresence>
+        {showDispositionModal && selectedLead && (
           <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 50, opacity: 0 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            key="disposition-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-[#0F172A]/60 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
           >
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              className="modal-panel bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            >
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <div>
