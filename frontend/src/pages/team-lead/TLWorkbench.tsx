@@ -9,18 +9,14 @@ import {
   FiLayers,
   FiCheckCircle,
   FiTrendingUp,
-  FiSend,
   FiAlertTriangle,
   FiUserCheck,
   FiPhoneForwarded,
   FiSearch,
-  FiRepeat,
   FiClock,
   FiCalendar,
 } from 'react-icons/fi';
 import { APP_ROUTES, OPEN_LEAD_STATUSES, LEAD_STATUS_CONFIG } from '../../utils/constants';
-
-type AllocationMethod = 'EQUAL' | 'WORKLOAD_BASED' | 'MANUAL';
 
 export const TLWorkbench: React.FC = () => {
   const navigate = useNavigate();
@@ -37,9 +33,7 @@ export const TLWorkbench: React.FC = () => {
     allocateStage2TeamToBdes,
     replenishmentAlerts,
     clearReplenishmentAlert,
-    reassignBdeLeads,
     escalatePoolEmpty,
-    clearPoolEscalation,
   } = useApp();
 
   const userTeamId = currentUser.teamId || 'team-1';
@@ -108,100 +102,6 @@ export const TLWorkbench: React.FC = () => {
   const [actionStatus, setActionStatus] = useState('');
   const [actionError, setActionError] = useState('');
 
-  // Modals
-  const [showStage2Modal, setShowStage2Modal] = useState(false);
-  const [allocationMethod, setAllocationMethod] = useState<AllocationMethod>('EQUAL');
-  const [selectedBdes, setSelectedBdes] = useState<string[]>([]);
-  const [countPerBde, setCountPerBde] = useState<number>(3);
-  const [manualQuotas, setManualQuotas] = useState<Record<string, number>>({});
-  const [allocationError, setAllocationError] = useState('');
-
-  const [showReassignModal, setShowReassignModal] = useState(false);
-  const [reassignFromBde, setReassignFromBde] = useState('');
-  const [reassignToBde, setReassignToBde] = useState('');
-  const [reassignError, setReassignError] = useState('');
-
-  const clampBatch = (value: number, cap: number) =>
-    Number.isFinite(value) ? Math.max(0, Math.min(Math.floor(value), Math.max(0, cap))) : 0;
-
-  const maxBatchForBde = (bdeId: string) =>
-    Math.min(countPerBde, bdeCapacity(bdeId), teamPoolLeads.length);
-
-  const selectedCapacities = teamBdes
-    .filter((b) => selectedBdes.includes(b.id))
-    .map((b) => bdeCapacity(b.id));
-  const maxBatchCeiling = Math.max(
-    1,
-    Math.min(teamPoolLeads.length, Math.max(0, ...selectedCapacities))
-  );
-
-  const openStage2Modal = () => {
-    setAllocationError('');
-    setActionStatus('');
-    setActionError('');
-    if (teamPoolLeads.length === 0) {
-      escalatePoolEmpty(userTeamId);
-      setActionError(
-        `${currentTeamName}'s pool is empty. Admin has been notified; add leads to the pool before distributing.`
-      );
-      return;
-    }
-    const eligibleIds = teamBdes.filter((b) => !bdeIneligibilityReason(b.id)).map((b) => b.id);
-    setSelectedBdes(eligibleIds);
-    setManualQuotas(
-      Object.fromEntries(eligibleIds.map((id) => [id, clampBatch(countPerBde, maxBatchForBde(id))]))
-    );
-    setShowStage2Modal(true);
-  };
-
-  const handleExecuteStage2 = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAllocationError('');
-
-    const eligibleIds = selectedBdes.filter((id) => !bdeIneligibilityReason(id));
-    if (!eligibleIds.length) {
-      setAllocationError('Select at least one active BDE with available workload capacity.');
-      return;
-    }
-    if (teamPoolLeads.length === 0) {
-      escalatePoolEmpty(userTeamId);
-      setAllocationError(`${currentTeamName}'s pool is empty; admin has been notified.`);
-      return;
-    }
-
-    const batch = clampBatch(countPerBde, maxBatchCeiling) || 1;
-    const manualBatchQuotas: Record<string, number> = {};
-    if (allocationMethod === 'MANUAL') {
-      let remaining = teamPoolLeads.length;
-      let total = 0;
-      eligibleIds.forEach((id) => {
-        const take = clampBatch(manualQuotas[id] ?? 0, Math.min(maxBatchForBde(id), remaining));
-        manualBatchQuotas[id] = take;
-        remaining -= take;
-        total += take;
-      });
-      if (total === 0) {
-        setAllocationError('Enter a batch size of at least 1 for one or more BDEs.');
-        return;
-      }
-    }
-
-    const allocated = allocateStage2TeamToBdes(
-      userTeamId,
-      eligibleIds,
-      batch,
-      allocationMethod,
-      allocationMethod === 'MANUAL' ? manualBatchQuotas : undefined
-    );
-    if (allocated > 0) {
-      setActionStatus(`Distributed ${allocated} lead${allocated === 1 ? '' : 's'} in ${currentTeamName}.`);
-      clearPoolEscalation(userTeamId);
-      setShowStage2Modal(false);
-    } else {
-      setAllocationError('No leads were allocated. Check pool availability and BDE workload capacity.');
-    }
-  };
-
   const handleQuickReplenish = (bde: User) => {
     setActionStatus('');
     setActionError('');
@@ -228,38 +128,11 @@ export const TLWorkbench: React.FC = () => {
     }
   };
 
-  const openReassignModal = () => {
-    setReassignFromBde('');
-    setReassignToBde('');
-    setReassignError('');
-    setShowReassignModal(true);
-  };
-
-  const handleExecuteReassign = (e: React.FormEvent) => {
-    e.preventDefault();
-    setReassignError('');
-    if (!reassignFromBde || !reassignToBde || reassignFromBde === reassignToBde) {
-      setReassignError('Select a source BDE and a different active target BDE.');
-      return;
-    }
-    const success = reassignBdeLeads(reassignFromBde, reassignToBde, 'BDE absent/transferred');
-    if (!success) {
-      setReassignError(
-        'Reassignment failed. Confirm both BDEs are active members of this team and the source has open leads.'
-      );
-      return;
-    }
-    clearReplenishmentAlert(reassignFromBde);
-    const targetName = teamBdes.find((b) => b.id === reassignToBde)?.name || 'target BDE';
-    setActionStatus(`Open leads were reassigned to ${targetName}.`);
-    setShowReassignModal(false);
-  };
-
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
-        <div className="max-w-2xl min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+        <div>
           <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUsers />
             <span>Team Lead Operational Command</span>
@@ -270,23 +143,6 @@ export const TLWorkbench: React.FC = () => {
           <p className="text-[#64748B] text-xs sm:text-sm mt-1 leading-relaxed">
             Real-time frontline operations workbench for supervising BDE call activity, queue balancing, and stage progression.
           </p>
-        </div>
-
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap">
-          <button
-            onClick={openReassignModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] text-xs font-bold shadow-xs transition-colors cursor-pointer whitespace-nowrap"
-          >
-            <FiRepeat className="text-[#2563EB]" />
-            <span>Reassign BDE Leads</span>
-          </button>
-          <button
-            onClick={openStage2Modal}
-            className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl shimmer-button text-white font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
-          >
-            <FiSend />
-            <span>Distribute from Pool ({teamPoolLeads.length} Available)</span>
-          </button>
         </div>
       </div>
 
@@ -671,256 +527,6 @@ export const TLWorkbench: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Stage 2 Modal */}
-      {showStage2Modal && (
-        <div className="fixed inset-0 bg-[#0F172A]/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
-          >
-            <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
-              <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiSend className="text-[#2563EB]" />
-                <span>Stage 2: Distribute to Team BDEs</span>
-              </h3>
-              <button
-                onClick={() => setShowStage2Modal(false)}
-                className="text-[#64748B] hover:text-[#0F172A] text-lg font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleExecuteStage2} className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E40AF] font-semibold">
-                Available in {currentTeamName} Pool: <strong>{teamPoolLeads.length} leads</strong>
-              </div>
-
-              <div>
-                <label className="block text-[#0F172A] font-bold mb-1">Allocation Strategy</label>
-                <select
-                  value={allocationMethod}
-                  onChange={(e) => {
-                    setAllocationMethod(e.target.value as AllocationMethod);
-                    setAllocationError('');
-                  }}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
-                >
-                  <option value="EQUAL">Equal Distribution</option>
-                  <option value="WORKLOAD_BASED">Workload-Based (Free Capacity)</option>
-                  <option value="MANUAL">Manual Quota per BDE</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[#0F172A] font-bold mb-2">Select Active BDEs</label>
-                <div className="space-y-2">
-                  {teamBdes.map((b) => {
-                    const reason = bdeIneligibilityReason(b.id);
-                    return (
-                      <label
-                        key={b.id}
-                        className={`flex flex-wrap items-center gap-2.5 p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] transition-colors ${
-                          reason ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-white'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          disabled={!!reason}
-                          checked={selectedBdes.includes(b.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedBdes((prev) => [...prev, b.id]);
-                              setManualQuotas((prev) => ({
-                                ...prev,
-                                [b.id]: clampBatch(countPerBde, maxBatchForBde(b.id)),
-                              }));
-                            } else {
-                              setSelectedBdes((prev) => prev.filter((id) => id !== b.id));
-                            }
-                          }}
-                          className="accent-[#2563EB]"
-                        />
-                        <span className="font-bold text-[#0F172A]">{b.name}</span>
-                        <span className="text-[#2563EB] text-[10px] font-semibold">
-                          {b.status} · {openLeadsForBde(b.id)}/{maxLeadsPerBde} open
-                        </span>
-                        {reason && <span className="text-[10px] font-bold text-[#DC2626]">({reason})</span>}
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {allocationMethod !== 'MANUAL' && (
-                <div>
-                  <label className="block text-[#0F172A] font-bold mb-1">Batch Size per BDE</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max={maxBatchCeiling}
-                    value={countPerBde}
-                    onChange={(e) => setCountPerBde(clampBatch(Number(e.target.value), maxBatchCeiling) || 1)}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
-                  />
-                  <p className="text-[10px] text-[#64748B] mt-1 font-medium">
-                    Maximum possible batch based on pool size & capacity: {maxBatchCeiling}
-                  </p>
-                </div>
-              )}
-
-              {allocationMethod === 'MANUAL' && (
-                <div className="space-y-2">
-                  <label className="block text-[#0F172A] font-bold mb-1">Manual Batch per BDE</label>
-                  {selectedBdes.map((id) => {
-                    const bde = teamBdes.find((b) => b.id === id);
-                    if (!bde) return null;
-                    const cap = maxBatchForBde(id);
-                    return (
-                      <div
-                        key={id}
-                        className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]"
-                      >
-                        <div>
-                          <div className="font-bold text-[#0F172A]">{bde.name}</div>
-                          <div className="text-[10px] text-[#64748B]">
-                            {openLeadsForBde(id)}/{maxLeadsPerBde} open · max {cap} batch
-                          </div>
-                        </div>
-                        <input
-                          type="number"
-                          min="0"
-                          max={cap}
-                          value={manualQuotas[id] ?? 0}
-                          onChange={(e) =>
-                            setManualQuotas((prev) => ({
-                              ...prev,
-                              [id]: clampBatch(Number(e.target.value), cap),
-                            }))
-                          }
-                          className="w-20 bg-white border border-[#E2E8F0] rounded-xl p-2 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB]"
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {allocationError && (
-                <p className="text-[11px] font-semibold text-[#DC2626] bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-2.5">
-                  {allocationError}
-                </p>
-              )}
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
-                <button
-                  type="button"
-                  onClick={() => setShowStage2Modal(false)}
-                  className="px-4 py-2 rounded-xl bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] text-xs font-bold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl shimmer-button text-white text-xs font-bold shadow-md cursor-pointer"
-                >
-                  Distribute Leads
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Reassign Modal */}
-      {showReassignModal && (
-        <div className="fixed inset-0 bg-[#0F172A]/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
-          >
-            <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
-              <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiRepeat className="text-[#2563EB]" />
-                <span>Reassign Active Leads (Leave / Absence)</span>
-              </h3>
-              <button
-                onClick={() => setShowReassignModal(false)}
-                className="text-[#64748B] hover:text-[#0F172A] text-lg font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleExecuteReassign} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-[#0F172A] font-bold mb-1">From Absent / Inactive BDE</label>
-                <select
-                  value={reassignFromBde}
-                  onChange={(e) => {
-                    setReassignFromBde(e.target.value);
-                    setReassignError('');
-                  }}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
-                >
-                  <option value="">Select source BDE...</option>
-                  {teamBdes.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name} ({openLeadsForBde(b.id)} open leads)
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[#0F172A] font-bold mb-1">To Active BDE</label>
-                <select
-                  value={reassignToBde}
-                  onChange={(e) => {
-                    setReassignToBde(e.target.value);
-                    setReassignError('');
-                  }}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
-                >
-                  <option value="">Select target BDE...</option>
-                  {teamBdes
-                    .filter((b) => b.status === 'ACTIVE' && b.id !== reassignFromBde)
-                    .map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} ({bdeCapacity(b.id)} slots free)
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              {reassignError && (
-                <p className="text-[11px] font-semibold text-[#DC2626] bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-2.5">
-                  {reassignError}
-                </p>
-              )}
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
-                <button
-                  type="button"
-                  onClick={() => setShowReassignModal(false)}
-                  className="px-4 py-2 rounded-xl bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] text-xs font-bold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl shimmer-button text-white text-xs font-bold cursor-pointer shadow-md"
-                >
-                  Confirm Transfer
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
     </div>
   );
 };

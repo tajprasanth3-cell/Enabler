@@ -228,11 +228,12 @@
       "city": "Kolkata",
       "education": "BCA",
       "status": "NEW",
-      "currentTeamId": null,
-      "currentTeamName": null,
+      "currentTeamId": "team-2",
+      "currentTeamName": "Team Beta",
       "currentBdeId": null,
       "currentBdeName": null,
-      "createdAt": "2026-02-15"
+      "createdAt": "2026-02-15",
+      "assignedToTeamAt": "2026-11-23T08:44:49.303Z"
     },
     {
       "id": "lead-110",
@@ -242,11 +243,12 @@
       "city": "Jaipur",
       "education": "BA English",
       "status": "NEW",
-      "currentTeamId": null,
-      "currentTeamName": null,
+      "currentTeamId": "team-2",
+      "currentTeamName": "Team Beta",
       "currentBdeId": null,
       "currentBdeName": null,
-      "createdAt": "2026-02-15"
+      "createdAt": "2026-02-15",
+      "assignedToTeamAt": "2026-11-23T08:44:49.303Z"
     }
   ],
   "leadStatusHistory": [
@@ -373,6 +375,26 @@
     "gracePeriodMinutes": 15
   },
   "auditLogs": [
+    {
+      "id": "audit-1795423489304-641",
+      "action": "LEAD_ALLOCATED_STAGE1",
+      "category": "ALLOCATION",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "TEAMS",
+      "summary": "Allocated 2 leads across 1 teams (2 per team via EQUAL)",
+      "details": {
+        "teamIds": [
+          "team-2"
+        ],
+        "countPerTeam": 2,
+        "method": "EQUAL",
+        "totalAllocated": 2
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T08:44:49.304Z"
+    },
     {
       "id": "audit-1795422272977-322",
       "action": "LEAD_ALLOCATED_STAGE2",

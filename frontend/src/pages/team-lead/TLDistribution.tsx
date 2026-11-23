@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/useApp';
 import type { User } from '../../types';
 import { calculateConversionRate } from '../../utils/calculations';
@@ -9,15 +8,13 @@ import {
   FiRepeat,
   FiSend,
   FiUserCheck,
-  FiArrowLeft,
   FiAlertTriangle,
 } from 'react-icons/fi';
-import { APP_ROUTES, OPEN_LEAD_STATUSES } from '../../utils/constants';
+import { OPEN_LEAD_STATUSES } from '../../utils/constants';
 
 type AllocationMethod = 'EQUAL' | 'WORKLOAD_BASED' | 'MANUAL';
 
 export const TLDistribution: React.FC = () => {
-  const navigate = useNavigate();
   const {
     leads,
     users,
@@ -200,15 +197,8 @@ export const TLDistribution: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div className="max-w-2xl min-w-0">
-          <button
-            onClick={() => navigate(APP_ROUTES.TEAM_LEAD.DASHBOARD)}
-            className="flex items-center gap-1.5 text-xs font-bold text-[#64748B] hover:text-[#2563EB] mb-2 cursor-pointer transition-colors"
-          >
-            <FiArrowLeft />
-            <span>Back to Team Workbench</span>
-          </button>
           <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUsers />
             <span>Frontline Workforce Balancing</span>

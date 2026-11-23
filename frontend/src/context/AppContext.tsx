@@ -472,14 +472,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         entityId,
         summary,
         details,
-        actorId: currentUser?.id || 'unknown',
-        actorName: currentUser?.name || 'Unknown user',
+        actorId: currentUser.id,
+        actorName: currentUser.name,
         actorRole: currentRole,
         timestamp: timestamp(),
       };
       setAuditEvents((prev) => [event, ...prev].slice(0, MAX_AUDIT_EVENTS));
     },
-    [currentUser?.id, currentUser?.name, currentRole, setAuditEvents]
+    [currentUser.id, currentUser.name, currentRole, setAuditEvents]
   );
 
   const login = useCallback(

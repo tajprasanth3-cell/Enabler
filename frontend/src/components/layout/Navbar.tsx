@@ -220,6 +220,20 @@ export const Navbar: React.FC = () => {
               <FiRotateCcw className="text-sm sm:text-base text-[#2563EB] group-hover:rotate-45 transition-transform" />
               <span className="hidden lg:inline text-[10px] font-bold text-[#475569]">Admin view</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                navigate(APP_ROUTES.LOGIN, { replace: true });
+              }}
+              title="Sign out"
+              aria-label="Sign out"
+              className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-full border border-[#FECACA] bg-white px-2 sm:px-3 shadow-xs hover:border-[#FCA5A5] hover:bg-[#FEF2F2] transition-all duration-200 cursor-pointer active:scale-95 shrink-0"
+            >
+              <FiLogOut className="text-sm sm:text-base text-[#DC2626]" />
+              <span className="hidden lg:inline text-[10px] font-bold text-[#B91C1C]">Sign out</span>
+            </button>
           </div>
         </div>
       </header>
