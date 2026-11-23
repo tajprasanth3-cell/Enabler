@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   FiActivity,
@@ -9,10 +9,12 @@ import {
   FiSearch,
   FiShield,
   FiUserCheck,
+  FiRefreshCw,
 } from 'react-icons/fi';
 import { useApp } from '../../context/useApp';
 import { LEAD_STATUS_CONFIG } from '../../utils/constants';
 import { formatClock } from '../../utils/calculations';
+import { auditService } from '../../services/auditService';
 import type {
   AttendanceCorrection,
   AuditEvent,
@@ -60,8 +62,9 @@ const StatusBadge: React.FC<{ status: string | null }> = ({ status }) => {
   );
 };
 
-const PlainBadge: React.FC<{ label: string; tone?: 'teal' | 'amber' | 'slate' }> = ({ label, tone = 'slate' }) => {
+const PlainBadge: React.FC<{ label: string; tone?: 'teal' | 'amber' | 'slate' | 'cobalt' }> = ({ label, tone = 'slate' }) => {
   const tones = {
+    cobalt: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]',
     teal: 'bg-[#ECFDF5] text-[#047857] border-[#A7F3D0]',
     amber: 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]',
     slate: 'bg-[#F8FAFC] text-[#475569] border-[#E2E8F0]',
@@ -78,14 +81,14 @@ const ActorCell: React.FC<{ id: string; name: string; meta?: string; users: User
   return (
     <div>
       <div className="font-bold text-[#0F172A] whitespace-nowrap">{resolvedName}</div>
-      <div className="text-[10px] text-[#64748B] font-mono whitespace-nowrap">{meta || id || '—'}</div>
+      <div className="text-[10px] text-[#2563EB] font-mono font-semibold whitespace-nowrap">{meta || id || '—'}</div>
     </div>
   );
 };
 
 const EmptyRow: React.FC<{ colSpan: number; message: string }> = ({ colSpan, message }) => (
   <tr>
-    <td colSpan={colSpan} className="py-12 px-3 text-center text-xs font-semibold text-[#64748B]">
+    <td colSpan={colSpan} className="py-12 px-4 text-center text-xs font-semibold text-[#64748B]">
       {message}
     </td>
   </tr>
@@ -93,7 +96,7 @@ const EmptyRow: React.FC<{ colSpan: number; message: string }> = ({ colSpan, mes
 
 const sectionTitleClass = 'text-base font-bold text-[#0F172A] flex items-center gap-2';
 const tableHeaderClass = 'border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]';
-const cellClass = 'py-3 px-3 align-top';
+const cellClass = 'py-3.5 px-4 align-top';
 const jsonClass = 'whitespace-pre-wrap font-mono text-[10px] leading-relaxed';
 
 export const AuditTrail: React.FC = () => {
@@ -113,21 +116,62 @@ export const AuditTrail: React.FC = () => {
   const [activitySearch, setActivitySearch] = useState('');
   const [actionFilter, setActionFilter] = useState('ALL');
   const [statusSearch, setStatusSearch] = useState('');
+  const [backendLogs, setBackendLogs] = useState<any[]>([]);
+  const [loadingBackendLogs, setLoadingBackendLogs] = useState(false);
+
+  const fetchBackendAudit = useCallback(async () => {
+    setLoadingBackendLogs(true);
+    try {
+      const res = await auditService.getAuditLogs({ limit: 100 });
+      if (res && res.logs) {
+        setBackendLogs(res.logs);
+      }
+    } catch (e) {
+      console.warn('Backend audit fetch error:', e);
+    } finally {
+      setLoadingBackendLogs(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBackendAudit();
+  }, [fetchBackendAudit]);
+
+  const combinedActivity = useMemo(() => {
+    const backendAdapted: AuditEvent[] = backendLogs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      entityType: log.category,
+      entityId: log.targetId || log.targetType || 'SYSTEM',
+      summary: log.summary,
+      details: { ...log.details, ipAddress: log.ipAddress },
+      actorId: log.actorId,
+      actorName: log.actorName,
+      actorRole: log.actorRole,
+      timestamp: log.timestamp,
+    }));
+
+    const existingIds = new Set(auditEvents.map((e) => e.id));
+    const uniqueBackend = backendAdapted.filter((e) => !existingIds.has(e.id));
+    return [...auditEvents, ...uniqueBackend].sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }, [auditEvents, backendLogs]);
 
   const actionOptions: string[] = useMemo(
-    () => Array.from(new Set<string>(auditEvents.map((event: AuditEvent) => String(event.action)))).sort(),
-    [auditEvents]
+    () => Array.from(new Set<string>(combinedActivity.map((event: AuditEvent) => String(event.action)))).sort(),
+    [combinedActivity]
   );
 
   const filteredActivity = useMemo(() => {
     const query = activitySearch.trim().toLowerCase();
-    return auditEvents.filter((event: AuditEvent) => {
+    return combinedActivity.filter((event: AuditEvent) => {
       if (actionFilter !== 'ALL' && event.action !== actionFilter) return false;
       if (!query) return true;
       return [event.id, event.action, event.entityType, event.entityId, event.summary, event.actorName]
         .some((field) => String(field).toLowerCase().includes(query));
     });
-  }, [auditEvents, activitySearch, actionFilter]);
+  }, [combinedActivity, activitySearch, actionFilter]);
 
   const filteredStatusHistory = useMemo(() => {
     const query = statusSearch.trim().toLowerCase();
@@ -146,15 +190,15 @@ export const AuditTrail: React.FC = () => {
   }, [leadStatusHistory, leads, statusSearch]);
 
   const kpis = [
-    { label: 'Total Events', value: auditEvents.length, icon: FiActivity, hint: 'Immutable activity records' },
-    { label: 'Lead Status Changes', value: leadStatusHistory.length, icon: FiGitBranch, hint: `${systemSettings.statuses.length} configured workflow statuses` },
-    { label: 'Assignments', value: leadAssignmentHistory.length, icon: FiUserCheck, hint: 'Team & BDE allocation moves' },
-    { label: 'Attendance Corrections', value: attendanceCorrections.length, icon: FiEdit3, hint: 'Authorized timesheet overrides' },
-    { label: 'Calculation Logs', value: calculationLogs.length, icon: FiDollarSign, hint: 'Saved financial projections' },
+    { label: 'Total Events', value: combinedActivity.length, icon: FiActivity, hint: 'Immutable audit records' },
+    { label: 'Lead Status Changes', value: leadStatusHistory.length, icon: FiGitBranch, hint: `${systemSettings.statuses.length} workflow statuses` },
+    { label: 'Assignments', value: leadAssignmentHistory.length, icon: FiUserCheck, hint: 'Allocation & distribution moves' },
+    { label: 'Attendance Corrections', value: attendanceCorrections.length, icon: FiEdit3, hint: 'Supervisor timesheet overrides' },
+    { label: 'Calculation Logs', value: calculationLogs.length, icon: FiDollarSign, hint: 'Revenue & profit split records' },
   ];
 
   const tabs = [
-    { key: 'ACTIVITY' as TabKey, label: 'Activity Log', icon: FiActivity, count: auditEvents.length },
+    { key: 'ACTIVITY' as TabKey, label: 'Activity Log', icon: FiActivity, count: combinedActivity.length },
     { key: 'STATUS' as TabKey, label: 'Lead Status History', icon: FiGitBranch, count: leadStatusHistory.length },
     { key: 'ASSIGNMENT' as TabKey, label: 'Assignment History', icon: FiUserCheck, count: leadAssignmentHistory.length },
     { key: 'CORRECTION' as TabKey, label: 'Attendance Corrections', icon: FiEdit3, count: attendanceCorrections.length },
@@ -162,33 +206,43 @@ export const AuditTrail: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-5 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-[#047857] text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-[#2563EB] text-xs font-bold uppercase tracking-wider mb-1">
             <FiShield />
-            <span>Administration & Governance</span>
+            <span>Enterprise Compliance & Governance</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">Audit Trail</h1>
+          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">System Audit Trail</h1>
           <p className="text-[#64748B] text-sm mt-1">
-            Immutable, append-only record of workflow activity — every status change, assignment, timesheet correction and
-            financial calculation with its actor, timestamp and supporting detail.
+            Immutable, append-only record of all system events — status changes, allocations, biometric timesheet corrections,
+            and 30:70 financial split calculations with actor identity, timestamp, IP, and payload diffs.
           </p>
         </div>
-        <span className="inline-flex items-center gap-2 text-xs font-bold text-[#047857] bg-[#ECFDF5] border border-[#A7F3D0] px-3 py-1.5 rounded-full">
-          <FiShield />
-          <span>Tamper-Proof History</span>
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchBackendAudit}
+            disabled={loadingBackendLogs}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] text-xs font-bold shadow-xs cursor-pointer transition-colors"
+          >
+            <FiRefreshCw className={loadingBackendLogs ? 'animate-spin text-[#2563EB]' : 'text-[#2563EB]'} />
+            <span>Refresh Audit Logs</span>
+          </button>
+          <span className="inline-flex items-center gap-2 text-xs font-bold text-[#2563EB] bg-[#EFF6FF] border border-[#BFDBFE] px-3.5 py-2 rounded-xl shadow-xs">
+            <FiShield />
+            <span>Immutable & Verified</span>
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <motion.div key={kpi.label} whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden">
+            <motion.div key={kpi.label} whileHover={{ y: -2 }} className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
               <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
                 <span>{kpi.label}</span>
-                <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#047857]">
+                <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB]">
                   <Icon className="text-base" />
                 </div>
               </div>
@@ -199,7 +253,7 @@ export const AuditTrail: React.FC = () => {
         })}
       </div>
 
-      <div className="glass-panel rounded-2xl p-6 space-y-6">
+      <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white p-6 space-y-6 shadow-xs">
         <div className="tab-strip flex border-b border-[#E2E8F0] pb-3 gap-2 overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -232,7 +286,7 @@ export const AuditTrail: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <h3 className={sectionTitleClass}>
-                <FiActivity className="text-[#047857]" />
+                <FiActivity className="text-[#2563EB]" />
                 <span>System Activity Log</span>
               </h3>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -243,13 +297,13 @@ export const AuditTrail: React.FC = () => {
                     value={activitySearch}
                     onChange={(event) => setActivitySearch(event.target.value)}
                     placeholder="Search action, entity or actor..."
-                    className="w-full sm:w-64 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#047857] focus:bg-white"
+                    className="w-full sm:w-64 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:bg-white"
                   />
                 </div>
                 <select
                   value={actionFilter}
                   onChange={(event) => setActionFilter(event.target.value)}
-                  className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 px-3 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#047857] focus:bg-white cursor-pointer"
+                  className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 px-3 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:bg-white cursor-pointer"
                 >
                   <option value="ALL">All action types</option>
                   {actionOptions.map((action) => (
@@ -265,10 +319,10 @@ export const AuditTrail: React.FC = () => {
                 <thead>
                   <tr className={tableHeaderClass}>
                     <th className={cellClass}>Timestamp</th>
-                    <th className={cellClass}>Action / Entity</th>
+                    <th className={cellClass}>Action / Category</th>
                     <th className={cellClass}>Summary</th>
                     <th className={cellClass}>Actor</th>
-                    <th className={cellClass}>Details</th>
+                    <th className={cellClass}>Payload & Network Details</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E2E8F0]">
@@ -282,7 +336,7 @@ export const AuditTrail: React.FC = () => {
                           <div className="text-[10px] text-[#94A3B8]">{event.id}</div>
                         </td>
                         <td className={cellClass}>
-                          <div className="font-bold text-[#047857] whitespace-nowrap">{String(event.action).replaceAll('_', ' ')}</div>
+                          <div className="font-bold text-[#2563EB] whitespace-nowrap">{String(event.action).replaceAll('_', ' ')}</div>
                           <div className="text-[10px] text-[#64748B] font-mono whitespace-nowrap">
                             {event.entityType} · {event.entityId}
                           </div>
@@ -305,7 +359,7 @@ export const AuditTrail: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <h3 className={sectionTitleClass}>
-                <FiGitBranch className="text-[#047857]" />
+                <FiGitBranch className="text-[#2563EB]" />
                 <span>Lead Status Change History</span>
               </h3>
               <div className="relative">
@@ -315,7 +369,7 @@ export const AuditTrail: React.FC = () => {
                   value={statusSearch}
                   onChange={(event) => setStatusSearch(event.target.value)}
                   placeholder="Search lead, status, remarks or actor..."
-                  className="w-full sm:w-72 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#047857] focus:bg-white"
+                  className="w-full sm:w-72 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl py-2 pl-9 pr-3 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:bg-white"
                 />
               </div>
             </div>
@@ -368,7 +422,7 @@ export const AuditTrail: React.FC = () => {
         {activeTab === 'ASSIGNMENT' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <h3 className={sectionTitleClass}>
-              <FiUserCheck className="text-[#047857]" />
+              <FiUserCheck className="text-[#2563EB]" />
               <span>Lead Assignment History</span>
             </h3>
             <div className="overflow-x-auto">
@@ -398,7 +452,7 @@ export const AuditTrail: React.FC = () => {
                           <div className="text-[10px] text-[#64748B] font-mono whitespace-nowrap">{entry.leadId}</div>
                         </td>
                         <td className={cellClass}>
-                          <div className="font-bold text-[#047857] whitespace-nowrap">
+                          <div className="font-bold text-[#2563EB] whitespace-nowrap">
                             {entry.assignedToBdeName || entry.assignedToTeamName || '—'}
                           </div>
                           <div className="text-[10px] text-[#64748B] font-mono whitespace-nowrap">
@@ -421,7 +475,7 @@ export const AuditTrail: React.FC = () => {
         {activeTab === 'CORRECTION' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <h3 className={sectionTitleClass}>
-              <FiEdit3 className="text-[#047857]" />
+              <FiEdit3 className="text-[#2563EB]" />
               <span>Attendance Correction Log</span>
             </h3>
             <div className="overflow-x-auto">
@@ -458,7 +512,7 @@ export const AuditTrail: React.FC = () => {
                             <span className="text-[#94A3B8] font-bold">→</span>
                             <PlainBadge
                               label={entry.newStatus}
-                              tone={entry.newStatus === 'PRESENT' ? 'teal' : entry.newStatus === 'LATE' ? 'amber' : 'slate'}
+                              tone={entry.newStatus === 'PRESENT' ? 'cobalt' : entry.newStatus === 'LATE' ? 'amber' : 'slate'}
                             />
                           </div>
                         </td>
@@ -490,7 +544,7 @@ export const AuditTrail: React.FC = () => {
         {activeTab === 'CALCULATION' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <h3 className={sectionTitleClass}>
-              <FiDollarSign className="text-[#047857]" />
+              <FiDollarSign className="text-[#2563EB]" />
               <span>Financial Calculation Log</span>
             </h3>
             <div className="overflow-x-auto">
@@ -515,11 +569,11 @@ export const AuditTrail: React.FC = () => {
                           <div>{formatTimestamp(log.createdAt)}</div>
                           <div className="text-[10px] text-[#94A3B8]">{log.id}</div>
                         </td>
-                        <td className={`${cellClass} font-bold text-[#047857] whitespace-nowrap`}>
+                        <td className={`${cellClass} font-bold text-[#2563EB] whitespace-nowrap`}>
                           {String(log.calcType).replaceAll('_', ' ')}
                         </td>
                         <td className={`${cellClass} ${jsonClass} text-[#475569]`}>{formatJson(log.inputValues)}</td>
-                        <td className={`${cellClass} ${jsonClass} text-[#047857] font-bold`}>{formatJson(log.resultValues)}</td>
+                        <td className={`${cellClass} ${jsonClass} text-[#2563EB] font-bold`}>{formatJson(log.resultValues)}</td>
                         <td className={cellClass}>
                           <ActorCell id={log.calculatedById} name={log.calculatedByName} users={users} />
                         </td>
@@ -534,15 +588,14 @@ export const AuditTrail: React.FC = () => {
         )}
       </div>
 
-      <div className="glass-panel rounded-2xl p-5 flex items-start gap-3">
-        <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#047857] shrink-0">
+      <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white p-5 flex items-start gap-3 shadow-xs">
+        <div className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB] shrink-0">
           <FiCalendar />
         </div>
         <div>
-          <div className="text-xs font-bold text-[#0F172A]">Retention & integrity</div>
+          <div className="text-xs font-bold text-[#0F172A]">Retention & Integrity Verification</div>
           <p className="text-[11px] text-[#64748B] mt-1">
-            Records are appended by the application at the moment each workflow action occurs and are never edited in this
-            view. Actor identities are resolved from the current user directory for display only.
+            Records are appended immutably at the moment each workflow event occurs, stored synchronously on disk in JSON persistence, and verifiable across audit logs.
           </p>
         </div>
       </div>

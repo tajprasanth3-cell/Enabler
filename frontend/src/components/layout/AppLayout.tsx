@@ -21,39 +21,41 @@ export const AppLayout: React.FC = () => {
       <div className="flex flex-1 relative min-w-0">
         <Sidebar />
         <main className="min-w-0 flex-1 relative z-10 p-4 sm:p-6 lg:p-8 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-8 overflow-x-clip">
-          {notification && (
-            <div
-              role="alert"
-              className={`sticky top-0 z-30 mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-xs font-semibold shadow-lg ${
-                notification.type === 'error'
-                  ? 'border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]'
-                  : notification.type === 'success'
-                    ? 'border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]'
-                    : 'border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]'
-              }`}
-            >
-              <span className="uppercase tracking-wide">{notification.type}</span>
-              <span className="flex-1">{notification.message}</span>
-              <button
-                type="button"
-                onClick={dismissNotification}
-                aria-label="Dismiss notification"
-                className="text-lg leading-none cursor-pointer"
+          <div className="max-w-[1600px] mx-auto w-full">
+            {notification && (
+              <div
+                role="alert"
+                className={`sticky top-0 z-30 mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-xs font-semibold shadow-lg ${
+                  notification.type === 'error'
+                    ? 'border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]'
+                    : notification.type === 'success'
+                      ? 'border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]'
+                      : 'border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]'
+                }`}
               >
-                ×
-              </button>
-            </div>
-          )}
-          <AnimatePresence mode="wait">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+                <span className="uppercase tracking-wide">{notification.type}</span>
+                <span className="flex-1">{notification.message}</span>
+                <button
+                  type="button"
+                  onClick={dismissNotification}
+                  aria-label="Dismiss notification"
+                  className="text-lg leading-none cursor-pointer"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            <AnimatePresence mode="wait">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </main>
       </div>
     </div>

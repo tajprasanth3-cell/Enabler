@@ -102,42 +102,47 @@ export const AttendanceOverview: React.FC = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 rounded-2xl">
+        <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
           <div className="text-xs text-[#64748B] font-bold">Punched In On-Time (Present)</div>
           <div className="text-3xl font-black text-[#2563EB] mt-2">{presentCount}</div>
-          <div className="text-xs text-[#64748B] mt-1">Within configured grace window</div>
+          <div className="text-xs text-[#64748B] mt-1 font-medium">Within configured grace window</div>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl">
+        <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
           <div className="text-xs text-[#64748B] font-bold">Late Arrivals</div>
           <div className="text-3xl font-black text-[#D97706] mt-2">{lateCount}</div>
-          <div className="text-xs text-[#64748B] mt-1">Arrived past shift start + grace</div>
+          <div className="text-xs text-[#64748B] mt-1 font-medium">Arrived past shift start + grace</div>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl">
+        <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
           <div className="text-xs text-[#64748B] font-bold">Half-Day Records</div>
           <div className="text-3xl font-black text-[#64748B] mt-2">{halfDayCount}</div>
-          <div className="text-xs text-[#64748B] mt-1">
+          <div className="text-xs text-[#64748B] mt-1 font-medium">
             Under {systemSettings.halfDayThresholdHours} hour threshold
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl">
+        <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
           <div className="text-xs text-[#64748B] font-bold">Missing Punch-Out</div>
           <div className="text-3xl font-black text-[#BE185D] mt-2">{missingPunchOutCount}</div>
-          <div className="text-xs text-[#64748B] mt-1">Past dates without a recorded punch-out</div>
+          <div className="text-xs text-[#64748B] mt-1 font-medium">Past dates without a recorded punch-out</div>
         </div>
       </div>
 
       {/* Attendance Table */}
-      <div className="glass-panel rounded-2xl p-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-            <FiCalendar className="text-[#2563EB]" />
-            <span>Daily Attendance Register & Punch Timesheets</span>
-          </h3>
-          <span className="text-xs text-[#2563EB] font-semibold bg-[#EFF6FF] px-3 py-1 rounded-full border border-[#BFDBFE]">
-            Corrections are logged locally
+      <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white overflow-hidden shadow-xs">
+        <div className="p-5 border-b border-[#E2E8F0] flex flex-wrap items-center justify-between gap-3 bg-white">
+          <div>
+            <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
+              <FiCalendar className="text-[#2563EB]" />
+              <span>Daily Attendance Register & Punch Timesheets</span>
+            </h3>
+            <p className="text-xs text-[#64748B] mt-0.5">
+              Automated punch audit with late arrival computation (09:00 AM + {systemSettings.lateGracePeriodMinutes}m grace).
+            </p>
+          </div>
+          <span className="text-xs text-[#2563EB] font-bold bg-[#EFF6FF] px-3.5 py-1 rounded-full border border-[#BFDBFE]">
+            Corrections require audit justification
           </span>
         </div>
 
@@ -145,14 +150,14 @@ export const AttendanceOverview: React.FC = () => {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                <th className="py-3 px-3">Date</th>
-                <th className="py-3 px-3">Employee Name</th>
-                <th className="py-3 px-3">Punch In</th>
-                <th className="py-3 px-3">Punch Out</th>
-                <th className="py-3 px-3">Duration</th>
-                <th className="py-3 px-3">System Status</th>
-                <th className="py-3 px-3">Audit Flags</th>
-                <th className="py-3 px-3 text-right">Admin Action</th>
+                <th className="py-3.5 px-4">Date</th>
+                <th className="py-3.5 px-4">Employee Name</th>
+                <th className="py-3.5 px-4">Punch In</th>
+                <th className="py-3.5 px-4">Punch Out</th>
+                <th className="py-3.5 px-4">Duration</th>
+                <th className="py-3.5 px-4">System Status</th>
+                <th className="py-3.5 px-4">Audit Flags & Reason</th>
+                <th className="py-3.5 px-4 text-right">Supervisor Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
@@ -160,28 +165,28 @@ export const AttendanceOverview: React.FC = () => {
                 const correction = correctionFor(att.id);
                 return (
                 <tr key={att.id} className="hover:bg-[#F8FAFC] transition-colors">
-                  <td className="py-3.5 px-3 font-mono text-[#64748B]">{att.date}</td>
-                  <td className="py-3.5 px-3 font-bold text-[#0F172A]">{att.userName}</td>
-                  <td className="py-3.5 px-3 text-[#2563EB] font-mono font-bold">
+                  <td className="py-3.5 px-4 font-mono text-[#64748B] font-semibold">{att.date}</td>
+                  <td className="py-3.5 px-4 font-bold text-[#0F172A]">{att.userName}</td>
+                  <td className="py-3.5 px-4 text-[#2563EB] font-mono font-bold">
                     {formatClock(att.punchInTime) || '—'}
                   </td>
                   <td
-                    className={`py-3.5 px-3 font-mono ${
+                    className={`py-3.5 px-4 font-mono ${
                       att.status === 'MISSING_PUNCH_OUT' ? 'text-[#BE185D] font-bold' : 'text-[#64748B]'
                     }`}
                   >
                     {formatClock(att.punchOutTime) ||
                       (att.status === 'MISSING_PUNCH_OUT' ? 'MISSING_PUNCH_OUT' : 'Active Shift')}
                   </td>
-                  <td className="py-3.5 px-3 text-[#0F172A] font-medium">
+                  <td className="py-3.5 px-4 text-[#0F172A] font-medium">
                     {Math.floor(att.workingMinutes / 60)}h {att.workingMinutes % 60}m
                   </td>
-                  <td className="py-3.5 px-3">
+                  <td className="py-3.5 px-4">
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusClass(att.status)}`}>
                       {att.status}
                     </span>
                   </td>
-                  <td className="py-3.5 px-3 text-[#64748B]">
+                  <td className="py-3.5 px-4 text-[#64748B]">
                     <div className="flex flex-col gap-1">
                       {att.earlyDeparture && (
                         <span className="text-[#D97706] font-bold text-[10px]">Early departure flagged</span>
@@ -204,7 +209,7 @@ export const AttendanceOverview: React.FC = () => {
                       )}
                     </div>
                   </td>
-                  <td className="py-3.5 px-3 text-right">
+                  <td className="py-3.5 px-4 text-right">
                     <button
                       onClick={() => {
                         setSelectedRecord(att);
@@ -213,7 +218,7 @@ export const AttendanceOverview: React.FC = () => {
                         setRevisedPunchOut(att.punchOutTime ? toDateTimeLocalValue(att.punchOutTime) : '');
                         setFeedback(null);
                       }}
-                      className="px-2.5 py-1.5 rounded-lg bg-[#EFF6FF] hover:bg-[#E0E7FF] text-[#2563EB] border border-[#BFDBFE] text-[11px] font-bold flex items-center gap-1.5 ml-auto cursor-pointer transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#2563EB] border border-[#BFDBFE] text-xs font-bold inline-flex items-center gap-1.5 ml-auto cursor-pointer transition-colors shadow-xs"
                     >
                       <FiEdit3 />
                       <span>Adjust</span>
