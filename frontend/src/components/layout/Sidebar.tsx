@@ -55,8 +55,9 @@ const SHORT_LABELS: Record<string, string> = {
 };
 
 export const Sidebar: React.FC = () => {
-  const { currentRole, replenishmentAlerts, unassignedAdminLeadsCount, isBdeExhausted } = useApp();
+  const { currentRole, currentUser, replenishmentAlerts, unassignedAdminLeadsCount, isBdeExhausted } = useApp();
   const location = useLocation();
+  const teamAlerts = replenishmentAlerts.filter((alert) => alert.teamId === currentUser.teamId);
   const [tabletNavPath, setTabletNavPath] = useState<string | null>(null);
   const tabletExpanded = tabletNavPath === location.pathname;
 
@@ -102,7 +103,7 @@ export const Sidebar: React.FC = () => {
             label: 'BDE Distribution',
             path: APP_ROUTES.TEAM_LEAD.DISTRIBUTION,
             icon: <FiUsers />,
-            badge: replenishmentAlerts.length > 0 ? `${replenishmentAlerts.length} Needs Leads` : undefined,
+            badge: teamAlerts.length > 0 ? `${teamAlerts.length} Needs Leads` : undefined,
             badgeColor: 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]',
             badgeDotColor: 'bg-[#DC2626]',
           },
@@ -251,7 +252,7 @@ export const Sidebar: React.FC = () => {
 
   return (
     <>
-      <aside className="hidden lg:flex w-72 shrink-0 self-start sticky top-16 h-[calc(100dvh-64px)] min-h-0 flex-col justify-between gap-4 border-r border-[#E2E8F0] bg-white/90 backdrop-blur-md p-4 overflow-y-auto select-none z-20 shadow-xs">
+      <aside className="hidden lg:flex w-72 shrink-0 self-start sticky top-16 h-[calc(100dvh-64px)] min-h-0 flex-col justify-start gap-3 border-r border-[#E2E8F0] bg-white/90 backdrop-blur-md p-4 overflow-y-auto select-none z-20 shadow-xs">
         <div className="space-y-1 min-w-0">
           <div className="px-3 py-2 text-[11px] font-bold text-[#64748B] uppercase tracking-wider flex items-center justify-between gap-2 min-w-0">
             <span className="truncate">Navigation</span>
@@ -289,7 +290,7 @@ export const Sidebar: React.FC = () => {
             onClick={() => setTabletNavPath(null)}
             aria-hidden="true"
           />
-          <aside className="relative flex h-full w-72 max-w-[85vw] shrink-0 flex-col gap-4 border-r border-[#E2E8F0] bg-white p-4 shadow-2xl" aria-label="Expanded navigation">
+          <aside className="relative flex h-full w-72 max-w-[85vw] shrink-0 flex-col gap-3 border-r border-[#E2E8F0] bg-white p-4 shadow-2xl" aria-label="Expanded navigation">
             <div className="flex items-center justify-between gap-2 px-1 min-w-0">
               <div className="flex min-w-0 items-center gap-2">
                 <span className="truncate text-[11px] font-bold text-[#64748B] uppercase tracking-wider">

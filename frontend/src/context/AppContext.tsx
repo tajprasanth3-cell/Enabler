@@ -40,6 +40,7 @@ export interface AppNotification {
 export interface ActionResult {
   ok: boolean;
   message: string;
+  role?: UserRole;
 }
 
 export interface ReportSubmission {
@@ -77,12 +78,13 @@ export interface AppContextType {
   dismissNotification: () => void;
 
   isAuthenticated: boolean;
-  login: (email: string, role?: UserRole) => Promise<ActionResult>;
+  login: (email: string, password: string) => Promise<ActionResult>;
   logout: () => void;
 
   currentUser: User;
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
+  switchUser: (userId: string) => ActionResult;
 
   teams: Team[];
   users: User[];
@@ -104,7 +106,8 @@ export interface AppContextType {
   allocateStage1AdminToTeams: (
     teamIds: string[],
     countPerTeam: number,
-    method: 'EQUAL' | 'WORKLOAD_BASED'
+    method: 'EQUAL' | 'WORKLOAD_BASED',
+    teamQuotas?: Record<string, number>
   ) => number;
   allocateStage2TeamToBdes: (
     teamId: string,
@@ -174,10 +177,17 @@ export interface AppContextType {
 
 export const AppContext = createContext<AppContextType | null>(null);
 
+const asArray = <T,>(value: unknown, key: string): T[] => {
+  if (Array.isArray(value)) return value as T[];
+  if (value && typeof value === 'object' && Array.isArray((value as Record<string, unknown>)[key])) {
+    return (value as Record<string, unknown>)[key] as T[];
+  }
+  return [];
+};
+
 const INITIAL_USERS: User[] = [
   { id: 'usr-1', name: 'Vikram Sharma', email: 'admin@leadflow.io', role: 'ADMIN', status: 'ACTIVE', createdAt: '2026-01-01' },
-  { id: 'usr-2', name: 'Priya Patel', email: 'priya.tl@leadflow.io', role: 'TEAM_LEAD', status: 'ACTIVE', teamId: 'team-1', teamName: 'Team Alpha', createdAt: '2026-01-10' },
-  { id: 'usr-3', name: 'Rajesh Verma', email: 'rajesh.tl@leadflow.io', role: 'TEAM_LEAD', status: 'ACTIVE', teamId: 'team-2', teamName: 'Team Beta', createdAt: '2026-01-15' },
+  { id: 'usr-2', name: 'Priya Patel', email: 'priya.tl@leadflow.io', role: 'TEAM_LEAD', status: 'ACTIVE', teamId: 'team-1', teamName: 'Team Alpha & Beta', createdAt: '2026-01-10' },
   { id: 'usr-4', name: 'Prasanth', email: 'prasanth.bde@leadflow.io', role: 'BDE', status: 'ACTIVE', teamId: 'team-1', teamName: 'Team Alpha', createdAt: '2026-02-01' },
   { id: 'usr-5', name: 'Sneha Gupta', email: 'sneha.bde@leadflow.io', role: 'BDE', status: 'ACTIVE', teamId: 'team-1', teamName: 'Team Alpha', createdAt: '2026-02-01' },
   { id: 'usr-6', name: 'Rohan Mehta', email: 'rohan.bde@leadflow.io', role: 'BDE', status: 'ACTIVE', teamId: 'team-2', teamName: 'Team Beta', createdAt: '2026-02-05' },
@@ -186,15 +196,15 @@ const INITIAL_USERS: User[] = [
 
 const INITIAL_TEAMS: Team[] = [
   { id: 'team-1', name: 'Team Alpha', teamLeadId: 'usr-2', teamLeadName: 'Priya Patel', bdeCount: 2, activeLeadsCount: 45, convertedLeadsCount: 12, status: 'ACTIVE', createdAt: '2026-01-10', updatedAt: '2026-02-01' },
-  { id: 'team-2', name: 'Team Beta', teamLeadId: 'usr-3', teamLeadName: 'Rajesh Verma', bdeCount: 2, activeLeadsCount: 38, convertedLeadsCount: 9, status: 'ACTIVE', createdAt: '2026-01-15', updatedAt: '2026-02-05' },
+  { id: 'team-2', name: 'Team Beta', teamLeadId: 'usr-2', teamLeadName: 'Priya Patel', bdeCount: 2, activeLeadsCount: 38, convertedLeadsCount: 9, status: 'ACTIVE', createdAt: '2026-01-15', updatedAt: '2026-02-05' },
 ];
 
 const INITIAL_LEADS: Lead[] = [
   { id: 'lead-101', candidateName: 'Rahul Verma', phone: '+91 98765 43210', email: 'rahul.v@gmail.com', city: 'Mumbai', education: 'B.Tech CS', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', createdAt: '2026-02-10' },
   { id: 'lead-102', candidateName: 'Deepika Nair', phone: '+91 98220 11223', email: 'deepika.n@outlook.com', city: 'Bangalore', education: 'MBA Marketing', status: 'CONTACTED', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', createdAt: '2026-02-11' },
   { id: 'lead-103', candidateName: 'Arjun Das', phone: '+91 99112 33445', email: 'arjun.das@yahoo.com', city: 'Delhi NCR', education: 'BBA', status: 'INTERESTED', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', createdAt: '2026-02-12' },
-  { id: 'lead-104', candidateName: 'Kavita Joshi', phone: '+91 97665 44332', email: 'kavita.j@gmail.com', city: 'Pune', education: 'B.Com', status: 'FOLLOW_UP_REQUIRED', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', nextFollowUpDate: '2026-11-19 14:00', createdAt: '2026-02-12' },
-  { id: 'lead-105', candidateName: 'Manish Pandey', phone: '+91 91234 56789', email: 'manish.p@gmail.com', city: 'Hyderabad', education: 'MCA', status: 'CONVERTED', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', createdAt: '2026-02-08' },
+  { id: 'lead-104', candidateName: 'Kavita Joshi', phone: '+91 97665 44332', email: 'kavita.j@gmail.com', city: 'Pune', education: 'B.Com', status: 'FOLLOW_UP_REQUIRED', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', nextFollowUpDate: '2026-11-25 14:00', createdAt: '2026-02-12' },
+  { id: 'lead-105', candidateName: 'Manish Pandey', phone: '+91 91234 56789', email: 'manish.p@gmail.com', city: 'Hyderabad', education: 'MCA', status: 'CONVERTED', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', dealValue: 50000, createdAt: '2026-02-08' },
   { id: 'lead-106', candidateName: 'Simran Kaur', phone: '+91 98450 99887', email: 'simran.k@live.com', city: 'Chandigarh', education: 'B.Tech IT', status: 'NOT_REACHABLE', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-5', currentBdeName: 'Sneha Gupta', createdAt: '2026-02-13' },
   { id: 'lead-107', candidateName: 'Aditya Rao', phone: '+91 95544 33221', email: 'aditya.rao@gmail.com', city: 'Chennai', education: 'B.Sc Data', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: null, currentBdeName: null, createdAt: '2026-02-14' },
   { id: 'lead-108', candidateName: 'Pooja Hegde', phone: '+91 96677 88990', email: 'pooja.h@gmail.com', city: 'Ahmedabad', education: 'B.Tech ECE', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: null, currentBdeName: null, createdAt: '2026-02-14' },
@@ -335,7 +345,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentRole, setCurrentRoleState] = usePersistentState<UserRole>('currentRole', 'ADMIN');
   const [currentUserId, setCurrentUserId] = usePersistentState<string>('currentUserId', INITIAL_USERS[0].id);
   const [users, setUsers] = usePersistentState<User[]>('users', INITIAL_USERS);
-  const [teams, setTeams] = usePersistentState<Team[]>('teams', INITIAL_TEAMS);
+  const [teamsState, setTeams] = usePersistentState<Team[]>('teams', INITIAL_TEAMS);
   const [leads, setLeads] = usePersistentState<Lead[]>('leads', INITIAL_LEADS);
   const [leadStatusHistory, setLeadStatusHistory] = usePersistentState<LeadStatusHistory[]>('leadStatusHistory', INITIAL_STATUS_HISTORY);
   const [leadAssignmentHistory, setLeadAssignmentHistory] = usePersistentState<LeadAssignmentHistory[]>('leadAssignmentHistory', []);
@@ -391,23 +401,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           settingsService.getSettings(),
         ]);
 
-        if (usersRes.status === 'fulfilled' && usersRes.value?.users?.length) {
-          setUsers(usersRes.value.users as any);
+        if (usersRes.status === 'fulfilled') {
+          const backendUsers = asArray<User>(usersRes.value, 'users');
+          setUsers(backendUsers as any);
         }
-        if (teamsRes.status === 'fulfilled' && teamsRes.value?.teams?.length) {
-          setTeams(teamsRes.value.teams as any);
+        if (teamsRes.status === 'fulfilled') {
+          const backendTeams = asArray<Team>(teamsRes.value, 'teams');
+          setTeams(backendTeams as any);
         }
-        if (leadsRes.status === 'fulfilled' && leadsRes.value?.leads?.length) {
-          setLeads(leadsRes.value.leads as any);
+        if (leadsRes.status === 'fulfilled') {
+          const backendLeads = asArray<Lead>(leadsRes.value, 'leads');
+          setLeads(backendLeads as any);
         }
-        if (attRes.status === 'fulfilled' && attRes.value?.records?.length) {
-          setAttendanceRecords(attRes.value.records as any);
+        if (attRes.status === 'fulfilled') {
+          const backendAttendance = asArray<AttendanceRecord>(attRes.value, 'records');
+          setAttendanceRecords(backendAttendance as any);
         }
-        if (finRes.status === 'fulfilled' && finRes.value?.transactions?.length) {
-          setTransactions(finRes.value.transactions as any);
+        if (finRes.status === 'fulfilled') {
+          const backendTransactions = asArray<FinancialTransaction>(finRes.value, 'transactions');
+          setTransactions(backendTransactions as any);
         }
-        if (folRes.status === 'fulfilled' && folRes.value?.followUps?.length) {
-          setFollowUps(folRes.value.followUps as any);
+        if (folRes.status === 'fulfilled') {
+          const backendFollowUps = asArray<FollowUpItem>(folRes.value, 'followUps');
+          setFollowUps(backendFollowUps as any);
         }
         if (settsRes.status === 'fulfilled' && settsRes.value) {
           setSystemSettings((prev) => ({
@@ -415,11 +431,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             companySharePercentage: settsRes.value.companySharePercentage ?? prev.companySharePercentage,
             remainingSharePercentage: settsRes.value.remainingSharePercentage ?? prev.remainingSharePercentage,
             profitSharePercentage: settsRes.value.profitSharePercentage ?? prev.profitSharePercentage,
+            conversionTargetPercentage: settsRes.value.conversionTargetPercentage ?? prev.conversionTargetPercentage,
             dailyTargetLeads: settsRes.value.dailyTargetLeads ?? prev.dailyTargetLeads,
             weeklyTargetLeads: settsRes.value.weeklyTargetLeads ?? prev.weeklyTargetLeads,
             monthlyTargetLeads: settsRes.value.monthlyTargetLeads ?? prev.monthlyTargetLeads,
             maxLeadsPerBde: settsRes.value.maxLeadsPerBde ?? prev.maxLeadsPerBde,
+            allocationMethod: settsRes.value.allocationMethod ?? prev.allocationMethod,
+            workdayStartTime: settsRes.value.shiftStartTime ?? prev.workdayStartTime,
+            workdayEndTime: settsRes.value.workdayEndTime ?? prev.workdayEndTime,
             lateGracePeriodMinutes: settsRes.value.gracePeriodMinutes ?? prev.lateGracePeriodMinutes,
+            earlyExitGracePeriodMinutes: settsRes.value.earlyExitGracePeriodMinutes ?? prev.earlyExitGracePeriodMinutes,
+            halfDayThresholdHours: settsRes.value.halfDayThresholdHours ?? prev.halfDayThresholdHours,
+            fullDayThresholdHours: settsRes.value.fullDayThresholdHours ?? prev.fullDayThresholdHours,
+            followUpReminderMinutes: settsRes.value.followUpReminderMinutes ?? prev.followUpReminderMinutes,
+            statuses: settsRes.value.statuses ?? prev.statuses,
+            statusTransitions: settsRes.value.statusTransitions ?? prev.statusTransitions,
           }));
         }
       } catch (err) {
@@ -441,12 +467,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const currentUser: User =
     users.find((user) => user.id === currentUserId && user.role === currentRole) ||
-    users.find((user) => user.role === currentRole) ||
-    users[0];
-  const isAdmin = currentRole === 'ADMIN';
-  const isTeamLead = currentRole === 'TEAM_LEAD';
-  const isBde = currentRole === 'BDE';
+    users.find((user) => user.role === currentRole && user.status === 'ACTIVE') || {
+      id: 'unknown-user',
+      name: 'Unknown User',
+      email: '',
+      role: currentRole,
+      status: 'ACTIVE' as const,
+      createdAt: '2026-01-01T00:00:00.000Z',
+    };
+  const isAdmin = currentUser.role === 'ADMIN';
+  const isTeamLead = currentUser.role === 'TEAM_LEAD';
+  const isBde = currentUser.role === 'BDE';
   const isAuthenticated = Boolean(authToken);
+
+  const teams: Team[] = teamsState.map((team) => ({
+    ...team,
+    bdeCount: users.filter((user) => user.role === 'BDE' && user.teamId === team.id && user.status === 'ACTIVE').length,
+    activeLeadsCount: leads.filter(
+      (lead) => lead.currentTeamId === team.id && OPEN_LEAD_STATUSES.includes(lead.status)
+    ).length,
+    convertedLeadsCount: leads.filter((lead) => lead.currentTeamId === team.id && lead.status === 'CONVERTED').length,
+  }));
   const todayAttendance = attendanceRecords.find(
     (record) => record.userId === currentUser?.id && record.date === today()
   );
@@ -483,14 +524,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   const login = useCallback(
-    async (email: string, role?: UserRole): Promise<ActionResult> => {
+    async (email: string, password: string): Promise<ActionResult> => {
       const normalizedEmail = email.trim().toLowerCase();
       if (!normalizedEmail) return { ok: false, message: 'Enter your email address.' };
+      if (!password.trim()) return { ok: false, message: 'Enter your password.' };
 
       try {
         const result = await apiRequest<{ user: User; token: string }>('/auth/login', {
           method: 'POST',
-          body: JSON.stringify({ email: normalizedEmail, role }),
+          body: JSON.stringify({ email: normalizedEmail, password }),
         });
         if (!result?.token || !result?.user) throw new Error('Sign-in response was incomplete.');
 
@@ -502,12 +544,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           role: result.user.role,
           mode: 'server',
         });
-        return { ok: true, message: `Welcome back, ${result.user.name}.` };
+        return { ok: true, message: `Welcome back, ${result.user.name}.`, role: result.user.role };
       } catch (error) {
-        const localUser = users.find(
-          (user) =>
-            user.email.toLowerCase() === normalizedEmail && (!role || user.role === role)
-        );
+        const localUser = users.find((user) => user.email.toLowerCase() === normalizedEmail);
         if (!localUser) {
           return {
             ok: false,
@@ -521,12 +560,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setAuthToken('local-demo');
         setCurrentUserId(localUser.id);
         setCurrentRoleState(localUser.role);
-        notify('warning', 'Server sign-in unavailable; signed in with the local demo directory.');
+        notify('warning', 'Server sign-in unavailable; signed in with the local directory.');
         logAudit('LOGIN', 'SESSION', localUser.id, `${localUser.name} signed in locally`, {
           role: localUser.role,
           mode: 'local',
         });
-        return { ok: true, message: `Signed in locally as ${localUser.name}.` };
+        return { ok: true, message: `Signed in as ${localUser.name}.`, role: localUser.role };
       }
     },
     [logAudit, notify, setAuthToken, setCurrentRoleState, setCurrentUserId, users]
@@ -579,6 +618,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       from: currentRole,
       to: role,
     });
+  };
+
+  const switchUser = (userId: string): ActionResult => {
+    const targetUser = users.find((user) => user.id === userId && user.status === 'ACTIVE');
+    if (!targetUser) return { ok: false, message: 'User not found or inactive.' };
+    if (targetUser.id === currentUserId && targetUser.role === currentRole) {
+      return { ok: true, message: `Already viewing as ${targetUser.name}.` };
+    }
+
+    setCurrentUserId(targetUser.id);
+    setCurrentRoleState(targetUser.role);
+    logAudit(
+      'ROLE_SWITCH',
+      'SESSION',
+      targetUser.id,
+      `Switched to ${targetUser.name} (${targetUser.role}${targetUser.teamName ? `, ${targetUser.teamName}` : ''})`,
+      { from: currentRole, to: targetUser.role, teamId: targetUser.teamId }
+    );
+    return {
+      ok: true,
+      message: `Viewing as ${targetUser.name}${targetUser.teamName ? ` (${targetUser.teamName})` : ''}.`,
+    };
   };
 
   const getAllowedStatuses = (currentStatus: LeadStatus): LeadStatus[] => {
@@ -652,18 +713,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const allocateStage1AdminToTeams = (
     teamIds: string[],
     countPerTeam: number,
-    method: 'EQUAL' | 'WORKLOAD_BASED'
+    method: 'EQUAL' | 'WORKLOAD_BASED',
+    teamQuotas?: Record<string, number>
   ): number => {
     if (!isAdmin || !teamIds.length || countPerTeam <= 0) return 0;
     const pool = leads.filter((lead) => !lead.currentTeamId);
     if (!pool.length) return 0;
+    if (teamIds.some((teamId) => !teams.some((team) => team.id === teamId))) return 0;
 
     const weights = teamIds.map((teamId) =>
       method === 'WORKLOAD_BASED'
         ? Math.max(1, users.filter((user) => user.teamId === teamId && user.role === 'BDE' && user.status === 'ACTIVE').length)
         : 1
     );
-    const quotas = distribute(Math.min(pool.length, countPerTeam * teamIds.length), weights);
+    const requestedTotal = Math.min(pool.length, countPerTeam * teamIds.length);
+    const quotas = teamQuotas
+      ? teamIds.map((teamId) => Math.max(0, teamQuotas[teamId] ?? 0))
+      : distribute(requestedTotal, weights);
+    let excess = Math.max(0, quotas.reduce((sum, value) => sum + value, 0) - pool.length);
+    for (let index = quotas.length - 1; index >= 0 && excess > 0; index--) {
+      const reduction = Math.min(quotas[index], excess);
+      quotas[index] -= reduction;
+      excess -= reduction;
+    }
     const updates = new Map<string, Lead>();
     const assignments: LeadAssignmentHistory[] = [];
     let cursor = 0;
@@ -697,7 +769,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
-    leadsService.allocateStage1({ teamIds, countPerTeam, method, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend stage1 sync:', e));
+    const exactTeamQuotas = Object.fromEntries(teamIds.map((teamId, index) => [teamId, quotas[index]]));
+    leadsService.allocateStage1({ teamIds, countPerTeam, method, teamQuotas: exactTeamQuotas, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend stage1 sync:', e));
     logAudit('LEAD_ALLOCATE', 'LEAD', teamIds.join(','), `Allocated ${cursor} leads to ${teamIds.length} teams using ${method}`, {
       allocated: cursor,
       method,
@@ -713,7 +786,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     method?: 'EQUAL' | 'WORKLOAD_BASED' | 'MANUAL',
     manualQuotas?: Record<string, number>
   ): number => {
-    if (!isAdmin && !(isTeamLead && currentUser?.teamId === teamId)) return 0;
+    if (!isAdmin && !isTeamLead) return 0;
     const effectiveMethod = method || (systemSettings.allocationMethod === 'MANUAL' ? 'EQUAL' : systemSettings.allocationMethod);
     const eligibleBdeIds = bdeIds.filter((bdeId) => {
       const bde = users.find((user) => user.id === bdeId);
@@ -723,11 +796,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const openLeads = (bdeId: string) =>
       leads.filter(
-        (lead) => lead.currentBdeId === bdeId && !['CONVERTED', 'LOST'].includes(lead.status)
+        (lead) => lead.currentBdeId === bdeId && OPEN_LEAD_STATUSES.includes(lead.status)
       ).length;
     const capacities = eligibleBdeIds.map((bdeId) => Math.max(0, systemSettings.maxLeadsPerBde - openLeads(bdeId)));
     const pool = leads.filter(
-      (lead) => lead.currentTeamId === teamId && !lead.currentBdeId && !['CONVERTED', 'LOST'].includes(lead.status)
+      (lead) => lead.currentTeamId === teamId && !lead.currentBdeId && OPEN_LEAD_STATUSES.includes(lead.status)
     );
     let quotas: number[];
     if (effectiveMethod === 'MANUAL' && manualQuotas) {
@@ -785,7 +858,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
     setReplenishmentAlerts((prev) => prev.filter((alert) => !eligibleBdeIds.includes(alert.bdeId)));
-    leadsService.allocateStage2({ teamId, bdeIds: eligibleBdeIds, countPerBde, method: effectiveMethod, manualQuotas, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend stage2 sync:', e));
+    const exactDistribution = Object.fromEntries(eligibleBdeIds.map((bdeId, index) => [bdeId, quotas[index]]));
+    leadsService.allocateStage2({ teamId, bdeIds: eligibleBdeIds, countPerBde, method: effectiveMethod, manualQuotas, distribution: exactDistribution, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend stage2 sync:', e));
     logAudit('LEAD_ALLOCATE', 'LEAD', teamId, `Distributed ${allocated} leads to ${eligibleBdeIds.length} BDEs using ${effectiveMethod}`, {
       allocated,
       method: effectiveMethod,
@@ -882,11 +956,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const sourceBde = users.find((user) => user.id === fromBdeId);
     const targetBde = users.find((user) => user.id === toBdeId);
     if (!sourceBde || !targetBde || targetBde.status !== 'ACTIVE' || targetBde.role !== 'BDE') return false;
+    if (!targetBde.teamId || !targetBde.teamName) return false;
     if (isTeamLead && (sourceBde.teamId !== currentUser?.teamId || targetBde.teamId !== currentUser?.teamId)) {
       return false;
     }
     const affected = leads.filter(
-      (lead) => lead.currentBdeId === fromBdeId && !['CONVERTED', 'LOST'].includes(lead.status)
+      (lead) => lead.currentBdeId === fromBdeId && OPEN_LEAD_STATUSES.includes(lead.status)
     );
     if (!affected.length) return false;
 
@@ -1110,6 +1185,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const lead = leads.find((item) => item.id === leadId);
     if (!lead || lead.status !== 'CONVERTED') return false;
     if (transactions.some((item) => item.leadId === leadId)) return false;
+    if (!lead.currentBdeId || !lead.currentBdeName || !lead.currentTeamId || !lead.currentTeamName) {
+      notify('error', 'This lead has no assigned BDE/team, so revenue cannot be confirmed.');
+      return false;
+    }
 
     const netProfit = grossAmount - investmentCost;
     const companyShareAmount = (grossAmount * systemSettings.companySharePercentage) / 100;
@@ -1121,10 +1200,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: uid('tx'),
       leadId,
       candidateName: lead.candidateName,
-      bdeId: lead.currentBdeId || 'unknown',
-      bdeName: lead.currentBdeName || 'BDE',
-      teamId: lead.currentTeamId || 'team-1',
-      teamName: lead.currentTeamName || 'Team Alpha',
+      bdeId: lead.currentBdeId,
+      bdeName: lead.currentBdeName,
+      teamId: lead.currentTeamId,
+      teamName: lead.currentTeamName,
       grossAmount,
       investmentCost,
       netProfit,
@@ -1154,10 +1233,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     financeService.createTransaction({
       leadId,
       candidateName: lead.candidateName,
-      bdeId: lead.currentBdeId || 'usr-4',
-      bdeName: lead.currentBdeName || 'BDE',
-      teamId: lead.currentTeamId || 'team-1',
-      teamName: lead.currentTeamName || 'Team Alpha',
+      bdeId: lead.currentBdeId,
+      bdeName: lead.currentBdeName,
+      teamId: lead.currentTeamId,
+      teamName: lead.currentTeamName,
       grossAmount,
       investmentCost,
       notes,
@@ -1260,6 +1339,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (typeof value === 'number' && value < 0) (safePatch as unknown as Record<string, number>)[key] = 0;
     });
 
+    const mergedSettings: SystemSettings = { ...systemSettings, ...safePatch };
     setSystemSettings((prev) => {
       const next = { ...prev, ...safePatch };
       const start = parseClockToMinutes(next.workdayStartTime);
@@ -1291,15 +1371,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       keys: Object.keys(safePatch).join(', '),
     });
     settingsService.updateSettings({
-      companySharePercentage: safePatch.companySharePercentage,
-      remainingSharePercentage: safePatch.remainingSharePercentage,
-      profitSharePercentage: safePatch.profitSharePercentage,
-      dailyTargetLeads: safePatch.dailyTargetLeads,
-      weeklyTargetLeads: safePatch.weeklyTargetLeads,
-      monthlyTargetLeads: safePatch.monthlyTargetLeads,
-      maxLeadsPerBde: safePatch.maxLeadsPerBde,
-      gracePeriodMinutes: safePatch.lateGracePeriodMinutes,
-      shiftStartTime: safePatch.workdayStartTime,
+      companySharePercentage: mergedSettings.companySharePercentage,
+      remainingSharePercentage: mergedSettings.remainingSharePercentage,
+      profitSharePercentage: mergedSettings.profitSharePercentage,
+      conversionTargetPercentage: mergedSettings.conversionTargetPercentage,
+      dailyTargetLeads: mergedSettings.dailyTargetLeads,
+      weeklyTargetLeads: mergedSettings.weeklyTargetLeads,
+      monthlyTargetLeads: mergedSettings.monthlyTargetLeads,
+      maxLeadsPerBde: mergedSettings.maxLeadsPerBde,
+      allocationMethod: mergedSettings.allocationMethod,
+      workdayStartTime: mergedSettings.workdayStartTime,
+      workdayEndTime: mergedSettings.workdayEndTime,
+      gracePeriodMinutes: mergedSettings.lateGracePeriodMinutes,
+      earlyExitGracePeriodMinutes: mergedSettings.earlyExitGracePeriodMinutes,
+      halfDayThresholdHours: mergedSettings.halfDayThresholdHours,
+      fullDayThresholdHours: mergedSettings.fullDayThresholdHours,
+      followUpReminderMinutes: mergedSettings.followUpReminderMinutes,
+      statuses: mergedSettings.statuses,
+      statusTransitions: mergedSettings.statusTransitions,
     }, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => notifySyncError('Backend settings sync:', e));
   };
 
@@ -1327,7 +1416,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!isAdmin || !name.trim() || !email.trim()) return false;
     const normalizedEmail = email.trim().toLowerCase();
     if (users.some((user) => user.email.trim().toLowerCase() === normalizedEmail)) return false;
+    if (role === 'ADMIN' && teamId) return false;
+    if (role !== 'ADMIN' && !teamId) return false;
     const team = teams.find((item) => item.id === teamId);
+    if (role !== 'ADMIN' && !team) return false;
     const user: User = {
       id: uid('usr'),
       name: name.trim(),
@@ -1350,7 +1442,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const createTeam = (name: string, teamLeadId: string): boolean => {
     if (!isAdmin || !name.trim()) return false;
-    const teamLead = users.find((user) => user.id === teamLeadId && user.role === 'TEAM_LEAD');
+    const teamLead = users.find(
+      (user) => user.id === teamLeadId && user.role === 'TEAM_LEAD' && user.status === 'ACTIVE'
+    );
     if (!teamLead || teams.some((team) => team.teamLeadId === teamLeadId)) return false;
     const newTeam: Team = {
       id: uid('team'),
@@ -1429,7 +1523,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const escalatePoolEmpty = (teamId: string) => {
-    if (!isTeamLead || currentUser?.teamId !== teamId) return;
+    if (!isTeamLead) return;
     const team = teams.find((item) => item.id === teamId);
     if (poolEscalations.some((item) => item.teamId === teamId)) return;
     setPoolEscalations((prev) => [
@@ -1445,13 +1539,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const requestLeadReplenishment = (): ActionResult => {
     if (!isBde) return { ok: false, message: 'Only BDE users can request replenishment.' };
+    if (!currentUser.teamId || !currentUser.teamName) {
+      return { ok: false, message: 'Your account is not assigned to a team.' };
+    }
+    const teamId = currentUser.teamId;
+    const teamName = currentUser.teamName;
     const existing = replenishmentAlerts.find((alert) => alert.bdeId === currentUser.id);
     if (existing) return { ok: false, message: 'A replenishment request is already pending.' };
     setReplenishmentAlerts((prev) => [
       {
         bdeId: currentUser.id,
         bdeName: currentUser.name,
-        teamId: currentUser.teamId || 'team-1',
+        teamId,
         timestamp: new Date().toISOString(),
       },
       ...prev,
@@ -1459,8 +1558,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     leadsService.requestReplenishment({
       bdeId: currentUser.id,
       bdeName: currentUser.name,
-      teamId: currentUser.teamId || 'team-1',
-      teamName: currentUser.teamName || 'Team Alpha',
+      teamId,
+      teamName,
       reason: 'Working queue exhausted',
     }).catch((e) => notifySyncError('Backend replenish sync:', e));
     return { ok: true, message: 'Replenishment request sent to your Team Lead.' };
@@ -1484,6 +1583,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentUser,
         currentRole,
         setCurrentRole,
+        switchUser,
         teams,
         users,
         toggleUserStatus,

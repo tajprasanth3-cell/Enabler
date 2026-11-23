@@ -77,8 +77,8 @@ export const SystemSettings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 sm:space-y-8 max-w-4xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+    <div className="space-y-5 max-w-4xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiSettings />
@@ -115,8 +115,8 @@ export const SystemSettings: React.FC = () => {
         </motion.div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-6">
-        <div className="glass-panel rounded-2xl p-6 space-y-4">
+      <form onSubmit={handleSave} className="space-y-4">
+        <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
             <FiDollarSign className="text-[#059669]" />
             <span>Financial Business Sharing Defaults</span>
@@ -176,7 +176,7 @@ export const SystemSettings: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-6 space-y-4">
+        <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
             <FiClock className="text-[#059669]" />
             <span>Attendance & Shift Configuration</span>
@@ -266,7 +266,7 @@ export const SystemSettings: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-6 space-y-4">
+        <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
             <FiUsers className="text-[#059669]" />
             <span>Workload & Allocation Safeguards</span>
@@ -319,7 +319,7 @@ export const SystemSettings: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-6 space-y-4">
+        <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
             <FiAward className="text-[#059669]" />
             <span>Volume Targets</span>
@@ -361,7 +361,7 @@ export const SystemSettings: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-6 space-y-4">
+        <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
           <div className="flex items-center gap-2 text-[#0F172A] font-bold text-sm">
             <FiGitBranch className="text-[#059669]" />
             <span>Configured Status Transitions</span>

@@ -1,65 +1,40 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/useApp';
-import type { UserRole } from '../../types';
 import { motion } from 'framer-motion';
 import {
-  FiShield,
-  FiUsers,
-  FiUserCheck,
   FiUser,
   FiClock,
   FiZap,
   FiMenu,
   FiLogOut,
 } from 'react-icons/fi';
-import { APP_ROUTES } from '../../utils/constants';
+import { APP_ROUTES, ROLE_HOME_ROUTES } from '../../utils/constants';
 
 export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const {
     currentUser,
     currentRole,
-    setCurrentRole,
-    replenishmentAlerts,
+    users,
+    switchUser,
+    notify,
     punchState,
     punchInTime,
     logout,
   } = useApp();
 
-  const roles: Array<{
-    role: UserRole;
-    label: string;
-    shortLabel: string;
-    path: string;
-    icon: React.ReactNode;
-  }> = [
-    {
-      role: 'ADMIN',
-      label: 'Admin Portal',
-      shortLabel: 'Admin',
-      path: APP_ROUTES.ADMIN.DASHBOARD,
-      icon: <FiShield className="text-[#059669]" />,
-    },
-    {
-      role: 'TEAM_LEAD',
-      label: 'Team Lead',
-      shortLabel: 'TL',
-      path: APP_ROUTES.TEAM_LEAD.DASHBOARD,
-      icon: <FiUsers className="text-[#64748B]" />,
-    },
-    {
-      role: 'BDE',
-      label: 'BDE Desk',
-      shortLabel: 'BDE',
-      path: APP_ROUTES.BDE.DASHBOARD,
-      icon: <FiUserCheck className="text-[#059669]" />,
-    },
-  ];
+  const activeUsers = users.filter((user) => user.status === 'ACTIVE');
 
-  const handleRoleChange = (role: UserRole, path: string) => {
-    setCurrentRole(role);
-    navigate(path);
+  const handleUserChange = (userId: string) => {
+    const targetUser = users.find((user) => user.id === userId);
+    const result = switchUser(userId);
+    if (!result.ok) {
+      notify('error', result.message);
+      return;
+    }
+    notify('success', result.message);
+    if (targetUser) navigate(ROLE_HOME_ROUTES[targetUser.role]);
   };
 
   const handleToggleTabletNav = () => {
@@ -72,11 +47,11 @@ export const Navbar: React.FC = () => {
     : 'User';
 
   const userRoleTitle =
-    currentUser?.role === 'ADMIN'
+    currentUser.role === 'ADMIN'
       ? 'Super Administrator'
-      : currentUser?.role === 'TEAM_LEAD'
-      ? 'Alpha Team Lead'
-      : 'BDE Executive';
+      : currentUser.role === 'TEAM_LEAD'
+      ? `${currentUser.teamName || 'Team'} Lead`
+      : `${currentUser.teamName || 'Team'} BDE`;
 
   return (
     <>
@@ -139,42 +114,26 @@ export const Navbar: React.FC = () => {
           )}
         </div>
 
-        {/* Right side: Role Mode & Profile Container */}
+        {/* Right side: Identity Switcher & Profile Container */}
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          {/* Role Mode Switcher */}
-          <div
-            title="Demo role preview — switching roles does not authenticate anyone"
-            className="flex min-w-0 bg-[#F1F5F9] p-0.5 sm:p-1 rounded-xl border border-[#E2E8F0] shadow-inner"
+          <label
+            title="Switch between the configured Alpha/Beta users"
+            className="flex min-w-0 items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-1 text-xs shadow-inner"
           >
-            {roles.map(({ role, label, shortLabel, path, icon }) => {
-              const isActive = currentRole === role;
-              return (
-                <button
-                  key={role}
-                  onClick={() => handleRoleChange(role, path)}
-                  className={`relative px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all duration-200 cursor-pointer ${
-                    isActive
-                      ? 'text-white shadow-sm'
-                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#E2E8F0]/50'
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeRolePillCobalt"
-                      className="absolute inset-0 bg-gradient-to-r from-[#047857] via-[#10B981] to-[#34D399] rounded-lg -z-10 shadow-sm"
-                      transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                    />
-                  )}
-                  <span className={isActive ? 'text-white' : ''}>{icon}</span>
-                  <span className="hidden md:inline">{label}</span>
-                  <span className="hidden sm:inline md:hidden">{shortLabel}</span>
-                  {role === 'TEAM_LEAD' && replenishmentAlerts.length > 0 && (
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#F59E0B] animate-ping" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+            <FiUser className="shrink-0 text-[#059669]" />
+            <span className="hidden lg:inline text-[10px] font-bold uppercase text-[#64748B]">Viewing as</span>
+            <select
+              value={currentUser.id}
+              onChange={(event) => handleUserChange(event.target.value)}
+              className="max-w-[9rem] bg-transparent text-[11px] font-bold text-[#0F172A] outline-none sm:max-w-[12rem]"
+            >
+              {activeUsers.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} · {user.teamName || user.role}
+                </option>
+              ))}
+            </select>
+          </label>
 
           {/* Vertical divider */}
           <div className="h-7 w-px bg-[#E2E8F0] hidden sm:block" />

@@ -55,9 +55,9 @@ export const TeamManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 sm:space-y-8">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUsers />
@@ -99,14 +99,14 @@ export const TeamManagement: React.FC = () => {
       )}
 
       {/* Teams Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {teams.map((t) => {
           const members = users.filter((u) => u.teamId === t.id);
           return (
             <motion.div
               key={t.id}
               whileHover={{ y: -3 }}
-              className="glass-panel rounded-2xl p-6 space-y-4 relative overflow-hidden"
+              className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4 relative overflow-hidden"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -175,7 +175,7 @@ export const TeamManagement: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-md rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-md rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">

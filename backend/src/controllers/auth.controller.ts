@@ -5,16 +5,20 @@ import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env';
 
 export const login = (req: Request, res: Response) => {
-  const { email, role } = req.body;
+  const { email, password } = req.body;
 
-  // Find user by email or role
-  let user = db.users.find((u) => u.email === email);
-  if (!user && role) {
-    user = db.users.find((u) => u.role === role);
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  if (!normalizedEmail) {
+    return errorResponse(res, 'Email is required', 400);
+  }
+  if (typeof password !== 'string' || !password.trim()) {
+    return errorResponse(res, 'Password is required', 400);
   }
 
+  const user = db.users.find((u) => u.email.toLowerCase() === normalizedEmail);
+
   if (!user) {
-    return errorResponse(res, 'User not found with provided credentials', 404);
+    return errorResponse(res, 'Invalid email or password', 401);
   }
 
   if (user.status !== 'ACTIVE') {
@@ -33,9 +37,7 @@ export const login = (req: Request, res: Response) => {
 export const getCurrentUser = (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    // Fallback: return default admin for easy testing
-    const defaultUser = db.users[0];
-    return successResponse(res, defaultUser, 'Current user retrieved');
+    return errorResponse(res, 'Authentication token is required', 401);
   }
 
   try {

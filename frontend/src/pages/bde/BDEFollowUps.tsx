@@ -87,7 +87,7 @@ export const BDEFollowUps: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -189,7 +189,7 @@ export const BDEFollowUps: React.FC = () => {
         </div>
 
         {myFollowUps.length === 0 && (
-          <div className="py-12 text-center text-xs text-[#64748B]">
+          <div className="py-8 text-center text-xs text-[#64748B]">
             No follow-ups are assigned to you yet. When you schedule callbacks from your calling disposition, they will appear here.
           </div>
         )}

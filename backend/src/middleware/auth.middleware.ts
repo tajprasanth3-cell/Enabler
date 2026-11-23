@@ -13,10 +13,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    // If no token provided in demo development mode, default to active admin or requested user
-    const fallbackUser = db.users[0];
-    req.user = fallbackUser;
-    return next();
+    return errorResponse(res, 'Authentication token is required', 401);
   }
 
   const token = authHeader.split(' ')[1];

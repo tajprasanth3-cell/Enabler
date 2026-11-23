@@ -2,7 +2,10 @@ import { Request, Response } from 'express';
 import { db } from '../services/store';
 import { successResponse, errorResponse } from '../utils/response';
 import { AuditService } from '../services/audit.service';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { UserRole } from '../types';
+
+const ACTIVE_LEAD_STATUSES = ['NEW', 'CONTACTED', 'INTERESTED', 'FOLLOW_UP_REQUIRED'];
 
 export const getTeams = (req: Request, res: Response) => {
   // Enrich teams with live lead counts
@@ -13,7 +16,7 @@ export const getTeams = (req: Request, res: Response) => {
     return {
       ...t,
       bdeCount: bdes.length,
-      activeLeadsCount: teamLeads.length,
+      activeLeadsCount: teamLeads.filter((l) => ACTIVE_LEAD_STATUSES.includes(l.status)).length,
       convertedLeadsCount: converted,
     };
   });
@@ -21,8 +24,8 @@ export const getTeams = (req: Request, res: Response) => {
   return successResponse(res, enriched);
 };
 
-export const createTeam = (req: Request, res: Response) => {
-  const { name, teamLeadId, actor } = req.body;
+export const createTeam = (req: AuthenticatedRequest, res: Response) => {
+  const { name, teamLeadId } = req.body;
 
   if (!name || !teamLeadId) {
     return errorResponse(res, 'Team name and teamLeadId are required', 400);
@@ -32,8 +35,19 @@ export const createTeam = (req: Request, res: Response) => {
   if (!teamLead) {
     return errorResponse(res, 'Team lead user not found', 404);
   }
+  if (teamLead.role !== 'TEAM_LEAD') {
+    return errorResponse(res, 'Selected user must have the TEAM_LEAD role', 400);
+  }
+  if (teamLead.status !== 'ACTIVE') {
+    return errorResponse(res, 'Selected team lead must be active', 400);
+  }
+  if (db.teams.some((t) => t.teamLeadId === teamLeadId)) {
+    return errorResponse(res, 'Selected team lead already leads another team', 409);
+  }
 
-  const currentActor = actor || { id: 'usr-1', name: 'Vikram Sharma', role: 'ADMIN' as UserRole };
+  const bodyActor = req.body.actor as { id: string; name: string; role: UserRole } | undefined;
+  const currentActor = req.user || bodyActor || null;
+  const auditActor = currentActor || { id: 'system', name: 'System', role: 'ADMIN' as UserRole };
 
   const newTeam = {
     id: `team-${Date.now()}`,
@@ -51,17 +65,18 @@ export const createTeam = (req: Request, res: Response) => {
   db.teams.push(newTeam);
   teamLead.teamId = newTeam.id;
   teamLead.teamName = newTeam.name;
+  db.save();
 
   // Audit log team creation
   AuditService.log(
     'TEAM_CREATED',
     'ALLOCATION',
-    currentActor,
+    auditActor,
     `Created new operational team: ${name} (Team Lead: ${teamLead.name})`,
     {
       targetId: newTeam.id,
       targetType: 'TEAM',
-      details: { teamName: name, teamLeadId, teamLeadName: teamLead.name },
+      details: { teamName: name, teamLeadId, teamLeadName: teamLead.name, actorId: currentActor?.id ?? null },
     }
   );
 

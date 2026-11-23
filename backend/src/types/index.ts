@@ -158,6 +158,13 @@ export interface SystemSettings {
   maxLeadsPerBde: number;
   shiftStartTime: string;
   gracePeriodMinutes: number;
+  allocationMethod: 'EQUAL' | 'WORKLOAD_BASED' | 'MANUAL';
+  workdayEndTime: string;
+  halfDayThresholdHours: number;
+  fullDayThresholdHours: number;
+  followUpReminderMinutes: number;
+  statuses: string[];
+  statusTransitions: Record<string, string[]>;
 }
 
 export type AuditAction =

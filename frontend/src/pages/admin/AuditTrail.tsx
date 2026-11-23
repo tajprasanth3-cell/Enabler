@@ -88,7 +88,7 @@ const ActorCell: React.FC<{ id: string; name: string; meta?: string; users: User
 
 const EmptyRow: React.FC<{ colSpan: number; message: string }> = ({ colSpan, message }) => (
   <tr>
-    <td colSpan={colSpan} className="py-12 px-4 text-center text-xs font-semibold text-[#64748B]">
+    <td colSpan={colSpan} className="py-8 px-4 text-center text-xs font-semibold text-[#64748B]">
       {message}
     </td>
   </tr>
@@ -206,8 +206,8 @@ export const AuditTrail: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+    <div className="space-y-4 sm:space-y-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiShield />
@@ -253,7 +253,7 @@ export const AuditTrail: React.FC = () => {
         })}
       </div>
 
-      <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white p-6 space-y-6 shadow-xs">
+      <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white p-4 sm:p-5 space-y-4 shadow-xs">
         <div className="tab-strip flex border-b border-[#E2E8F0] pb-3 gap-2 overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;

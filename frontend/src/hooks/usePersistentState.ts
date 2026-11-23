@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const PREFIX = 'leadflow.v1.';
+const PREFIX = 'leadflow.v2.';
 
 function readValue<T>(key: string, fallback: T): T {
   try {

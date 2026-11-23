@@ -20,8 +20,8 @@ export const AppLayout: React.FC = () => {
 
       <div className="flex flex-1 relative min-w-0">
         <Sidebar />
-        <main className="min-w-0 flex-1 relative z-10 p-4 sm:p-6 lg:p-8 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-8 overflow-x-clip">
-          <div className="max-w-[1600px] mx-auto w-full">
+        <main className="min-w-0 flex-1 relative z-10 p-4 sm:p-5 lg:p-5 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-5 overflow-x-clip">
+          <div className="max-w-[1800px] mx-auto w-full">
             {notification && (
               <div
                 role="alert"

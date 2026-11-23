@@ -11,11 +11,11 @@ For testing and demonstration, use any of the pre-configured accounts below. The
 | Role | Name | Email | Password | Scope & Dashboard Access |
 | :--- | :--- | :--- | :--- | :--- |
 | **Super Admin** | Vikram Sharma | `admin@leadflow.io` | `demo1234` | Full Org Governance, Ingestion, Finance, Settings |
-| **Team Lead** | Priya Patel | `priya.tl@leadflow.io` | `demo1234` | Team Alpha Workbench, Pool Governance, BDE Distribution |
-| **Team Lead** | Rajesh Verma | `rajesh.tl@leadflow.io` | `demo1234` | Team Beta Workbench, Pool Governance, BDE Distribution |
+| **Team Lead (Sole TL)** | Priya Patel | `priya.tl@leadflow.io` | `demo1234` | Supervises both Team Alpha & Team Beta; Allocates tasks & leads to both teams |
 | **BDE Executive** | Prasanth | `prasanth.bde@leadflow.io` | `demo1234` | Team Alpha BDE Working Queue, Follow-ups, Calls |
 | **BDE Executive** | Sneha Gupta | `sneha.bde@leadflow.io` | `demo1234` | Team Alpha BDE Working Queue, Follow-ups, Calls |
 | **BDE Executive** | Rohan Mehta | `rohan.bde@leadflow.io` | `demo1234` | Team Beta BDE Working Queue, Follow-ups, Calls |
+| **BDE Executive** | Ananya Sen | `ananya.bde@leadflow.io` | `demo1234` | Team Beta BDE Working Queue, Follow-ups, Calls |
 
 > **Local Ports**:
 > - **Frontend Web App**: [http://localhost:5173](http://localhost:5173)
@@ -33,17 +33,25 @@ The application enforces a strict three-tier hierarchy at both the backend servi
                   │ (Org-wide Governance)│
                   └──────────┬───────────┘
                              │
+                  ┌──────────┴───────────┐
+                  │   SOLE TEAM LEAD     │
+                  │    (Priya Patel)     │
+                  │  Allocates tasks to  │
+                  │  Alpha & Beta Teams  │
+                  └──────────┬───────────┘
+                             │
             ┌────────────────┴────────────────┐
             ▼                                 ▼
    ┌─────────────────┐               ┌─────────────────┐
-   │   TEAM LEAD A   │               │   TEAM LEAD B   │
-   │  (Team Alpha)   │               │   (Team Beta)   │
+   │   TEAM ALPHA    │               │    TEAM BETA    │
+   │ (Prasanth,Sneha)│               │  (Rohan,Ananya) │
    └────────┬────────┘               └────────┬────────┘
             │                                 │
      ┌──────┴──────┐                   ┌──────┴──────┐
      ▼             ▼                   ▼             ▼
 ┌─────────┐   ┌─────────┐         ┌─────────┐   ┌─────────┐
-│  BDE 1  │   │  BDE 2  │         │  BDE 3  │   │  BDE 4  │
+│Prasanth │   │  Sneha  │         │  Rohan  │   │ Ananya  │
+│  (BDE)  │   │  (BDE)  │         │  (BDE)  │   │  (BDE)  │
 └─────────┘   └─────────┘         └─────────┘   └─────────┘
 ```
 

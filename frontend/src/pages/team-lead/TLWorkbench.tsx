@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/useApp';
 import type { User, LeadStatus } from '../../types';
@@ -25,7 +25,6 @@ export const TLWorkbench: React.FC = () => {
     leads,
     users,
     teams,
-    currentUser,
     systemSettings,
     followUps,
     leadStatusHistory,
@@ -36,13 +35,31 @@ export const TLWorkbench: React.FC = () => {
     escalatePoolEmpty,
   } = useApp();
 
-  const userTeamId = currentUser.teamId || 'team-1';
-  const currentTeamName =
-    teams.find((team) => team.id === userTeamId)?.name || currentUser.teamName || 'Team Alpha';
+  const [clock, setClock] = useState(() => ({
+    today: new Date().toISOString().split('T')[0],
+    nowMs: Date.now(),
+  }));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setClock({ today: new Date().toISOString().split('T')[0], nowMs: Date.now() });
+    }, 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('ALL');
+
   const maxLeadsPerBde = systemSettings.maxLeadsPerBde;
 
+  // Active teams determination for the single TL
+  const activeTeamIds = selectedTeamId === 'ALL' ? teams.map((t) => t.id) : [selectedTeamId];
+  const activeTeamName =
+    selectedTeamId === 'ALL'
+      ? 'All Teams (Team Alpha & Beta)'
+      : teams.find((t) => t.id === selectedTeamId)?.name || 'Team';
+
   // Filter team-specific data
-  const teamLeads = leads.filter((l) => l.currentTeamId === userTeamId);
+  const teamLeads = leads.filter((l) => activeTeamIds.includes(l.currentTeamId || ''));
   const teamPoolLeads = teamLeads.filter(
     (l) => !l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)
   );
@@ -52,22 +69,20 @@ export const TLWorkbench: React.FC = () => {
   const teamConvertedLeads = teamLeads.filter((l) => l.status === 'CONVERTED');
   const teamConversionPct = calculateConversionRate(teamConvertedLeads.length, teamLeads.length);
 
-  const teamBdes = users.filter((u) => u.teamId === userTeamId && u.role === 'BDE');
+  const teamBdes = users.filter((u) => activeTeamIds.includes(u.teamId || '') && u.role === 'BDE');
   const teamBdeIds = new Set(teamBdes.map((b) => b.id));
 
   // Attendance metrics
-  const today = new Date().toISOString().split('T')[0];
   const todayAttendance = attendanceRecords.filter(
-    (a) => a.date === today && teamBdeIds.has(a.userId)
+    (a) => a.date === clock.today && teamBdeIds.has(a.userId)
   );
   const presentCount = todayAttendance.filter((a) => a.status === 'PRESENT' || a.status === 'LATE').length;
 
   // Overdue followups
-  const nowMs = Date.now();
   const overdueFollowUps = followUps.filter((item) => {
     if (item.status !== 'PENDING' || !teamBdeIds.has(item.bdeId)) return false;
     const scheduled = new Date(item.scheduledTime).getTime();
-    return !Number.isNaN(scheduled) && scheduled < nowMs;
+    return !Number.isNaN(scheduled) && scheduled < clock.nowMs;
   }).length;
 
   const openLeadsForBde = (bdeId: string) =>
@@ -75,13 +90,13 @@ export const TLWorkbench: React.FC = () => {
   const bdeCapacity = (bdeId: string) => Math.max(0, maxLeadsPerBde - openLeadsForBde(bdeId));
   const bdeIneligibilityReason = (bdeId: string) => {
     const bde = teamBdes.find((item) => item.id === bdeId);
-    if (!bde) return 'Not on this team';
+    if (!bde) return 'Not in selected team';
     if (bde.status !== 'ACTIVE') return 'Inactive BDE';
     if (bdeCapacity(bdeId) === 0) return `At workload cap (${maxLeadsPerBde})`;
     return '';
   };
 
-  const teamAlerts = replenishmentAlerts.filter((alert) => alert.teamId === userTeamId);
+  const teamAlerts = replenishmentAlerts.filter((alert) => activeTeamIds.includes(alert.teamId));
 
   // Lead queue search & filter in workbench
   const [queueSearch, setQueueSearch] = useState('');
@@ -105,21 +120,27 @@ export const TLWorkbench: React.FC = () => {
   const handleQuickReplenish = (bde: User) => {
     setActionStatus('');
     setActionError('');
-    if (bde.teamId !== userTeamId || bde.status !== 'ACTIVE') {
-      setActionError(`${bde.name} is not an active member of ${currentTeamName}.`);
+    const targetTeamId = bde.teamId || 'team-1';
+    const targetTeamPool = leads.filter(
+      (l) => l.currentTeamId === targetTeamId && !l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)
+    );
+
+    if (bde.status !== 'ACTIVE') {
+      setActionError(`${bde.name} is not an active BDE.`);
       return;
     }
-    if (teamPoolLeads.length === 0) {
-      escalatePoolEmpty(userTeamId);
-      setActionError(`${currentTeamName}'s pool is empty. Admin has been notified; no leads were added.`);
+    if (targetTeamPool.length === 0) {
+      escalatePoolEmpty(targetTeamId);
+      const tName = teams.find((t) => t.id === targetTeamId)?.name || 'Team';
+      setActionError(`${tName}'s pool is empty. Admin has been notified; no leads were added.`);
       return;
     }
-    const allocCount = Math.min(5, teamPoolLeads.length, bdeCapacity(bde.id));
+    const allocCount = Math.min(5, targetTeamPool.length, bdeCapacity(bde.id));
     if (allocCount <= 0) {
       setActionError(`${bde.name} is at the workload cap (${maxLeadsPerBde} open leads).`);
       return;
     }
-    const allocated = allocateStage2TeamToBdes(userTeamId, [bde.id], allocCount);
+    const allocated = allocateStage2TeamToBdes(targetTeamId, [bde.id], allocCount);
     if (allocated > 0) {
       setActionStatus(`Added ${allocated} lead${allocated === 1 ? '' : 's'} to ${bde.name}.`);
       clearReplenishmentAlert(bde.id);
@@ -129,20 +150,49 @@ export const TLWorkbench: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+    <div className="space-y-4">
+      {/* Top Header with Team Switcher */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUsers />
-            <span>Team Lead Operational Command</span>
+            <span>Team Lead Operational Command · Alpha &amp; Beta Governance</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
-            Team Workbench: {currentTeamName}
+            Team Workbench: {activeTeamName}
           </h1>
           <p className="text-[#64748B] text-xs sm:text-sm mt-1 leading-relaxed">
-            Real-time frontline operations workbench for supervising BDE call activity, queue balancing, and stage progression.
+            Supervising frontline BDE execution, call queues, and lead capacity across Team Alpha and Team Beta.
           </p>
+        </div>
+
+        {/* Team Selector Controls */}
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#F1F5F9] border border-[#E2E8F0] shrink-0 self-start md:self-auto shadow-2xs">
+          <button
+            type="button"
+            onClick={() => setSelectedTeamId('ALL')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              selectedTeamId === 'ALL'
+                ? 'bg-white text-[#059669] shadow-xs'
+                : 'text-[#64748B] hover:text-[#0F172A]'
+            }`}
+          >
+            All Teams
+          </button>
+          {teams.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setSelectedTeamId(t.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                selectedTeamId === t.id
+                  ? 'bg-white text-[#059669] shadow-xs'
+                  : 'text-[#64748B] hover:text-[#0F172A]'
+              }`}
+            >
+              {t.name}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -522,7 +572,7 @@ export const TLWorkbench: React.FC = () => {
         </div>
 
         {filteredQueueLeads.length === 0 && (
-          <div className="p-8 text-center text-[#64748B] text-xs">
+          <div className="p-6 text-center text-[#64748B] text-xs">
             No active queue leads matched your search criteria.
           </div>
         )}

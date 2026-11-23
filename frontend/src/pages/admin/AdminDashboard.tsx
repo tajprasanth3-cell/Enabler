@@ -34,9 +34,9 @@ export const AdminDashboard: React.FC = () => {
   const totalRevenueConfirmed = confirmedTransactions.reduce((sum, t) => sum + t.grossAmount, 0);
 
   return (
-    <div className="space-y-5 sm:space-y-8">
+    <div className="space-y-5">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiGrid />
@@ -173,7 +173,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Team Comparative Benchmarking Table */}
-      <div className="glass-panel rounded-2xl p-6 space-y-4">
+      <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-black text-[#0F172A] flex items-center gap-2">

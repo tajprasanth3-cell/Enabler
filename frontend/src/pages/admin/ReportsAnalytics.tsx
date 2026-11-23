@@ -74,7 +74,7 @@ export const ReportsAnalytics: React.FC = () => {
   }, []);
   const [dateRange, setDateRange] = useState<DateRange>('ALL');
   const [teamFilter, setTeamFilter] = useState<string>(
-    currentRole === 'TEAM_LEAD' ? currentUser.teamId || 'team-1' : 'ALL'
+    currentRole === 'TEAM_LEAD' ? currentUser.teamId || '' : 'ALL'
   );
   const [exportNotice, setExportNotice] = useState(false);
 
@@ -89,7 +89,7 @@ export const ReportsAnalytics: React.FC = () => {
   const relevantLeads = leads.filter((l) => {
     if (!inDateRange(l.createdAt)) return false;
     if (currentRole === 'TEAM_LEAD') {
-      return l.currentTeamId === (currentUser.teamId || 'team-1');
+      return l.currentTeamId === (currentUser.teamId || '');
     }
     if (teamFilter !== 'ALL') {
       return l.currentTeamId === teamFilter;
@@ -113,7 +113,7 @@ export const ReportsAnalytics: React.FC = () => {
     if (t.status !== 'CONFIRMED') return false;
     if (!inDateRange(t.confirmedAt || t.createdAt)) return false;
     if (currentRole === 'TEAM_LEAD') {
-      return t.teamId === (currentUser.teamId || 'team-1');
+      return t.teamId === (currentUser.teamId || '');
     }
     if (teamFilter !== 'ALL') {
       return t.teamId === teamFilter;
@@ -128,7 +128,7 @@ export const ReportsAnalytics: React.FC = () => {
   // BDE Leaderboard
   const bdeUsers = users.filter((u) => {
     if (u.role !== 'BDE' || u.status !== 'ACTIVE') return false;
-    if (currentRole === 'TEAM_LEAD') return u.teamId === (currentUser.teamId || 'team-1');
+    if (currentRole === 'TEAM_LEAD') return u.teamId === (currentUser.teamId || '');
     if (teamFilter !== 'ALL') return u.teamId === teamFilter;
     return true;
   });
@@ -202,9 +202,9 @@ export const ReportsAnalytics: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiBarChart2 />
@@ -213,7 +213,9 @@ export const ReportsAnalytics: React.FC = () => {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight">
-            {currentRole === 'TEAM_LEAD' ? 'Team Alpha Calling & Conversion Audit' : 'Enterprise Performance Reports'}
+            {currentRole === 'TEAM_LEAD'
+              ? `${currentUser.teamName || 'Team'} Calling & Conversion Audit`
+              : 'Enterprise Performance Reports'}
           </h1>
           <p className="text-[#64748B] text-xs sm:text-sm mt-1">
             Pipeline funnel, team conversion benchmarks and confirmed revenue for the selected period.
@@ -349,9 +351,9 @@ export const ReportsAnalytics: React.FC = () => {
       </div>
 
       {/* Conversion Funnel + Lead Sources */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Conversion Funnel Bar Graph */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-2xl space-y-5">
+        <div className="lg:col-span-2 glass-panel p-4 sm:p-5 rounded-2xl space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
               <FiTrendingUp className="text-[#059669]" />
@@ -447,7 +449,7 @@ export const ReportsAnalytics: React.FC = () => {
         </div>
 
         {/* Lead Source Effectiveness */}
-        <div className="glass-panel p-6 rounded-2xl space-y-4">
+        <div className="glass-panel p-4 sm:p-5 rounded-2xl space-y-4">
           <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
             <FiAward className="text-[#059669]" />
             <span>Conversion Rate By Source</span>
@@ -475,7 +477,7 @@ export const ReportsAnalytics: React.FC = () => {
       </div>
 
       {/* BDE Leaderboard */}
-      <div className="glass-panel rounded-2xl p-6 space-y-5">
+      <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
@@ -531,7 +533,7 @@ export const ReportsAnalytics: React.FC = () => {
                   </td>
                   <td className="py-3.5 px-4">
                     <div className="font-bold text-[#0F172A]">{bde.name}</div>
-                    <div className="text-[10px] text-[#64748B]">Team: {bde.teamId || 'Team Alpha'}</div>
+                    <div className="text-[10px] text-[#64748B]">Team: {teams.find((team) => team.id === bde.teamId)?.name || 'Unassigned'}</div>
                   </td>
                   <td className="py-3.5 px-4 text-center font-mono font-bold text-[#475569]">{bde.assignedCount}</td>
                   <td className="py-3.5 px-4 text-center font-mono font-bold text-[#059669]">{bde.convertedCount}</td>

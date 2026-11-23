@@ -222,9 +222,9 @@ export const LeadIngestion: React.FC = () => {
   });
 
   return (
-    <div className="space-y-5 sm:space-y-8">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUploadCloud className="text-sm" />
@@ -258,9 +258,9 @@ export const LeadIngestion: React.FC = () => {
       </div>
 
       {/* Upload & Duplicate Validation Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* CSV Ingestion */}
-        <div className="lg:col-span-2 glass-panel rounded-2xl p-6 space-y-4">
+        <div className="lg:col-span-2 glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
               <FiFileText className="text-[#059669]" />
@@ -271,7 +271,7 @@ export const LeadIngestion: React.FC = () => {
             </span>
           </div>
 
-          <div className="border-2 border-dashed border-[#CBD5E1] hover:border-[#10B981] rounded-2xl p-6 text-center transition-all bg-[#F8FAFC]">
+          <div className="border-2 border-dashed border-[#CBD5E1] hover:border-[#10B981] rounded-2xl p-4 sm:p-5 text-center transition-all bg-[#F8FAFC]">
             <FiUploadCloud className="mx-auto text-4xl text-[#059669] mb-2" />
             <h4 className="text-sm font-bold text-[#0F172A]">Import Candidate Master File</h4>
             <p className="text-xs text-[#64748B] max-w-md mx-auto mt-1 mb-1 font-medium">
@@ -361,7 +361,7 @@ export const LeadIngestion: React.FC = () => {
         </div>
 
         {/* Quick Add Single Candidate */}
-        <div className="glass-panel rounded-2xl p-6 space-y-4">
+        <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
           <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#10B981]" />
             <span>Quick Add Candidate</span>
@@ -410,7 +410,7 @@ export const LeadIngestion: React.FC = () => {
       </div>
 
       {/* Master Leads Ledger */}
-      <div className="glass-panel rounded-2xl p-6 space-y-4">
+      <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <FiLayers className="text-[#059669]" />
@@ -497,7 +497,7 @@ export const LeadIngestion: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">

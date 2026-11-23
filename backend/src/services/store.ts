@@ -37,8 +37,24 @@ export class DataStore {
     weeklyTargetLeads: 50,
     monthlyTargetLeads: 200,
     maxLeadsPerBde: 75,
-    shiftStartTime: '09:00',
+    shiftStartTime: '09:30',
     gracePeriodMinutes: 15,
+    allocationMethod: 'WORKLOAD_BASED',
+    workdayEndTime: '18:30',
+    halfDayThresholdHours: 4.5,
+    fullDayThresholdHours: 8,
+    followUpReminderMinutes: 30,
+    statuses: ['NEW', 'CONTACTED', 'INTERESTED', 'NOT_INTERESTED', 'FOLLOW_UP_REQUIRED', 'CONVERTED', 'NOT_REACHABLE', 'LOST'],
+    statusTransitions: {
+      NEW: ['CONTACTED'],
+      CONTACTED: ['INTERESTED', 'NOT_INTERESTED', 'NOT_REACHABLE', 'FOLLOW_UP_REQUIRED'],
+      INTERESTED: ['CONVERTED', 'LOST'],
+      NOT_INTERESTED: ['LOST'],
+      FOLLOW_UP_REQUIRED: ['CONTACTED', 'CONVERTED', 'LOST'],
+      CONVERTED: [],
+      NOT_REACHABLE: ['FOLLOW_UP_REQUIRED', 'LOST'],
+      LOST: [],
+    },
   };
   public auditLogs: AuditLogEntry[] = [];
 
@@ -76,7 +92,7 @@ export class DataStore {
         this.attendanceRecords = data.attendanceRecords || [];
         this.transactions = data.transactions || [];
         this.financialCalculationLogs = data.financialCalculationLogs || [];
-        this.settings = data.settings || this.settings;
+        this.settings = { ...this.settings, ...(data.settings || {}) };
         this.auditLogs = data.auditLogs || [];
         logger.info(`Loaded persistent database from ${this.dbFilePath}`);
         return;
@@ -113,8 +129,7 @@ export class DataStore {
   private seedDefaultData(): void {
     this.users = [
       { id: 'usr-1', name: 'Vikram Sharma', email: 'admin@leadflow.io', role: 'ADMIN', status: 'ACTIVE', phone: '+91 98111 00001', createdAt: '2026-01-01' },
-      { id: 'usr-2', name: 'Priya Patel', email: 'priya.tl@leadflow.io', role: 'TEAM_LEAD', status: 'ACTIVE', teamId: 'team-1', teamName: 'Team Alpha', phone: '+91 98222 00002', createdAt: '2026-01-10' },
-      { id: 'usr-3', name: 'Rajesh Verma', email: 'rajesh.tl@leadflow.io', role: 'TEAM_LEAD', status: 'ACTIVE', teamId: 'team-2', teamName: 'Team Beta', phone: '+91 98333 00003', createdAt: '2026-01-15' },
+      { id: 'usr-2', name: 'Priya Patel', email: 'priya.tl@leadflow.io', role: 'TEAM_LEAD', status: 'ACTIVE', teamId: 'team-1', teamName: 'Team Alpha & Beta', phone: '+91 98222 00002', createdAt: '2026-01-10' },
       { id: 'usr-4', name: 'Prasanth', email: 'prasanth.bde@leadflow.io', role: 'BDE', status: 'ACTIVE', teamId: 'team-1', teamName: 'Team Alpha', phone: '+91 98444 00004', createdAt: '2026-02-01' },
       { id: 'usr-5', name: 'Sneha Gupta', email: 'sneha.bde@leadflow.io', role: 'BDE', status: 'ACTIVE', teamId: 'team-1', teamName: 'Team Alpha', phone: '+91 98555 00005', createdAt: '2026-02-01' },
       { id: 'usr-6', name: 'Rohan Mehta', email: 'rohan.bde@leadflow.io', role: 'BDE', status: 'ACTIVE', teamId: 'team-2', teamName: 'Team Beta', phone: '+91 98666 00006', createdAt: '2026-02-05' },
@@ -122,8 +137,8 @@ export class DataStore {
     ];
 
     this.teams = [
-      { id: 'team-1', name: 'Team Alpha', teamLeadId: 'usr-2', teamLeadName: 'Priya Patel', bdeCount: 2, activeLeadsCount: 45, convertedLeadsCount: 12, status: 'ACTIVE', createdAt: '2026-01-10', updatedAt: '2026-02-01' },
-      { id: 'team-2', name: 'Team Beta', teamLeadId: 'usr-3', teamLeadName: 'Rajesh Verma', bdeCount: 2, activeLeadsCount: 38, convertedLeadsCount: 9, status: 'ACTIVE', createdAt: '2026-01-15', updatedAt: '2026-02-05' },
+      { id: 'team-1', name: 'Team Alpha', teamLeadId: 'usr-2', teamLeadName: 'Priya Patel', bdeCount: 0, activeLeadsCount: 0, convertedLeadsCount: 0, status: 'ACTIVE', createdAt: '2026-01-10', updatedAt: '2026-02-01' },
+      { id: 'team-2', name: 'Team Beta', teamLeadId: 'usr-2', teamLeadName: 'Priya Patel', bdeCount: 0, activeLeadsCount: 0, convertedLeadsCount: 0, status: 'ACTIVE', createdAt: '2026-01-15', updatedAt: '2026-02-05' },
     ];
 
     this.leads = [

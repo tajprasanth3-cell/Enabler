@@ -6,20 +6,10 @@ import {
   FiArrowRight,
   FiLock,
   FiMail,
-  FiShield,
-  FiUserCheck,
-  FiUsers,
   FiZap,
 } from 'react-icons/fi';
 import { useApp } from '../context/useApp';
 import { APP_ROUTES, ROLE_HOME_ROUTES } from '../utils/constants';
-import type { UserRole } from '../types';
-
-const roleOptions: Array<{ role: UserRole; label: string; icon: React.ReactNode; accent: string }> = [
-  { role: 'ADMIN', label: 'Admin', icon: <FiShield />, accent: '#10B981' },
-  { role: 'TEAM_LEAD', label: 'Team Lead', icon: <FiUsers />, accent: '#7C3AED' },
-  { role: 'BDE', label: 'BDE', icon: <FiUserCheck />, accent: '#0F766E' },
-];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
@@ -29,23 +19,18 @@ const fadeUp = {
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { users, isAuthenticated, login } = useApp();
+  const { isAuthenticated, login, currentRole } = useApp();
 
-  const [email, setEmail] = useState('admin@leadflow.io');
-  const [password, setPassword] = useState('demo1234');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('ADMIN');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const from = (location.state as { from?: string } | null)?.from;
 
   if (isAuthenticated) {
-    return <Navigate to={from || ROLE_HOME_ROUTES[selectedRole] || APP_ROUTES.ADMIN.DASHBOARD} replace />;
+    return <Navigate to={from || ROLE_HOME_ROUTES[currentRole] || APP_ROUTES.ADMIN.DASHBOARD} replace />;
   }
-
-  const demoAccounts = users
-    .filter((user) => user.status === 'ACTIVE' && roleOptions.some((option) => option.role === user.role))
-    .slice(0, 4);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -61,7 +46,7 @@ export const Login: React.FC = () => {
     }
 
     setSubmitting(true);
-    const result = await login(email, selectedRole);
+    const result = await login(email, password);
     setSubmitting(false);
 
     if (!result.ok) {
@@ -69,7 +54,7 @@ export const Login: React.FC = () => {
       return;
     }
 
-    navigate(from || ROLE_HOME_ROUTES[selectedRole] || APP_ROUTES.ADMIN.DASHBOARD, { replace: true });
+    navigate(from || ROLE_HOME_ROUTES[result.role || currentRole] || APP_ROUTES.ADMIN.DASHBOARD, { replace: true });
   };
 
   return (
@@ -92,14 +77,14 @@ export const Login: React.FC = () => {
         />
       </div>
 
-      <div className="relative mx-auto grid min-h-screen max-w-7xl gap-10 px-5 py-8 lg:grid-cols-2 lg:items-center lg:px-10 lg:py-12">
+      <div className="relative mx-auto grid min-h-screen max-w-7xl gap-8 px-5 py-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-8">
         <motion.div
           className="hidden lg:block"
           initial="hidden"
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
         >
-          <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="mb-8 flex items-center gap-3">
+          <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="mb-6 flex items-center gap-3">
             <motion.div
               className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#10B981] text-white shadow-xl"
               animate={{ rotate: [0, 8, 0, -8, 0] }}
@@ -135,7 +120,7 @@ export const Login: React.FC = () => {
             revenue reconciliation.
           </motion.p>
 
-          <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="mt-10 grid max-w-lg grid-cols-3 gap-3">
+          <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="mt-6 grid max-w-lg grid-cols-3 gap-3">
             {[
               { value: '3', label: 'Live roles' },
               { value: '10', label: 'API groups' },
@@ -159,7 +144,7 @@ export const Login: React.FC = () => {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto w-full max-w-md"
         >
-          <div className="rounded-3xl border border-white bg-white/85 p-6 shadow-2xl shadow-[#0F172A]/10 backdrop-blur-xl sm:p-8">
+          <div className="rounded-3xl border border-white bg-white/85 p-4 shadow-2xl shadow-[#0F172A]/10 backdrop-blur-xl sm:p-5">
             <motion.div
               initial="hidden"
               animate="visible"
@@ -178,35 +163,6 @@ export const Login: React.FC = () => {
               <motion.p variants={fadeUp} transition={{ duration: 0.4 }} className="mt-1 text-xs font-medium text-[#64748B]">
                 Sign in to continue to your workspace.
               </motion.p>
-
-              <motion.div variants={fadeUp} transition={{ duration: 0.4 }} className="mt-6 grid grid-cols-3 gap-2">
-                {roleOptions.map((option) => (
-                  <button
-                    key={option.role}
-                    type="button"
-                    onClick={() => {
-                      setSelectedRole(option.role);
-                      setError('');
-                    }}
-                    className={`relative flex flex-col items-center gap-1.5 rounded-2xl border px-2 py-3 text-[10px] font-bold transition-colors cursor-pointer ${
-                      selectedRole === option.role
-                        ? 'border-transparent text-white'
-                        : 'border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B] hover:border-[#A7F3D0]'
-                    }`}
-                  >
-                    {selectedRole === option.role && (
-                      <motion.span
-                        layoutId="role-highlight"
-                        className="absolute inset-0 rounded-2xl"
-                        style={{ backgroundColor: option.accent }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative text-base">{option.icon}</span>
-                    <span className="relative">{option.label}</span>
-                  </button>
-                ))}
-              </motion.div>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <motion.div variants={fadeUp} transition={{ duration: 0.4 }}>
@@ -228,7 +184,7 @@ export const Login: React.FC = () => {
                 </motion.div>
 
                 <motion.div variants={fadeUp} transition={{ duration: 0.4 }}>
-                  <label className="mb-1.5 block text-[11px] font-bold text-[#475569]">Password (demo)</label>
+                  <label className="mb-1.5 block text-[11px] font-bold text-[#475569]">Password</label>
                   <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 focus-within:border-[#10B981] focus-within:bg-white">
                     <FiLock className="text-[#94A3B8]" />
                     <input
@@ -240,7 +196,7 @@ export const Login: React.FC = () => {
                       }}
                       autoComplete="current-password"
                       className="w-full bg-transparent py-3 text-xs font-semibold text-[#0F172A] outline-none"
-                      placeholder="Any value works in this demo"
+                      placeholder="Enter your password"
                     />
                   </div>
                 </motion.div>
@@ -277,35 +233,15 @@ export const Login: React.FC = () => {
               </form>
 
               <motion.div variants={fadeUp} transition={{ duration: 0.4 }} className="mt-6 border-t border-[#E2E8F0] pt-5">
-                <div className="mb-3 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">
-                  Quick demo accounts
-                </div>
-                <div className="space-y-2">
-                  {demoAccounts.map((account) => (
-                    <motion.button
-                      key={account.id}
-                      type="button"
-                      whileHover={{ x: 3 }}
-                      onClick={() => {
-                        setEmail(account.email);
-                        setSelectedRole(account.role);
-                        setError('');
-                      }}
-                      className="flex w-full items-center justify-between rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-left transition-colors hover:border-[#A7F3D0] hover:bg-[#ECFDF5] cursor-pointer"
-                    >
-                      <span>
-                        <span className="block text-[11px] font-bold text-[#0F172A]">{account.name}</span>
-                        <span className="block text-[10px] font-medium text-[#64748B]">{account.email}</span>
-                      </span>
-                      <span className="rounded-md bg-[#F1F5F9] px-2 py-1 text-[9px] font-black text-[#475569]">
-                        {account.role.replace('_', ' ')}
-                      </span>
-                    </motion.button>
-                  ))}
-                </div>
-                <p className="mt-4 text-[10px] font-medium leading-relaxed text-[#94A3B8]">
-                  Demo sign-in: the password is not verified. The app connects to the local API when available and falls
-                  back to the offline directory otherwise.
+                <p className="text-[11px] font-medium leading-relaxed text-[#64748B]">
+                  Don&apos;t have an account?{' '}
+                  <a
+                    href="mailto:admin@leadflow.io?subject=Enabler%20Account%20Request"
+                    className="font-bold text-[#2563EB] hover:text-[#1D4ED8]"
+                  >
+                    Contact your administrator
+                  </a>
+                  .
                 </p>
               </motion.div>
             </motion.div>

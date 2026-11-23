@@ -61,6 +61,7 @@ export interface Lead {
   currentBdeName?: string | null;
   lastContactedAt?: string | null;
   nextFollowUpDate?: string | null;
+  dealValue?: number;
   createdAt: string;
   updatedAt?: string;
   remarksCount?: number;

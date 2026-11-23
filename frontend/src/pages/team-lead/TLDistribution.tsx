@@ -19,7 +19,6 @@ export const TLDistribution: React.FC = () => {
     leads,
     users,
     teams,
-    currentUser,
     systemSettings,
     allocateStage2TeamToBdes,
     replenishmentAlerts,
@@ -29,17 +28,22 @@ export const TLDistribution: React.FC = () => {
     clearPoolEscalation,
   } = useApp();
 
-  const userTeamId = currentUser.teamId || 'team-1';
-  const currentTeamName =
-    teams.find((team) => team.id === userTeamId)?.name || currentUser.teamName || 'Team Alpha';
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('ALL');
+
   const maxLeadsPerBde = systemSettings.maxLeadsPerBde;
 
-  const teamLeads = leads.filter((l) => l.currentTeamId === userTeamId);
+  const activeTeamIds = selectedTeamId === 'ALL' ? teams.map((t) => t.id) : [selectedTeamId];
+  const activeTeamName =
+    selectedTeamId === 'ALL'
+      ? 'All Teams (Team Alpha & Beta)'
+      : teams.find((t) => t.id === selectedTeamId)?.name || 'Team';
+
+  const teamLeads = leads.filter((l) => activeTeamIds.includes(l.currentTeamId || ''));
   const teamPoolLeads = teamLeads.filter(
     (l) => !l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)
   );
 
-  const teamBdes = users.filter((u) => u.teamId === userTeamId && u.role === 'BDE');
+  const teamBdes = users.filter((u) => activeTeamIds.includes(u.teamId || '') && u.role === 'BDE');
   const openLeadsForBde = (bdeId: string) =>
     leads.filter((l) => l.currentBdeId === bdeId && OPEN_LEAD_STATUSES.includes(l.status)).length;
   const bdeCapacity = (bdeId: string) => Math.max(0, maxLeadsPerBde - openLeadsForBde(bdeId));
@@ -51,7 +55,7 @@ export const TLDistribution: React.FC = () => {
     return '';
   };
 
-  const teamAlerts = replenishmentAlerts.filter((alert) => alert.teamId === userTeamId);
+  const teamAlerts = replenishmentAlerts.filter((alert) => activeTeamIds.includes(alert.teamId));
 
   const [actionStatus, setActionStatus] = useState('');
   const [actionError, setActionError] = useState('');
@@ -88,8 +92,9 @@ export const TLDistribution: React.FC = () => {
     setActionStatus('');
     setActionError('');
     if (teamPoolLeads.length === 0) {
-      escalatePoolEmpty(userTeamId);
-      setActionError(`${currentTeamName}'s pool is empty. Admin has been notified.`);
+      const targetTeamId = selectedTeamId === 'ALL' ? 'team-1' : selectedTeamId;
+      escalatePoolEmpty(targetTeamId);
+      setActionError(`${activeTeamName}'s pool is empty. Admin has been notified.`);
       return;
     }
     const eligibleIds = teamBdes.filter((b) => !bdeIneligibilityReason(b.id)).map((b) => b.id);
@@ -127,16 +132,28 @@ export const TLDistribution: React.FC = () => {
       }
     }
 
-    const allocated = allocateStage2TeamToBdes(
-      userTeamId,
-      eligibleIds,
-      batch,
-      allocationMethod,
-      allocationMethod === 'MANUAL' ? manualBatchQuotas : undefined
-    );
-    if (allocated > 0) {
-      setActionStatus(`Distributed ${allocated} leads to active BDEs.`);
-      clearPoolEscalation(userTeamId);
+    let totalAllocated = 0;
+    const targetTeams = selectedTeamId === 'ALL' ? teams : teams.filter((t) => t.id === selectedTeamId);
+    targetTeams.forEach((t) => {
+      const teamEligibleBdes = eligibleIds.filter((bId) => {
+        const b = users.find((u) => u.id === bId);
+        return b?.teamId === t.id;
+      });
+      if (teamEligibleBdes.length > 0) {
+        const count = allocateStage2TeamToBdes(
+          t.id,
+          teamEligibleBdes,
+          batch,
+          allocationMethod,
+          allocationMethod === 'MANUAL' ? manualBatchQuotas : undefined
+        );
+        totalAllocated += count;
+        clearPoolEscalation(t.id);
+      }
+    });
+
+    if (totalAllocated > 0) {
+      setActionStatus(`Distributed ${totalAllocated} leads to active BDEs.`);
       setShowStage2Modal(false);
     } else {
       setAllocationError('No leads were allocated. Check pool availability and BDE workload capacity.');
@@ -146,21 +163,27 @@ export const TLDistribution: React.FC = () => {
   const handleQuickReplenish = (bde: User) => {
     setActionStatus('');
     setActionError('');
-    if (bde.teamId !== userTeamId || bde.status !== 'ACTIVE') {
-      setActionError(`${bde.name} is not an active member of ${currentTeamName}.`);
+    const targetTeamId = bde.teamId || 'team-1';
+    const targetTeamPool = leads.filter(
+      (l) => l.currentTeamId === targetTeamId && !l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)
+    );
+
+    if (bde.status !== 'ACTIVE') {
+      setActionError(`${bde.name} is not an active BDE.`);
       return;
     }
-    if (teamPoolLeads.length === 0) {
-      escalatePoolEmpty(userTeamId);
-      setActionError(`${currentTeamName}'s pool is empty. Admin has been notified; no leads were added.`);
+    if (targetTeamPool.length === 0) {
+      escalatePoolEmpty(targetTeamId);
+      const tName = teams.find((t) => t.id === targetTeamId)?.name || 'Team';
+      setActionError(`${tName}'s pool is empty. Admin has been notified; no leads were added.`);
       return;
     }
-    const allocCount = Math.min(5, teamPoolLeads.length, bdeCapacity(bde.id));
+    const allocCount = Math.min(5, targetTeamPool.length, bdeCapacity(bde.id));
     if (allocCount <= 0) {
       setActionError(`${bde.name} is at the workload cap (${maxLeadsPerBde} open leads).`);
       return;
     }
-    const allocated = allocateStage2TeamToBdes(userTeamId, [bde.id], allocCount);
+    const allocated = allocateStage2TeamToBdes(targetTeamId, [bde.id], allocCount);
     if (allocated > 0) {
       setActionStatus(`Added ${allocated} lead${allocated === 1 ? '' : 's'} to ${bde.name}.`);
       clearReplenishmentAlert(bde.id);
@@ -195,23 +218,52 @@ export const TLDistribution: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Page Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div className="max-w-2xl min-w-0">
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUsers />
-            <span>Frontline Workforce Balancing</span>
+            <span>Frontline Workforce Balancing · Alpha &amp; Beta Governance</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
-            BDE Distribution & Workload Matrix
+            {activeTeamName}: BDE Distribution Matrix
           </h1>
           <p className="text-[#64748B] text-xs sm:text-sm mt-1 leading-relaxed">
-            Monitor real-time executive queue depth, distribute pooled leads, and reassign workloads during team leave.
+            Monitor executive queue depth, distribute pooled leads to BDEs, and reassign workloads during team leave.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+          {/* Team Switcher Tabs */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#F1F5F9] border border-[#E2E8F0] shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setSelectedTeamId('ALL')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                selectedTeamId === 'ALL'
+                  ? 'bg-white text-[#059669] shadow-xs'
+                  : 'text-[#64748B] hover:text-[#0F172A]'
+              }`}
+            >
+              All Teams
+            </button>
+            {teams.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setSelectedTeamId(t.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  selectedTeamId === t.id
+                    ? 'bg-white text-[#059669] shadow-xs'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+              >
+                {t.name}
+              </button>
+            ))}
+          </div>
+
           <button
             onClick={openReassignModal}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] text-xs font-bold shadow-xs cursor-pointer whitespace-nowrap"
@@ -398,7 +450,7 @@ export const TLDistribution: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
@@ -556,7 +608,7 @@ export const TLDistribution: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A]">Reassign Leads (Absence / Deactivation)</h3>

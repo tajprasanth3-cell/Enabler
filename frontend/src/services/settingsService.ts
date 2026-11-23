@@ -14,8 +14,16 @@ export const settingsService = {
     weeklyTargetLeads: number;
     monthlyTargetLeads: number;
     maxLeadsPerBde: number;
-    shiftStartTime: string;
+    allocationMethod: 'EQUAL' | 'WORKLOAD_BASED' | 'MANUAL';
+    workdayStartTime: string;
+    workdayEndTime: string;
     gracePeriodMinutes: number;
+    earlyExitGracePeriodMinutes: number;
+    halfDayThresholdHours: number;
+    fullDayThresholdHours: number;
+    followUpReminderMinutes: number;
+    statuses: string[];
+    statusTransitions: Record<string, string[]>;
   }>, actor?: any) => {
     return apiRequest<any>('/settings', {
       method: 'PATCH',

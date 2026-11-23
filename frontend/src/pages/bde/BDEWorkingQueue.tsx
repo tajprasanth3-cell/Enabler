@@ -134,7 +134,7 @@ export const BDEWorkingQueue: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -258,7 +258,7 @@ export const BDEWorkingQueue: React.FC = () => {
 
         {/* Empty State */}
         {filteredLeads.length === 0 && (
-          <div className="py-12 text-center text-xs text-[#64748B] space-y-2">
+          <div className="py-8 text-center text-xs text-[#64748B] space-y-2">
             <FiPhoneCall className="mx-auto text-3xl text-[#059669] opacity-60" />
             <div className="font-bold text-sm text-[#0F172A]">No candidates found</div>
             <p>Try resetting search filters or requesting additional leads from your Team Lead.</p>

@@ -229,7 +229,7 @@ export const BDEDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-7">
+    <div className="space-y-4 sm:space-y-5">
       {/* =========================================================================
           1. HEADER & GREETING BAR (Exact match to user screenshot)
           ========================================================================= */}
@@ -275,7 +275,7 @@ export const BDEDashboard: React.FC = () => {
       {/* =========================================================================
           2. HERO LIVE PUNCH CLOCK BANNER (Exact visual match to user screenshot in Titanium Graphite)
           ========================================================================= */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#0B1120] to-[#0F172A] p-6 sm:p-8 lg:p-10 shadow-xl text-white select-none border border-[#1E293B]">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#0B1120] to-[#0F172A] p-4 sm:p-5 lg:p-6 shadow-xl text-white select-none border border-[#1E293B]">
         {/* Soft Circular Indigo Glow Shapes */}
         <div className="w-64 h-64 rounded-full bg-[#10B981]/15 absolute -top-12 -right-8 pointer-events-none blur-2xl" />
         <div className="w-48 h-48 rounded-full bg-[#34D399]/10 absolute -bottom-16 -left-12 pointer-events-none blur-2xl" />
@@ -455,7 +455,7 @@ export const BDEDashboard: React.FC = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="space-y-6 overflow-hidden"
+            className="space-y-4 overflow-hidden"
           >
             {/* Section A: Target Progress Bar (Collapsible) */}
             <div className="glass-panel p-5 rounded-2xl space-y-4">
@@ -683,7 +683,7 @@ export const BDEDashboard: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
@@ -757,7 +757,7 @@ export const BDEDashboard: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
@@ -865,7 +865,7 @@ export const BDEDashboard: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">

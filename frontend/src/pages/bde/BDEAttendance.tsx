@@ -143,7 +143,7 @@ export const BDEAttendance: React.FC = () => {
     todayRecord?.status || (punchState === 'PUNCHED_IN' ? 'PRESENT' : punchState === 'PUNCHED_OUT' ? 'OFF SHIFT' : 'NOT PUNCHED');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -170,7 +170,7 @@ export const BDEAttendance: React.FC = () => {
       </div>
 
       {/* Hero Live Punch Clock Banner (Deep Titanium Graphite) */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#0B1120] to-[#0F172A] p-6 sm:p-8 lg:p-10 shadow-xl text-white select-none border border-[#1E293B]">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#0B1120] to-[#0F172A] p-4 sm:p-5 lg:p-6 shadow-xl text-white select-none border border-[#1E293B]">
         <div className="w-64 h-64 rounded-full bg-[#10B981]/15 absolute -top-12 -right-8 pointer-events-none blur-2xl" />
         <div className="w-48 h-48 rounded-full bg-[#34D399]/10 absolute -bottom-16 -left-12 pointer-events-none blur-2xl" />
 
@@ -295,7 +295,7 @@ export const BDEAttendance: React.FC = () => {
               ))}
               {myRecords.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-10 text-center text-xs text-[#64748B]">
+                  <td colSpan={5} className="py-8 text-center text-xs text-[#64748B]">
                     No attendance records found for your account yet.
                   </td>
                 </tr>
@@ -326,7 +326,7 @@ export const BDEAttendance: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">

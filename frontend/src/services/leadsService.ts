@@ -32,14 +32,14 @@ export const leadsService = {
     });
   },
 
-  allocateStage1: async (payload: { teamIds: string[]; countPerTeam: number; method: string; actor?: any }) => {
+  allocateStage1: async (payload: { teamIds: string[]; countPerTeam: number; method: string; teamQuotas?: Record<string, number>; actor?: any }) => {
     return apiRequest<{ allocated: number; countPerTeam: number }>('/leads/allocate/stage1', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
   },
 
-  allocateStage2: async (payload: { teamId: string; bdeIds: string[]; countPerBde: number; method?: string; manualQuotas?: Record<string, number>; actor?: any }) => {
+  allocateStage2: async (payload: { teamId: string; bdeIds: string[]; countPerBde: number; method?: string; manualQuotas?: Record<string, number>; distribution?: Record<string, number>; actor?: any }) => {
     return apiRequest<{ allocated: number; distribution: Record<string, number> }>('/leads/allocate/stage2', {
       method: 'POST',
       body: JSON.stringify(payload),

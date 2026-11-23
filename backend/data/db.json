@@ -21,17 +21,6 @@
       "createdAt": "2026-01-10"
     },
     {
-      "id": "usr-3",
-      "name": "Rajesh Verma",
-      "email": "rajesh.tl@leadflow.io",
-      "role": "TEAM_LEAD",
-      "status": "ACTIVE",
-      "teamId": "team-2",
-      "teamName": "Team Beta",
-      "phone": "+91 98333 00003",
-      "createdAt": "2026-01-15"
-    },
-    {
       "id": "usr-4",
       "name": "Prasanth",
       "email": "prasanth.bde@leadflow.io",
@@ -92,8 +81,8 @@
     {
       "id": "team-2",
       "name": "Team Beta",
-      "teamLeadId": "usr-3",
-      "teamLeadName": "Rajesh Verma",
+      "teamLeadId": "usr-2",
+      "teamLeadName": "Priya Patel",
       "bdeCount": 2,
       "activeLeadsCount": 38,
       "convertedLeadsCount": 9,
@@ -110,13 +99,14 @@
       "email": "rahul.v@gmail.com",
       "city": "Mumbai",
       "education": "B.Tech CS",
-      "status": "FOLLOW_UP_REQUIRED",
+      "status": "CONVERTED",
       "currentTeamId": "team-1",
       "currentTeamName": "Team Alpha",
       "currentBdeId": "usr-4",
       "currentBdeName": "Prasanth",
       "createdAt": "2026-02-10",
-      "nextFollowUpDate": "2026-11-26 10:00"
+      "nextFollowUpDate": "2026-11-26 10:00",
+      "remarks": "yes"
     },
     {
       "id": "lead-102",
@@ -230,10 +220,11 @@
       "status": "NEW",
       "currentTeamId": "team-2",
       "currentTeamName": "Team Beta",
-      "currentBdeId": null,
-      "currentBdeName": null,
+      "currentBdeId": "usr-6",
+      "currentBdeName": "Rohan Mehta",
       "createdAt": "2026-02-15",
-      "assignedToTeamAt": "2026-11-23T08:44:49.303Z"
+      "assignedToTeamAt": "2026-11-23T08:44:49.303Z",
+      "assignedToBdeAt": "2026-11-23T10:11:39.573Z"
     },
     {
       "id": "lead-110",
@@ -245,10 +236,11 @@
       "status": "NEW",
       "currentTeamId": "team-2",
       "currentTeamName": "Team Beta",
-      "currentBdeId": null,
-      "currentBdeName": null,
+      "currentBdeId": "usr-7",
+      "currentBdeName": "Ananya Sen",
       "createdAt": "2026-02-15",
-      "assignedToTeamAt": "2026-11-23T08:44:49.303Z"
+      "assignedToTeamAt": "2026-11-23T08:44:49.303Z",
+      "assignedToBdeAt": "2026-11-23T10:11:39.573Z"
     }
   ],
   "leadStatusHistory": [
@@ -261,6 +253,16 @@
       "changedByName": "Prasanth",
       "remarks": "Candidate enrolled in Full Stack Enterprise Program",
       "timestamp": "2026-02-14 11:30 AM"
+    },
+    {
+      "id": "hist-1795428661071",
+      "leadId": "lead-101",
+      "previousStatus": "FOLLOW_UP_REQUIRED",
+      "newStatus": "CONVERTED",
+      "changedById": "usr-4",
+      "changedByName": "Prasanth",
+      "remarks": "yes",
+      "timestamp": "11/23/2026, 3:41:01 PM"
     }
   ],
   "followUps": [
@@ -298,12 +300,12 @@
       "teamId": "team-1",
       "date": "2026-11-23",
       "punchInTime": "09:00 AM",
-      "punchOutTime": null,
-      "workingMinutes": 240,
+      "punchOutTime": "03:40 PM",
+      "workingMinutes": 400,
       "status": "PRESENT",
       "isModified": false,
       "createdAt": "2026-11-23T07:24:13.200Z",
-      "updatedAt": "2026-11-23T07:24:13.200Z"
+      "updatedAt": "2026-11-23T10:10:43.321Z"
     },
     {
       "id": "att-2",
@@ -318,6 +320,48 @@
       "isModified": false,
       "createdAt": "2026-11-23T07:24:13.200Z",
       "updatedAt": "2026-11-23T07:24:13.200Z"
+    },
+    {
+      "id": "att-1795428643827",
+      "userId": "usr-4",
+      "userName": "Prasanth",
+      "teamId": "team-1",
+      "date": "2026-11-23",
+      "punchInTime": "03:40 PM",
+      "punchOutTime": null,
+      "workingMinutes": 0,
+      "status": "LATE",
+      "isModified": false,
+      "createdAt": "2026-11-23T10:10:43.827Z",
+      "updatedAt": "2026-11-23T10:10:43.827Z"
+    },
+    {
+      "id": "att-1795428667177",
+      "userId": "usr-6",
+      "userName": "Rohan Mehta",
+      "teamId": "team-2",
+      "date": "2026-11-23",
+      "punchInTime": "03:41 PM",
+      "punchOutTime": null,
+      "workingMinutes": 0,
+      "status": "LATE",
+      "isModified": false,
+      "createdAt": "2026-11-23T10:11:07.177Z",
+      "updatedAt": "2026-11-23T10:11:07.177Z"
+    },
+    {
+      "id": "att-1795428682569",
+      "userId": "usr-7",
+      "userName": "Ananya Sen",
+      "teamId": "team-2",
+      "date": "2026-11-23",
+      "punchInTime": "03:41 PM",
+      "punchOutTime": null,
+      "workingMinutes": 0,
+      "status": "LATE",
+      "isModified": false,
+      "createdAt": "2026-11-23T10:11:22.569Z",
+      "updatedAt": "2026-11-23T10:11:22.569Z"
     }
   ],
   "transactions": [
@@ -372,9 +416,170 @@
     "monthlyTargetLeads": 200,
     "maxLeadsPerBde": 75,
     "shiftStartTime": "09:30",
-    "gracePeriodMinutes": 15
+    "gracePeriodMinutes": 15,
+    "allocationMethod": "WORKLOAD_BASED",
+    "workdayEndTime": "18:30",
+    "halfDayThresholdHours": 4.5,
+    "fullDayThresholdHours": 8,
+    "followUpReminderMinutes": 30,
+    "statuses": [
+      "NEW",
+      "CONTACTED",
+      "INTERESTED",
+      "NOT_INTERESTED",
+      "FOLLOW_UP_REQUIRED",
+      "CONVERTED",
+      "NOT_REACHABLE",
+      "LOST"
+    ],
+    "statusTransitions": {
+      "NEW": [
+        "CONTACTED"
+      ],
+      "CONTACTED": [
+        "INTERESTED",
+        "NOT_INTERESTED",
+        "NOT_REACHABLE",
+        "FOLLOW_UP_REQUIRED"
+      ],
+      "INTERESTED": [
+        "CONVERTED",
+        "LOST"
+      ],
+      "NOT_INTERESTED": [
+        "LOST"
+      ],
+      "FOLLOW_UP_REQUIRED": [
+        "CONTACTED",
+        "CONVERTED",
+        "LOST"
+      ],
+      "CONVERTED": [],
+      "NOT_REACHABLE": [
+        "FOLLOW_UP_REQUIRED",
+        "LOST"
+      ],
+      "LOST": []
+    }
   },
   "auditLogs": [
+    {
+      "id": "audit-1795428699575-367",
+      "action": "LEAD_ALLOCATED_STAGE2",
+      "category": "ALLOCATION",
+      "actorId": "usr-3",
+      "actorName": "Rajesh Verma",
+      "actorRole": "TEAM_LEAD",
+      "targetId": "team-2",
+      "targetType": "TEAM",
+      "summary": "Allocated 2 leads from Team Pool to 2 BDEs (exact distribution)",
+      "details": {
+        "teamId": "team-2",
+        "bdeIds": [
+          "usr-6",
+          "usr-7"
+        ],
+        "countPerBde": 2,
+        "distribution": {
+          "usr-6": 1,
+          "usr-7": 1
+        },
+        "method": "EQUAL",
+        "totalAllocated": 2,
+        "actorId": "usr-3"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T10:11:39.575Z"
+    },
+    {
+      "id": "audit-1795428682574-6",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-7",
+      "actorName": "Ananya Sen",
+      "actorRole": "BDE",
+      "targetId": "att-1795428682569",
+      "targetType": "ATTENDANCE",
+      "summary": "Ananya Sen punched in at 03:41 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "03:41 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T10:11:22.574Z"
+    },
+    {
+      "id": "audit-1795428667178-192",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "att-1795428667177",
+      "targetType": "ATTENDANCE",
+      "summary": "Rohan Mehta punched in at 03:41 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "03:41 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T10:11:07.178Z"
+    },
+    {
+      "id": "audit-1795428661073-253",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-4",
+      "actorName": "Prasanth",
+      "actorRole": "BDE",
+      "targetId": "lead-101",
+      "targetType": "LEAD",
+      "summary": "Lead Rahul Verma updated from FOLLOW_UP_REQUIRED to CONVERTED",
+      "details": {
+        "previousStatus": "FOLLOW_UP_REQUIRED",
+        "newStatus": "CONVERTED",
+        "remarks": "yes"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T10:11:01.073Z"
+    },
+    {
+      "id": "audit-1795428643828-10",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-4",
+      "actorName": "Prasanth",
+      "actorRole": "BDE",
+      "targetId": "att-1795428643827",
+      "targetType": "ATTENDANCE",
+      "summary": "Prasanth punched in at 03:40 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "03:40 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T10:10:43.828Z"
+    },
+    {
+      "id": "audit-1795428643327-840",
+      "action": "ATTENDANCE_PUNCH_OUT",
+      "category": "ATTENDANCE",
+      "actorId": "usr-4",
+      "actorName": "Prasanth",
+      "actorRole": "BDE",
+      "targetId": "att-1",
+      "targetType": "ATTENDANCE",
+      "summary": "Prasanth punched out at 03:40 PM (Duration: 400 mins)",
+      "details": {
+        "punchOutTime": "03:40 PM",
+        "workingMinutes": 400
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T10:10:43.327Z"
+    },
     {
       "id": "audit-1795425476021-4",
       "action": "SETTINGS_UPDATED",

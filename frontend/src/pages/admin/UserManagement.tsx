@@ -28,7 +28,7 @@ export const UserManagement: React.FC = () => {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPhone, setNewUserPhone] = useState('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('BDE');
-  const [newUserTeam, setNewUserTeam] = useState<string>(teams[0]?.id || 'team-1');
+  const [newUserTeam, setNewUserTeam] = useState<string>(teams[0]?.id || '');
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -109,9 +109,9 @@ export const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiUserCheck />
@@ -367,7 +367,7 @@ export const UserManagement: React.FC = () => {
       </div>
 
       {filteredUsers.length === 0 && (
-        <div className="glass-panel p-12 text-center rounded-2xl text-[#64748B]">
+        <div className="glass-panel p-6 text-center rounded-2xl text-[#64748B]">
           <FiUserX className="text-4xl mx-auto mb-2 text-[#059669]" />
           <h3 className="text-base font-bold text-[#0F172A]">No Employees Found</h3>
           <p className="text-xs mt-1">No employees matched your search query or filter parameters.</p>
@@ -380,7 +380,7 @@ export const UserManagement: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-md rounded-2xl p-6 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel bg-white w-full max-w-md rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">

@@ -3,12 +3,14 @@ import { db } from '../services/store';
 import { UserRole } from '../types';
 import { successResponse, errorResponse } from '../utils/response';
 import { AuditService } from '../services/audit.service';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export const getSettings = (req: Request, res: Response) => {
   return successResponse(res, db.settings, 'System settings retrieved successfully');
 };
 
-export const updateSettings = (req: Request, res: Response) => {
+export const updateSettings = (req: AuthenticatedRequest, res: Response) => {
+  const body = req.body;
   const {
     companySharePercentage,
     remainingSharePercentage,
@@ -20,14 +22,18 @@ export const updateSettings = (req: Request, res: Response) => {
     maxLeadsPerBde,
     shiftStartTime,
     gracePeriodMinutes,
-    actor,
-  } = req.body;
+    allocationMethod,
+    workdayEndTime,
+    halfDayThresholdHours,
+    fullDayThresholdHours,
+    followUpReminderMinutes,
+    statuses,
+    statusTransitions,
+  } = body;
 
-  const currentActor = actor || {
-    id: 'usr-1',
-    name: 'Vikram Sharma',
-    role: 'ADMIN' as UserRole,
-  };
+  const bodyActor = body.actor as { id: string; name: string; role: UserRole } | undefined;
+  const currentActor = req.user || bodyActor || null;
+  const auditActor = currentActor || { id: 'system', name: 'System', role: 'ADMIN' as UserRole };
 
   const oldSettings = { ...db.settings };
 
@@ -71,24 +77,71 @@ export const updateSettings = (req: Request, res: Response) => {
     db.settings.maxLeadsPerBde = Number(maxLeadsPerBde);
   }
 
-  if (shiftStartTime !== undefined) {
-    db.settings.shiftStartTime = String(shiftStartTime);
+  const effectiveShiftStart = shiftStartTime ?? body.workdayStartTime;
+  if (effectiveShiftStart !== undefined) {
+    db.settings.shiftStartTime = String(effectiveShiftStart);
   }
 
-  if (gracePeriodMinutes !== undefined) {
-    db.settings.gracePeriodMinutes = Number(gracePeriodMinutes);
+  const effectiveGrace = gracePeriodMinutes ?? body.lateGracePeriodMinutes;
+  if (effectiveGrace !== undefined) {
+    db.settings.gracePeriodMinutes = Number(effectiveGrace);
+  }
+
+  if (allocationMethod !== undefined) {
+    if (!['EQUAL', 'WORKLOAD_BASED', 'MANUAL'].includes(allocationMethod)) {
+      return errorResponse(res, 'Invalid allocationMethod', 400);
+    }
+    db.settings.allocationMethod = allocationMethod;
+  }
+
+  if (workdayEndTime !== undefined) {
+    db.settings.workdayEndTime = String(workdayEndTime);
+  }
+
+  if (halfDayThresholdHours !== undefined) {
+    db.settings.halfDayThresholdHours = Number(halfDayThresholdHours);
+  }
+
+  if (fullDayThresholdHours !== undefined) {
+    db.settings.fullDayThresholdHours = Number(fullDayThresholdHours);
+  }
+
+  if (followUpReminderMinutes !== undefined) {
+    db.settings.followUpReminderMinutes = Number(followUpReminderMinutes);
+  }
+
+  if (statuses !== undefined) {
+    if (!Array.isArray(statuses) || statuses.some((status) => typeof status !== 'string')) {
+      return errorResponse(res, 'statuses must be an array of status names', 400);
+    }
+    db.settings.statuses = [...new Set(statuses)];
+  }
+
+  if (statusTransitions !== undefined) {
+    if (!statusTransitions || typeof statusTransitions !== 'object' || Array.isArray(statusTransitions)) {
+      return errorResponse(res, 'statusTransitions must be an object', 400);
+    }
+    const normalized: Record<string, string[]> = {};
+    Object.entries(statusTransitions).forEach(([from, targets]) => {
+      if (!Array.isArray(targets) || targets.some((target) => typeof target !== 'string')) {
+        return;
+      }
+      normalized[from] = [...new Set(targets as string[])];
+    });
+    db.settings.statusTransitions = normalized;
   }
 
   AuditService.log(
     'SETTINGS_UPDATED',
     'SYSTEM',
-    currentActor,
-    `System governance settings updated by ${currentActor.name}`,
+    auditActor,
+    `System governance settings updated by ${auditActor.name}`,
     {
       targetType: 'SYSTEM_SETTINGS',
       details: {
         previous: oldSettings,
         updated: db.settings,
+        actorId: currentActor?.id ?? null,
       },
     }
   );

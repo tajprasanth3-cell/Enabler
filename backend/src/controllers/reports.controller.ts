@@ -44,7 +44,10 @@ export const getKpis = (req: Request, res: Response) => {
 
   // Attendance metrics for today
   const today = new Date().toISOString().split('T')[0];
-  const todayAttendance = db.attendanceRecords.filter((a) => a.date === today);
+  let todayAttendance = db.attendanceRecords.filter((a) => a.date === today);
+  if (teamId) {
+    todayAttendance = todayAttendance.filter((a) => a.teamId === teamId);
+  }
   const presentCount = todayAttendance.filter((a) => a.status === 'PRESENT').length;
   const lateCount = todayAttendance.filter((a) => a.status === 'LATE').length;
   const absentCount = todayAttendance.filter((a) => a.status === 'ABSENT').length;
@@ -132,7 +135,8 @@ export const getFunnel = (req: Request, res: Response) => {
 };
 
 export const getLeaderboard = (req: Request, res: Response) => {
-  const bdes = db.users.filter((u) => u.role === 'BDE');
+  const { teamId } = req.query;
+  const bdes = db.users.filter((u) => u.role === 'BDE' && (!teamId || u.teamId === teamId));
 
   const leaderboard = bdes.map((bde) => {
     const assignedLeads = db.leads.filter((l) => l.currentBdeId === bde.id);
@@ -168,7 +172,8 @@ export const getLeaderboard = (req: Request, res: Response) => {
 };
 
 export const getTeamPerformance = (req: Request, res: Response) => {
-  const performance = db.teams.map((team) => {
+  const { teamId } = req.query;
+  const performance = db.teams.filter((team) => !teamId || team.id === teamId).map((team) => {
     const teamLeads = db.leads.filter((l) => l.currentTeamId === team.id);
     const converted = teamLeads.filter((l) => l.status === 'CONVERTED').length;
     const teamTxs = db.transactions.filter((t) => t.teamId === team.id && t.status === 'CONFIRMED');

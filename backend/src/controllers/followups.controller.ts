@@ -54,10 +54,16 @@ export const createFollowUp = (req: Request, res: Response) => {
   if (!lead) {
     return errorResponse(res, 'Lead not found', 404);
   }
+  if (!lead.currentBdeId || !lead.currentBdeName) {
+    return errorResponse(res, 'Lead has no assigned BDE', 400);
+  }
+  if (actor?.role === 'BDE' && actor.id !== lead.currentBdeId) {
+    return errorResponse(res, 'Only the assigned BDE can create a follow-up', 403);
+  }
 
   const currentActor = actor || {
-    id: lead.currentBdeId || 'usr-4',
-    name: lead.currentBdeName || 'BDE User',
+    id: lead.currentBdeId,
+    name: lead.currentBdeName,
     role: 'BDE' as UserRole,
   };
 
