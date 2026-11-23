@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/useApp';
 import { motion } from 'framer-motion';
 import {
@@ -96,12 +96,8 @@ export const LeadIngestion: React.FC = () => {
 
   const unassignedCount = leads.filter((l) => !l.currentTeamId).length;
   const maxPerTeam = selectedTeams.length ? Math.floor(unassignedCount / selectedTeams.length) : 0;
-  const plannedAllocation = Math.min(selectedTeams.length * leadsPerTeam, unassignedCount);
-
-  useEffect(() => {
-    const cap = selectedTeams.length ? Math.floor(unassignedCount / selectedTeams.length) : 0;
-    setLeadsPerTeam((current) => Math.min(Math.max(0, current), cap));
-  }, [unassignedCount, selectedTeams]);
+  const effectiveLeadsPerTeam = Math.min(Math.max(0, leadsPerTeam), maxPerTeam);
+  const plannedAllocation = Math.min(selectedTeams.length * effectiveLeadsPerTeam, unassignedCount);
 
   const handleCsvFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -203,11 +199,11 @@ export const LeadIngestion: React.FC = () => {
 
   const handleExecuteStage1Allocation = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTeams.length || leadsPerTeam <= 0) {
+    if (!selectedTeams.length || effectiveLeadsPerTeam <= 0) {
       setAllocationError('Select at least one team and a per-team count above zero.');
       return;
     }
-    const allocated = allocateStage1AdminToTeams(selectedTeams, leadsPerTeam, allocMethod);
+    const allocated = allocateStage1AdminToTeams(selectedTeams, effectiveLeadsPerTeam, allocMethod);
     if (allocated <= 0) {
       setAllocationError('Allocation failed. Check the admin pool and your selection, then try again.');
       return;
@@ -553,9 +549,9 @@ export const LeadIngestion: React.FC = () => {
                   <input
                     type="number"
                     min="1"
-                    max={Math.floor(unassignedCount / Math.max(1, selectedTeams.length))}
-                    value={leadsPerTeam}
-                    onChange={(e) => setLeadsPerTeam(Number(e.target.value))}
+                    max={maxPerTeam}
+                    value={effectiveLeadsPerTeam}
+                    onChange={(e) => setLeadsPerTeam(Math.max(0, Number(e.target.value)))}
                     className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#2563EB] focus:bg-white"
                   />
                 </div>

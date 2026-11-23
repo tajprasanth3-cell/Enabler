@@ -1,4 +1,4 @@
-import React, { createContext, useEffect } from 'react';
+import React, { createContext, useCallback, useEffect } from 'react';
 import type {
   UserRole,
   User,
@@ -22,6 +22,13 @@ import confetti from 'canvas-confetti';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { DEFAULT_SYSTEM_SETTINGS, MAX_AUDIT_EVENTS, OPEN_LEAD_STATUSES } from '../utils/constants';
 import { formatClock, isFutureDateTime, parseClockToMinutes } from '../utils/calculations';
+import { leadsService } from '../services/leadsService';
+import { attendanceService } from '../services/attendanceService';
+import { financeService } from '../services/financeService';
+import { teamsService } from '../services/teamsService';
+import { usersService } from '../services/usersService';
+import { followupsService } from '../services/followupsService';
+import { settingsService } from '../services/settingsService';
 
 export type ThemeMode = 'royal-violet' | 'emerald-mint' | 'cyber-amber' | 'ocean-azure' | 'clean-light';
 
@@ -331,6 +338,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     document.documentElement.setAttribute('data-theme', currentTheme);
   }, [currentTheme]);
 
+  useEffect(() => {
+    const syncBackendData = async () => {
+      try {
+        const [leadsRes, teamsRes, usersRes, attRes, finRes, folRes, settsRes] = await Promise.allSettled([
+          leadsService.getLeads(),
+          teamsService.getTeams(),
+          usersService.getUsers(),
+          attendanceService.getRecords(),
+          financeService.getTransactions(),
+          followupsService.getFollowUps(),
+          settingsService.getSettings(),
+        ]);
+
+        if (usersRes.status === 'fulfilled' && usersRes.value?.users?.length) {
+          setUsers(usersRes.value.users as any);
+        }
+        if (teamsRes.status === 'fulfilled' && teamsRes.value?.teams?.length) {
+          setTeams(teamsRes.value.teams as any);
+        }
+        if (leadsRes.status === 'fulfilled' && leadsRes.value?.leads?.length) {
+          setLeads(leadsRes.value.leads as any);
+        }
+        if (attRes.status === 'fulfilled' && attRes.value?.records?.length) {
+          setAttendanceRecords(attRes.value.records as any);
+        }
+        if (finRes.status === 'fulfilled' && finRes.value?.transactions?.length) {
+          setTransactions(finRes.value.transactions as any);
+        }
+        if (folRes.status === 'fulfilled' && folRes.value?.followUps?.length) {
+          setFollowUps(folRes.value.followUps as any);
+        }
+        if (settsRes.status === 'fulfilled' && settsRes.value) {
+          setSystemSettings((prev) => ({
+            ...prev,
+            companySharePercentage: settsRes.value.companySharePercentage ?? prev.companySharePercentage,
+            remainingSharePercentage: settsRes.value.remainingSharePercentage ?? prev.remainingSharePercentage,
+            profitSharePercentage: settsRes.value.profitSharePercentage ?? prev.profitSharePercentage,
+            dailyTargetLeads: settsRes.value.dailyTargetLeads ?? prev.dailyTargetLeads,
+            weeklyTargetLeads: settsRes.value.weeklyTargetLeads ?? prev.weeklyTargetLeads,
+            monthlyTargetLeads: settsRes.value.monthlyTargetLeads ?? prev.monthlyTargetLeads,
+            maxLeadsPerBde: settsRes.value.maxLeadsPerBde ?? prev.maxLeadsPerBde,
+            lateGracePeriodMinutes: settsRes.value.gracePeriodMinutes ?? prev.lateGracePeriodMinutes,
+          }));
+        }
+      } catch (err) {
+        console.warn('Initial backend sync skipped; using persistent store', err);
+      }
+    };
+
+    syncBackendData();
+  }, [setAttendanceRecords, setFollowUps, setLeads, setSystemSettings, setTeams, setTransactions, setUsers]);
+
   const currentUser: User =
     users.find((user) => user.id === currentUserId && user.role === currentRole) ||
     users.find((user) => user.role === currentRole) ||
@@ -348,27 +407,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : 'NOT_PUNCHED';
   const punchInTime = formatClock(todayAttendance?.punchInTime);
 
-  const logAudit = (
-    action: AuditAction,
-    entityType: AuditEntityType,
-    entityId: string,
-    summary: string,
-    details?: Record<string, string | number | boolean | null | undefined>
-  ) => {
-    const event: AuditEvent = {
-      id: uid('audit'),
-      action,
-      entityType,
-      entityId,
-      summary,
-      details,
-      actorId: currentUser?.id || 'unknown',
-      actorName: currentUser?.name || 'Unknown user',
-      actorRole: currentRole,
-      timestamp: timestamp(),
-    };
-    setAuditEvents((prev) => [event, ...prev].slice(0, MAX_AUDIT_EVENTS));
-  };
+  const logAudit = useCallback(
+    (
+      action: AuditAction,
+      entityType: AuditEntityType,
+      entityId: string,
+      summary: string,
+      details?: Record<string, string | number | boolean | null | undefined>
+    ) => {
+      const event: AuditEvent = {
+        id: uid('audit'),
+        action,
+        entityType,
+        entityId,
+        summary,
+        details,
+        actorId: currentUser?.id || 'unknown',
+        actorName: currentUser?.name || 'Unknown user',
+        actorRole: currentRole,
+        timestamp: timestamp(),
+      };
+      setAuditEvents((prev) => [event, ...prev].slice(0, MAX_AUDIT_EVENTS));
+    },
+    [currentUser?.id, currentUser?.name, currentRole, setAuditEvents]
+  );
 
   useEffect(() => {
     const stale = attendanceRecords.filter(
@@ -396,7 +458,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         { status: 'MISSING_PUNCH_OUT' }
       )
     );
-  }, [attendanceRecords]);
+  }, [attendanceRecords, logAudit, setAttendanceRecords]);
 
   const setCurrentRole = (role: UserRole) => {
     if (role === currentRole) return;
@@ -471,6 +533,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     setLeads((prev) => [...prev, ...cleanLeads]);
+    leadsService.ingestLeads(cleanLeads as any, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => console.warn('Backend ingest sync:', e));
     logAudit('LEAD_INGEST', 'LEAD', 'pool', `Ingested ${added} leads; ${duplicates} duplicates skipped`, {
       added,
       duplicates,
@@ -526,6 +589,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
+    leadsService.allocateStage1({ teamIds, countPerTeam, method, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend stage1 sync:', e));
     logAudit('LEAD_ALLOCATE', 'LEAD', teamIds.join(','), `Allocated ${cursor} leads to ${teamIds.length} teams using ${method}`, {
       allocated: cursor,
       method,
@@ -613,6 +677,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
     setReplenishmentAlerts((prev) => prev.filter((alert) => !eligibleBdeIds.includes(alert.bdeId)));
+    leadsService.allocateStage2({ teamId, bdeIds: eligibleBdeIds, countPerBde, method: effectiveMethod, manualQuotas, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend stage2 sync:', e));
     logAudit('LEAD_ALLOCATE', 'LEAD', teamId, `Distributed ${allocated} leads to ${eligibleBdeIds.length} BDEs using ${effectiveMethod}`, {
       allocated,
       method: effectiveMethod,
@@ -695,6 +760,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (newStatus === 'CONVERTED') {
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }
+    leadsService.updateLeadStatus(leadId, {
+      status: newStatus,
+      remarks,
+      nextFollowUpDate: scheduleFollowUp ? new Date(scheduleFollowUp.time).toISOString() : undefined,
+      actor: { id: currentUser.id, name: currentUser.name, role: currentRole },
+    }).catch((e) => console.warn('Backend lead status sync:', e));
     return true;
   };
 
@@ -740,6 +811,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
     setReplenishmentAlerts((prev) => prev.filter((alert) => alert.bdeId !== fromBdeId));
+    leadsService.reassignLeads({ fromBdeId, toBdeId, reason, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend reassign sync:', e));
     logAudit('LEAD_REASSIGN', 'LEAD', fromBdeId, `Reassigned ${affected.length} leads to ${targetBde.name}`, {
       fromBdeId,
       toBdeId,
@@ -775,6 +847,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     logAudit('FOLLOW_UP_COMPLETE', 'FOLLOW_UP', followUpId, `Completed follow-up for ${followUp.candidateName}`, {
       leadId: followUp.leadId,
     });
+    followupsService.updateFollowUp(followUpId, { status: 'COMPLETED', actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend followup sync:', e));
     return true;
   };
 
@@ -809,6 +882,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       },
       ...prev,
     ]);
+    attendanceService.punchIn(currentUser.id, currentUser.name, currentUser.teamId || '').catch((e) => console.warn('Backend punchIn sync:', e));
     logAudit('ATTENDANCE_PUNCH_IN', 'ATTENDANCE', currentUser.id, `${currentUser.name} punched in at ${timeStr}`, {
       status,
       time: timeStr,
@@ -847,6 +921,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : record
       )
     );
+    attendanceService.punchOut(currentUser.id).catch((e) => console.warn('Backend punchOut sync:', e));
     logAudit('ATTENDANCE_PUNCH_OUT', 'ATTENDANCE', openRecord.id, `${currentUser.name} punched out at ${timeStr}`, {
       workedMinutes,
       status,
@@ -909,6 +984,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       previousPunchOutTime: record.punchOutTime,
       newPunchOutTime: revisedPunchOut,
     });
+    attendanceService.modifyAttendance(recordId, { status: newStatus, punchOutTime: revisedPunchOut || undefined, reason, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend attendance modify sync:', e));
     return true;
   };
 
@@ -963,6 +1039,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       netProfit,
     });
     confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+    financeService.createTransaction({
+      leadId,
+      candidateName: lead.candidateName,
+      bdeId: lead.currentBdeId || 'usr-4',
+      bdeName: lead.currentBdeName || 'BDE',
+      teamId: lead.currentTeamId || 'team-1',
+      teamName: lead.currentTeamName || 'Team Alpha',
+      grossAmount,
+      investmentCost,
+      notes,
+      actor: { id: currentUser.id, name: currentUser.name, role: currentRole },
+    }).catch((e) => console.warn('Backend finance tx sync:', e));
     return true;
   };
 
@@ -1090,6 +1178,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     logAudit('SETTINGS_UPDATE', 'SETTINGS', 'system', 'Updated system configuration', {
       keys: Object.keys(safePatch).join(', '),
     });
+    settingsService.updateSettings({
+      companySharePercentage: safePatch.companySharePercentage,
+      remainingSharePercentage: safePatch.remainingSharePercentage,
+      profitSharePercentage: safePatch.profitSharePercentage,
+      dailyTargetLeads: safePatch.dailyTargetLeads,
+      weeklyTargetLeads: safePatch.weeklyTargetLeads,
+      monthlyTargetLeads: safePatch.monthlyTargetLeads,
+      maxLeadsPerBde: safePatch.maxLeadsPerBde,
+      gracePeriodMinutes: safePatch.lateGracePeriodMinutes,
+      shiftStartTime: safePatch.workdayStartTime,
+    }, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => console.warn('Backend settings sync:', e));
   };
 
   const toggleUserStatus = (userId: string): boolean => {
@@ -1108,6 +1207,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newStatus: nextStatus,
       openLeads,
     });
+    usersService.toggleStatus(userId, { id: currentUser.id, name: currentUser.name, role: currentRole }).catch((e) => console.warn('Backend user toggle sync:', e));
     return true;
   };
 
@@ -1132,6 +1232,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setTeams((prev) => prev.map((item) => (item.id === team.id ? { ...item, teamLeadId: user.id, teamLeadName: user.name } : item)));
     }
     logAudit('USER_CREATE', 'USER', user.id, `Created ${role} ${user.name}`, { email: normalizedEmail, teamId: team?.id });
+    usersService.createUser({ name: name.trim(), email: normalizedEmail, role, teamId: team?.id, phone: phone?.trim(), actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend user create sync:', e));
     return true;
   };
 
@@ -1156,6 +1257,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map((user) => (user.id === teamLeadId ? { ...user, teamId: newTeam.id, teamName: newTeam.name } : user))
     );
     logAudit('TEAM_CREATE', 'TEAM', newTeam.id, `Created team ${newTeam.name}`, { teamLeadId });
+    teamsService.createTeam({ name: name.trim(), teamLeadId, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => console.warn('Backend team create sync:', e));
     return true;
   };
 
@@ -1242,6 +1344,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       },
       ...prev,
     ]);
+    leadsService.requestReplenishment({
+      bdeId: currentUser.id,
+      bdeName: currentUser.name,
+      teamId: currentUser.teamId || 'team-1',
+      teamName: currentUser.teamName || 'Team Alpha',
+      reason: 'Working queue exhausted',
+    }).catch((e) => console.warn('Backend replenish sync:', e));
   };
 
   const clearReplenishmentAlert = (bdeId: string) => {

@@ -828,22 +828,32 @@ export const FinancialManagement: React.FC = () => {
               <div className="p-3.5 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-1.5">
                 <div className="flex justify-between text-[#64748B]">
                   <span>Net Profit:</span>
-                  <span className="text-[#0F172A] font-bold">
-                    ₹{(txGrossAmount - txInvestmentCost).toLocaleString()}
-                  </span>
+                  <span className="text-[#0F172A] font-bold">₹{txProfitPreview.netProfit.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[#64748B]">
-                  <span>Company Share ({companySharePct}%):</span>
-                  <span className="text-[#2563EB] font-bold">
-                    ₹{((txGrossAmount * companySharePct) / 100).toLocaleString()}
-                  </span>
+                  <span>Company Share ({txSharePreview.companyPercentage}%):</span>
+                  <span className="text-[#2563EB] font-bold">₹{txSharePreview.companyShare.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[#64748B]">
-                  <span>Remaining Share ({100 - companySharePct}%):</span>
-                  <span className="text-[#64748B] font-bold">
-                    ₹{(txGrossAmount - (txGrossAmount * companySharePct) / 100).toLocaleString()}
-                  </span>
+                  <span>Remaining Share ({txSharePreview.remainingPercentage}%):</span>
+                  <span className="text-[#64748B] font-bold">₹{txSharePreview.remainingShare.toLocaleString()}</span>
                 </div>
+                {txProfitPreview.isProfitable && (
+                  <>
+                    <div className="flex justify-between text-[#64748B]">
+                      <span>Profit Split - Company ({systemSettings.profitSharePercentage}%):</span>
+                      <span className="text-[#2563EB] font-bold">
+                        ₹{txProfitPreview.companyProfitShare.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-[#64748B]">
+                      <span>Profit Split - Remaining:</span>
+                      <span className="text-[#64748B] font-bold">
+                        ₹{txProfitPreview.remainingProfitShare.toLocaleString()}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div>

@@ -44,6 +44,12 @@ export const TLDashboard: React.FC = () => {
     clearPoolEscalation,
   } = useApp();
 
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
   const userTeamId = currentUser.teamId || 'team-1';
   const currentTeamName =
     teams.find((team) => team.id === userTeamId)?.name || currentUser.teamName || userTeamId;
@@ -99,7 +105,7 @@ export const TLDashboard: React.FC = () => {
   const overdueFollowUps = followUps.filter((item) => {
     if (item.status !== 'PENDING' || !teamBdeIds.has(item.bdeId)) return false;
     const scheduled = new Date(item.scheduledTime).getTime();
-    return !Number.isNaN(scheduled) && scheduled < Date.now();
+    return !Number.isNaN(scheduled) && scheduled < nowMs;
   }).length;
 
   useEffect(() => {

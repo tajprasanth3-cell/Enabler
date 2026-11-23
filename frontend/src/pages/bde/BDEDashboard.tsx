@@ -39,6 +39,12 @@ export const BDEDashboard: React.FC = () => {
     submitLeaveRequest,
   } = useApp();
 
+  const [todayNow, setTodayNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setTodayNow(new Date()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Workbench Collapse States
   const [isWorkbenchCollapsed, setIsWorkbenchCollapsed] = useState(false);
   const [isMilestonesCollapsed, setIsMilestonesCollapsed] = useState(false);
@@ -58,7 +64,7 @@ export const BDEDashboard: React.FC = () => {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  }).format(new Date());
+  }).format(todayNow);
 
   useEffect(() => {
     const clockTimer = setInterval(() => {
@@ -151,7 +157,7 @@ export const BDEDashboard: React.FC = () => {
   const convertedLeads = myLeads.filter((l: Lead) => l.status === 'CONVERTED');
   const myConversionRate = calculateConversionRate(convertedLeads.length, myLeads.length);
 
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = todayNow.toISOString().slice(0, 10);
   const myHistoryToday = leadStatusHistory.filter((entry) => {
     if (entry.changedById !== currentUser.id) return false;
     const timestamp = new Date(entry.timestamp).getTime();
@@ -167,7 +173,7 @@ export const BDEDashboard: React.FC = () => {
     conversionTargetCount > 0 ? Math.min(100, Math.round((conversionsToday / conversionTargetCount) * 100)) : 0;
 
   const myFollowUps = followUps.filter((fol: FollowUpItem) => fol.bdeId === currentUser.id);
-  const endOfToday = new Date();
+  const endOfToday = new Date(todayNow);
   endOfToday.setHours(23, 59, 59, 999);
   const dueFollowUps = myFollowUps.filter((fol: FollowUpItem) => {
     if (fol.status !== 'PENDING' && fol.status !== 'OVERDUE') return false;

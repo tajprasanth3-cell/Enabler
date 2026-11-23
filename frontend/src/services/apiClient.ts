@@ -1,13 +1,13 @@
 /**
- * Centralized API client wrapper with auth header injection
+ * Enabler Centralized API Client Wrapper
  */
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
-export async function apiRequest<T>(
+export async function apiRequest<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem('leadflow_token');
+  const token = localStorage.getItem('enabler_token') || localStorage.getItem('leadflow_token');
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -25,5 +25,6 @@ export async function apiRequest<T>(
     throw new Error(errorData.message || `API Error: ${response.status} ${response.statusText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  return result.data !== undefined ? result.data : result;
 }

@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiTrendingUp, FiTarget } from 'react-icons/fi';
 import { useApp } from '../../context/useApp';
 import type { Lead } from '../../types';
 import { calculateConversionRate } from '../../utils/calculations';
 import { OPEN_LEAD_STATUSES } from '../../utils/constants';
+
+const INITIAL_NOW = new Date();
 
 const isCurrentMonth = (value: string, now: Date): boolean => {
   const date = new Date(value);
@@ -16,13 +18,18 @@ const isCurrentMonth = (value: string, now: Date): boolean => {
 
 export const BDEPerformance: React.FC = () => {
   const { leads, currentUser, systemSettings } = useApp();
+  const [now, setNow] = useState(INITIAL_NOW);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
   const myLeads = leads.filter((l: Lead) => l.currentBdeId === currentUser.id);
   const activeLeads = myLeads.filter((l: Lead) => OPEN_LEAD_STATUSES.includes(l.status));
   const convertedLeads = myLeads.filter((l: Lead) => l.status === 'CONVERTED');
   const interestedLeads = myLeads.filter((l: Lead) => l.status === 'INTERESTED');
 
-  const now = new Date();
   const monthlyLeads = myLeads.filter((l: Lead) => isCurrentMonth(l.createdAt, now));
   const monthlyConversions = monthlyLeads.filter((l: Lead) => l.status === 'CONVERTED');
   const monthlyConversionRate = calculateConversionRate(monthlyConversions.length, monthlyLeads.length);

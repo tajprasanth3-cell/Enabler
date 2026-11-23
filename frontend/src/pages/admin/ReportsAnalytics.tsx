@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../../context/useApp';
 import { motion } from 'framer-motion';
 import {
@@ -66,6 +66,12 @@ const getRangeStart = (range: DateRange): Date | null => {
 
 export const ReportsAnalytics: React.FC = () => {
   const { leads, users, teams, currentRole, currentUser, transactions } = useApp();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
   const [dateRange, setDateRange] = useState<DateRange>('ALL');
   const [teamFilter, setTeamFilter] = useState<string>(
     currentRole === 'TEAM_LEAD' ? currentUser.teamId || 'team-1' : 'ALL'
@@ -186,7 +192,7 @@ export const ReportsAnalytics: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `LeadFlow_Performance_Report_${Date.now()}.csv`);
+    link.setAttribute('download', `LeadFlow_Performance_Report_${now.getTime()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
