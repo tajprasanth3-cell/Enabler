@@ -7,6 +7,9 @@ import {
   FiLock,
   FiMail,
   FiZap,
+  FiKey,
+  FiCheckCircle,
+  FiX,
 } from 'react-icons/fi';
 import { useApp } from '../context/useApp';
 import { APP_ROUTES, ROLE_HOME_ROUTES } from '../utils/constants';
@@ -25,6 +28,9 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSubmitted, setForgotSubmitted] = useState(false);
 
   const from = (location.state as { from?: string } | null)?.from;
 
@@ -184,7 +190,20 @@ export const Login: React.FC = () => {
                 </motion.div>
 
                 <motion.div variants={fadeUp} transition={{ duration: 0.4 }}>
-                  <label className="mb-1.5 block text-[11px] font-bold text-[#475569]">Password</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[11px] font-bold text-[#475569]">Password</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForgotEmail(email);
+                        setForgotSubmitted(false);
+                        setShowForgotPassword(true);
+                      }}
+                      className="text-[11px] font-bold text-[#059669] hover:text-[#047857] hover:underline cursor-pointer"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
                   <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 focus-within:border-[#10B981] focus-within:bg-white">
                     <FiLock className="text-[#94A3B8]" />
                     <input
@@ -237,7 +256,7 @@ export const Login: React.FC = () => {
                   Don&apos;t have an account?{' '}
                   <a
                     href="mailto:admin@leadflow.io?subject=Enabler%20Account%20Request"
-                    className="font-bold text-[#2563EB] hover:text-[#1D4ED8]"
+                    className="font-bold text-[#059669] hover:text-[#047857]"
                   >
                     Contact your administrator
                   </a>
@@ -248,6 +267,120 @@ export const Login: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {showForgotPassword && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F172A]/50 backdrop-blur-xs">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+                    <FiKey className="text-base" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#0F172A]">Reset Your Password</h3>
+                    <p className="text-[10px] text-[#64748B]">Enabler Security &amp; Access Recovery</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(false)}
+                  className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F1F5F9] hover:text-[#0F172A] cursor-pointer"
+                >
+                  <FiX className="text-base" />
+                </button>
+              </div>
+
+              {!forgotSubmitted ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!forgotEmail.trim()) return;
+                    setForgotSubmitted(true);
+                  }}
+                  className="space-y-4"
+                >
+                  <p className="text-xs text-[#64748B] leading-relaxed">
+                    Enter the email address registered with your Enabler account to receive password recovery details.
+                  </p>
+
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-bold text-[#475569]">Registered Email</label>
+                    <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 focus-within:border-[#10B981] focus-within:bg-white">
+                      <FiMail className="text-[#94A3B8]" />
+                      <input
+                        type="email"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        placeholder="you@leadflow.io"
+                        required
+                        className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#0F172A] outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[11px] text-[#065F46] leading-relaxed">
+                    <span className="font-bold">Demo Quick Access:</span> All active demo accounts accept password <code className="font-bold font-mono px-1 py-0.5 rounded bg-white border border-[#A7F3D0] text-[#047857]">demo1234</code>.
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(false)}
+                      className="px-3.5 py-2 rounded-xl bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] text-xs font-bold cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold shadow-md cursor-pointer transition-all"
+                    >
+                      Send Reset Instructions
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-4 text-center py-2">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+                    <FiCheckCircle className="text-2xl" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#0F172A]">Reset Instructions Sent!</h4>
+                    <p className="text-xs text-[#64748B] mt-1 max-w-sm mx-auto leading-relaxed">
+                      If an account exists for <strong className="text-[#0F172A]">{forgotEmail}</strong>, password reset steps have been dispatched.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-xs text-[#475569] text-left">
+                    <div className="font-bold text-[#0F172A] mb-1">Instant Demo Sign-In:</div>
+                    <div className="text-[11px]">
+                      You can instantly sign in using the default credentials: password <span className="font-mono font-bold text-[#059669]">demo1234</span>.
+                    </div>
+                  </div>
+                  <div className="flex gap-2 justify-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPassword('demo1234');
+                        if (forgotEmail) setEmail(forgotEmail);
+                        setShowForgotPassword(false);
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold shadow-md cursor-pointer transition-all"
+                    >
+                      Fill &apos;demo1234&apos; &amp; Return to Sign In
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
