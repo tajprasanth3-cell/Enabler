@@ -178,7 +178,7 @@ export const Login: React.FC = () => {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto w-full max-w-md"
         >
-          <div className="rounded-3xl border border-white bg-white/95 p-4 shadow-2xl shadow-[#0F172A]/10 ring-1 ring-white/80 backdrop-blur-xl sm:p-5">
+          <div className="login-form-card rounded-3xl border border-white bg-white/90 p-4 shadow-2xl shadow-[#0F172A]/10 ring-1 ring-white/80 backdrop-blur-xl sm:p-5">
             <motion.div
               initial="hidden"
               animate="visible"
