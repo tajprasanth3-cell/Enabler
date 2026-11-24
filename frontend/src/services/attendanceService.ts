@@ -9,7 +9,7 @@ export interface BackendAttendance {
   punchInTime: string | null;
   punchOutTime: string | null;
   workingMinutes: number;
-  status: 'PRESENT' | 'LATE' | 'HALF_DAY' | 'ABSENT';
+  status: 'PRESENT' | 'LATE' | 'HALF_DAY' | 'ABSENT' | 'MISSING_PUNCH_OUT';
   isModified: boolean;
   modifiedBy?: string;
   modifiedReason?: string;
@@ -38,7 +38,7 @@ export const attendanceService = {
   },
 
   modifyAttendance: async (id: string, payload: { status?: string; punchOutTime?: string; reason: string; actor?: any }) => {
-    return apiRequest<BackendAttendance>(`/attendance/${id}`, {
+    return apiRequest<BackendAttendance>(`/attendance/${id}/modify`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });

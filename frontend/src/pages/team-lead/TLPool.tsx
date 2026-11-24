@@ -16,28 +16,38 @@ export const TLPool: React.FC = () => {
     leads,
     users,
     teams,
+    managedTeamIds,
     systemSettings,
     allocateStage2TeamToBdes,
     escalatePoolEmpty,
     clearPoolEscalation,
   } = useApp();
 
-  const [selectedTeamId, setSelectedTeamId] = useState<string>('team-1');
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('ALL');
 
   const maxLeadsPerBde = systemSettings.maxLeadsPerBde;
 
-  const activeTeamIds = selectedTeamId === 'ALL' ? teams.map((t) => t.id) : [selectedTeamId];
+  const managedTeams = teams.filter((team) => managedTeamIds.includes(team.id));
+  const managedTeamNames = managedTeams.map((team) => team.name);
+  const effectiveTeamIds =
+    selectedTeamId === 'ALL'
+      ? managedTeamIds
+      : managedTeamIds.includes(selectedTeamId)
+      ? [selectedTeamId]
+      : [];
   const activeTeamName =
     selectedTeamId === 'ALL'
-      ? 'All Teams (Alpha + Beta)'
-      : teams.find((t) => t.id === selectedTeamId)?.name || 'Team Alpha';
+      ? managedTeamNames.length > 0
+        ? `All Teams (${managedTeamNames.join(' & ')})`
+        : 'All Teams (Unassigned)'
+      : teams.find((t) => t.id === selectedTeamId)?.name || 'Unassigned';
 
-  const teamLeads = leads.filter((l) => activeTeamIds.includes(l.currentTeamId || ''));
+  const teamLeads = leads.filter((l) => effectiveTeamIds.includes(l.currentTeamId || ''));
   const teamPoolLeads = teamLeads.filter(
     (l) => !l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)
   );
 
-  const teamBdes = users.filter((u) => activeTeamIds.includes(u.teamId || '') && u.role === 'BDE');
+  const teamBdes = users.filter((u) => effectiveTeamIds.includes(u.teamId || '') && u.role === 'BDE');
   const openLeadsForBde = (bdeId: string) =>
     leads.filter((l) => l.currentBdeId === bdeId && OPEN_LEAD_STATUSES.includes(l.status)).length;
   const bdeCapacity = (bdeId: string) => Math.max(0, maxLeadsPerBde - openLeadsForBde(bdeId));
@@ -96,7 +106,15 @@ export const TLPool: React.FC = () => {
     setActionStatus('');
     setActionError('');
     if (teamPoolLeads.length === 0) {
-      escalatePoolEmpty(selectedTeamId === 'ALL' ? 'team-1' : selectedTeamId);
+      effectiveTeamIds.forEach((teamId) => {
+        const hasPool = leads.some(
+          (lead) =>
+            lead.currentTeamId === teamId &&
+            !lead.currentBdeId &&
+            OPEN_LEAD_STATUSES.includes(lead.status)
+        );
+        if (!hasPool) escalatePoolEmpty(teamId);
+      });
       setActionError(`${activeTeamName}'s pool is empty. Admin has been notified.`);
       return;
     }
@@ -137,22 +155,30 @@ export const TLPool: React.FC = () => {
 
     // Allocate per team if multiple teams selected
     let totalAllocated = 0;
-    const targetTeams = selectedTeamId === 'ALL' ? teams : teams.filter((t) => t.id === selectedTeamId);
+    const targetTeams = selectedTeamId === 'ALL' ? managedTeams : managedTeams.filter((t) => t.id === selectedTeamId);
     targetTeams.forEach((t) => {
       const teamEligibleBdes = eligibleIds.filter((bId) => {
         const b = users.find((u) => u.id === bId);
         return b?.teamId === t.id;
       });
       if (teamEligibleBdes.length > 0) {
+        const teamPoolCount = leads.filter(
+          (lead) =>
+            lead.currentTeamId === t.id &&
+            !lead.currentBdeId &&
+            OPEN_LEAD_STATUSES.includes(lead.status)
+        ).length;
+        const teamCapacity = teamEligibleBdes.reduce((sum, id) => sum + bdeCapacity(id), 0);
+        const teamBatch = Math.max(1, Math.min(batch, teamPoolCount, teamCapacity));
         const count = allocateStage2TeamToBdes(
           t.id,
           teamEligibleBdes,
-          batch,
+          teamBatch,
           allocationMethod,
           allocationMethod === 'MANUAL' ? manualBatchQuotas : undefined
         );
         totalAllocated += count;
-        clearPoolEscalation(t.id);
+        if (count > 0) clearPoolEscalation(t.id);
       }
     });
 
@@ -165,31 +191,42 @@ export const TLPool: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 sm:space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
-        <div className="max-w-2xl min-w-0">
-          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
+      <div className="flex flex-col gap-4 border-b border-[#E2E8F0] pb-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#059669]">
             <FiLayers />
-            <span>Lead Inventory &amp; Pool Governance · Alpha &amp; Beta Governance</span>
+            <span>Lead Inventory &amp; Pool Governance · {managedTeamNames.join(' & ') || 'Unassigned'}</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
+          <h1 className="break-words text-2xl font-black leading-tight tracking-tight text-[#0F172A] sm:text-3xl">
             {activeTeamName} Lead Pool
           </h1>
-          <p className="text-[#64748B] text-xs sm:text-sm mt-1 leading-relaxed">
+          <p className="mt-1 text-xs leading-relaxed text-[#64748B] sm:text-sm">
             Browse and search candidate leads allocated from Admin Master Pool, waiting for Stage 2 distribution to BDEs.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 shrink-0 self-start lg:self-center">
           {/* Team Switcher Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#F1F5F9] border border-[#E2E8F0] shadow-2xs">
-            {teams.map((t) => (
+          <div className="inline-flex items-center gap-1 rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] p-1 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setSelectedTeamId('ALL')}
+              className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer ${
+                selectedTeamId === 'ALL'
+                  ? 'bg-white text-[#059669] shadow-xs'
+                  : 'text-[#64748B] hover:text-[#0F172A]'
+              }`}
+            >
+              All Pools
+            </button>
+            {managedTeams.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setSelectedTeamId(t.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer ${
                   selectedTeamId === t.id
                     ? 'bg-white text-[#059669] shadow-xs'
                     : 'text-[#64748B] hover:text-[#0F172A]'
@@ -198,22 +235,16 @@ export const TLPool: React.FC = () => {
                 {t.name}
               </button>
             ))}
-            <button
-              type="button"
-              onClick={() => setSelectedTeamId('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedTeamId === 'ALL'
-                  ? 'bg-white text-[#059669] shadow-xs'
-                  : 'text-[#64748B] hover:text-[#0F172A]'
-              }`}
-            >
-              All Pools
-            </button>
           </div>
 
           <button
             onClick={openStage2Modal}
-            className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl shimmer-button text-white font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
+            disabled={teamPoolLeads.length === 0}
+            className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold text-white shadow-md transition-colors ${
+              teamPoolLeads.length === 0
+                ? 'bg-[#94A3B8] cursor-not-allowed opacity-75'
+                : 'shimmer-button cursor-pointer'
+            }`}
           >
             <FiSend />
             <span>Batch Allocate to BDEs ({teamPoolLeads.length} Available)</span>
@@ -224,7 +255,7 @@ export const TLPool: React.FC = () => {
       {/* Action Banner */}
       {(actionStatus || actionError) && (
         <div
-          className={`p-3.5 rounded-xl text-xs font-semibold border flex items-center justify-between ${
+          className={`flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-xs font-semibold sm:px-5 ${
             actionError
               ? 'bg-[#FEF2F2] border-[#FECACA] text-[#B91C1C]'
               : 'bg-[#ECFDF5] border-[#A7F3D0] text-[#047857]'
@@ -244,7 +275,7 @@ export const TLPool: React.FC = () => {
       )}
 
       {/* Search & Filter Bar */}
-      <div className="glass-panel p-4 rounded-2xl border border-[#CBD5E1] bg-white flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between shadow-xs">
+      <div className="glass-panel flex flex-col gap-3 rounded-2xl border border-[#CBD5E1] bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div className="relative flex-1">
           <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
           <input
@@ -275,7 +306,7 @@ export const TLPool: React.FC = () => {
 
       {/* Pool Table */}
       <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white overflow-hidden shadow-xs">
-        <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
+        <div className="flex flex-col gap-3 border-b border-[#E2E8F0] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
             <FiLayers className="text-[#059669]" />
             <span>Unassigned Pool Candidates ({filteredPoolLeads.length} Leads)</span>
@@ -286,33 +317,33 @@ export const TLPool: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[960px] border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                <th className="py-3 px-4">Candidate Name</th>
-                <th className="py-3 px-4">Contact Phone</th>
-                <th className="py-3 px-4">Email</th>
-                <th className="py-3 px-4">Location</th>
-                <th className="py-3 px-4">Education / Program</th>
-                <th className="py-3 px-4">Acquisition Channel</th>
-                <th className="py-3 px-4 text-center">Status</th>
+              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
+                <th className="px-4 py-3.5 sm:px-5">Candidate Name</th>
+                <th className="px-4 py-3.5 sm:px-5">Contact Phone</th>
+                <th className="px-4 py-3.5 sm:px-5">Email</th>
+                <th className="px-4 py-3.5 sm:px-5">Location</th>
+                <th className="px-4 py-3.5 sm:px-5">Education / Program</th>
+                <th className="px-4 py-3.5 sm:px-5">Acquisition Channel</th>
+                <th className="px-4 py-3.5 sm:px-5 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
               {filteredPoolLeads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-[#F8FAFC] transition-colors">
-                  <td className="py-3 px-4 font-bold text-[#0F172A]">{lead.candidateName}</td>
-                  <td className="py-3 px-4 font-mono text-[#475569]">{lead.phone}</td>
-                  <td className="py-3 px-4 text-[#64748B]">{lead.email || '—'}</td>
-                  <td className="py-3 px-4 text-[#64748B]">{lead.city || 'India'}</td>
-                  <td className="py-3 px-4 font-medium text-[#0F172A]">{lead.education || 'Graduate'}</td>
-                  <td className="py-3 px-4">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+                  <td className="px-4 py-3.5 sm:px-5 font-bold text-[#0F172A]">{lead.candidateName}</td>
+                  <td className="px-4 py-3.5 sm:px-5 font-mono text-[#475569]">{lead.phone}</td>
+                  <td className="px-4 py-3.5 sm:px-5 text-[#64748B]">{lead.email || '—'}</td>
+                  <td className="px-4 py-3.5 sm:px-5 text-[#64748B]">{lead.city || 'India'}</td>
+                  <td className="px-4 py-3.5 sm:px-5 font-medium text-[#0F172A]">{lead.education || 'Graduate'}</td>
+                  <td className="px-4 py-3.5 sm:px-5">
+                    <span className="rounded-full px-2.5 py-1 text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
                       {lead.source || 'Website'}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+                  <td className="px-4 py-3.5 sm:px-5 text-center">
+                    <span className="rounded-full px-2.5 py-1 text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
                       Ready in Pool
                     </span>
                   </td>
@@ -323,7 +354,7 @@ export const TLPool: React.FC = () => {
         </div>
 
         {filteredPoolLeads.length === 0 && (
-          <div className="p-6 text-center text-[#64748B] text-xs">
+          <div className="border-t border-[#E2E8F0] px-5 py-10 text-center text-xs text-[#64748B]">
             No leads in the team pool matched your filters.
           </div>
         )}
@@ -335,23 +366,23 @@ export const TLPool: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel w-full max-w-lg space-y-5 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-2xl sm:p-6"
           >
-            <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] pb-4">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
                 <FiSend className="text-[#059669]" />
                 <span>Distribute Leads to Team BDEs</span>
               </h3>
               <button
                 onClick={() => setShowStage2Modal(false)}
-                className="text-[#64748B] hover:text-[#0F172A] text-lg font-bold cursor-pointer"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg font-bold text-[#64748B] cursor-pointer hover:text-[#0F172A]"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleExecuteStage2} className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] font-semibold">
+              <div className="rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-4 font-semibold text-[#065F46]">
                 Available in Pool: <strong>{teamPoolLeads.length} leads</strong>
               </div>
 
@@ -379,7 +410,7 @@ export const TLPool: React.FC = () => {
                     return (
                       <label
                         key={b.id}
-                        className={`flex flex-wrap items-center gap-2.5 p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] transition-colors ${
+                        className={`flex flex-wrap items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 transition-colors ${
                           reason ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-white'
                         }`}
                       >
@@ -436,7 +467,7 @@ export const TLPool: React.FC = () => {
                     return (
                       <div
                         key={id}
-                        className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]"
+                        className="flex items-center justify-between gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5"
                       >
                         <div>
                           <div className="font-bold text-[#0F172A]">{bde.name}</div>
@@ -467,7 +498,7 @@ export const TLPool: React.FC = () => {
                 </p>
               )}
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+              <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
                 <button
                   type="button"
                   onClick={() => setShowStage2Modal(false)}

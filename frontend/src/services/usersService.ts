@@ -31,4 +31,11 @@ export const usersService = {
       body: JSON.stringify({ actor }),
     });
   },
+
+  reassignTeam: async (userId: string, teamId?: string, actor?: any) => {
+    return apiRequest<BackendUser>(`/users/${userId}/reassign-team`, {
+      method: 'PATCH',
+      body: JSON.stringify({ teamId, actor }),
+    });
+  },
 };

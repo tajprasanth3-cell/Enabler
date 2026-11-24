@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { apiRequest } from '../services/apiClient';
 import type {
   UserRole,
@@ -30,6 +30,7 @@ import { teamsService } from '../services/teamsService';
 import { usersService } from '../services/usersService';
 import { followupsService } from '../services/followupsService';
 import { settingsService } from '../services/settingsService';
+import { AppContext } from './AppContextDefinition';
 
 export type ThemeMode = 'royal-violet' | 'emerald-mint' | 'cyber-amber' | 'ocean-azure' | 'clean-light';
 export type AppNotificationType = 'error' | 'warning' | 'success';
@@ -69,6 +70,18 @@ export interface PoolEscalation {
   timestamp: string;
 }
 
+export interface AssignmentNotification {
+  id: string;
+  bdeId: string;
+  bdeName: string;
+  teamId?: string;
+  teamName?: string;
+  count: number;
+  assignedByName: string;
+  reason: string;
+  timestamp: string;
+}
+
 export interface AppContextType {
   currentTheme: ThemeMode;
   setCurrentTheme: (theme: ThemeMode) => void;
@@ -83,8 +96,8 @@ export interface AppContextType {
 
   currentUser: User;
   currentRole: UserRole;
-  setCurrentRole: (role: UserRole) => void;
   switchUser: (userId: string) => ActionResult;
+  managedTeamIds: string[];
 
   teams: Team[];
   users: User[];
@@ -153,7 +166,7 @@ export interface AppContextType {
     transactionId: string,
     status: FinancialTransaction['status'],
     notes?: string
-  ) => void;
+  ) => boolean;
   logFinancialCalculation: (
     calcType: FinancialCalculationLog['calcType'],
     inputValues: Record<string, number | string>,
@@ -165,6 +178,8 @@ export interface AppContextType {
   requestLeadReplenishment: () => ActionResult;
   replenishmentAlerts: Array<{ bdeId: string; bdeName: string; teamId: string; timestamp: string }>;
   clearReplenishmentAlert: (bdeId: string) => void;
+  assignmentNotifications: AssignmentNotification[];
+  dismissAssignmentNotification: (id: string) => void;
 
   reports: ReportSubmission[];
   leaveRequests: LeaveRequest[];
@@ -174,8 +189,6 @@ export interface AppContextType {
   escalatePoolEmpty: (teamId: string) => void;
   clearPoolEscalation: (teamId: string) => void;
 }
-
-export const AppContext = createContext<AppContextType | null>(null);
 
 const asArray = <T,>(value: unknown, key: string): T[] => {
   if (Array.isArray(value)) return value as T[];
@@ -206,10 +219,16 @@ const INITIAL_LEADS: Lead[] = [
   { id: 'lead-104', candidateName: 'Kavita Joshi', phone: '+91 97665 44332', email: 'kavita.j@gmail.com', city: 'Pune', education: 'B.Com', status: 'FOLLOW_UP_REQUIRED', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', nextFollowUpDate: '2026-11-25 14:00', createdAt: '2026-02-12' },
   { id: 'lead-105', candidateName: 'Manish Pandey', phone: '+91 91234 56789', email: 'manish.p@gmail.com', city: 'Hyderabad', education: 'MCA', status: 'CONVERTED', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-4', currentBdeName: 'Prasanth', dealValue: 50000, createdAt: '2026-02-08' },
   { id: 'lead-106', candidateName: 'Simran Kaur', phone: '+91 98450 99887', email: 'simran.k@live.com', city: 'Chandigarh', education: 'B.Tech IT', status: 'NOT_REACHABLE', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: 'usr-5', currentBdeName: 'Sneha Gupta', createdAt: '2026-02-13' },
-  { id: 'lead-107', candidateName: 'Aditya Rao', phone: '+91 95544 33221', email: 'aditya.rao@gmail.com', city: 'Chennai', education: 'B.Sc Data', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: null, currentBdeName: null, createdAt: '2026-02-14' },
-  { id: 'lead-108', candidateName: 'Pooja Hegde', phone: '+91 96677 88990', email: 'pooja.h@gmail.com', city: 'Ahmedabad', education: 'B.Tech ECE', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: null, currentBdeName: null, createdAt: '2026-02-14' },
-  { id: 'lead-109', candidateName: 'Naveen Kumar', phone: '+91 94433 22110', email: 'naveen.k@gmail.com', city: 'Kolkata', education: 'BCA', status: 'NEW', currentTeamId: null, currentTeamName: null, currentBdeId: null, currentBdeName: null, createdAt: '2026-02-15' },
-  { id: 'lead-110', candidateName: 'Shreya Roy', phone: '+91 93322 11009', email: 'shreya.r@gmail.com', city: 'Jaipur', education: 'BA English', status: 'NEW', currentTeamId: null, currentTeamName: null, currentBdeId: null, currentBdeName: null, createdAt: '2026-02-15' },
+  { id: 'lead-107', candidateName: 'Aditya Rao', phone: '+91 95544 33221', email: 'aditya.rao@gmail.com', city: 'Chennai', education: 'B.Sc Data', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: null, currentBdeName: null, source: 'LinkedIn Inbound', createdAt: '2026-02-14' },
+  { id: 'lead-108', candidateName: 'Pooja Hegde', phone: '+91 96677 88990', email: 'pooja.h@gmail.com', city: 'Ahmedabad', education: 'B.Tech ECE', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: null, currentBdeName: null, source: 'Google Ads Search', createdAt: '2026-02-14' },
+  { id: 'lead-109', candidateName: 'Naveen Kumar', phone: '+91 94433 22110', email: 'naveen.k@gmail.com', city: 'Kolkata', education: 'BCA', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: null, currentBdeName: null, source: 'Meta Portal', createdAt: '2026-02-15' },
+  { id: 'lead-110', candidateName: 'Shreya Roy', phone: '+91 93322 11009', email: 'shreya.r@gmail.com', city: 'Jaipur', education: 'BA English', status: 'NEW', currentTeamId: 'team-1', currentTeamName: 'Team Alpha', currentBdeId: null, currentBdeName: null, source: 'Direct Website', createdAt: '2026-02-15' },
+  { id: 'lead-111', candidateName: 'Siddharth Nair', phone: '+91 98777 11223', email: 'siddharth.n@gmail.com', city: 'Kochi', education: 'B.Tech Mechanical', status: 'NEW', currentTeamId: 'team-2', currentTeamName: 'Team Beta', currentBdeId: null, currentBdeName: null, source: 'Google Ads Search', createdAt: '2026-02-15' },
+  { id: 'lead-112', candidateName: 'Meera Nambiar', phone: '+91 97888 22334', email: 'meera.n@outlook.com', city: 'Trivandrum', education: 'B.Sc Computer Science', status: 'NEW', currentTeamId: 'team-2', currentTeamName: 'Team Beta', currentBdeId: null, currentBdeName: null, source: 'LinkedIn Inbound', createdAt: '2026-02-16' },
+  { id: 'lead-113', candidateName: 'Vikramaditya Sen', phone: '+91 96999 33445', email: 'vikram.sen@gmail.com', city: 'Delhi', education: 'B.Com Honours', status: 'NEW', currentTeamId: 'team-2', currentTeamName: 'Team Beta', currentBdeId: null, currentBdeName: null, source: 'Meta Portal', createdAt: '2026-02-16' },
+  { id: 'lead-114', candidateName: 'Ritika Sharma', phone: '+91 95444 88776', email: 'ritika.s@gmail.com', city: 'Lucknow', education: 'BBA Marketing', status: 'NEW', currentTeamId: 'team-2', currentTeamName: 'Team Beta', currentBdeId: null, currentBdeName: null, source: 'Referral Partner', createdAt: '2026-02-17' },
+  { id: 'lead-115', candidateName: 'Farhan Akhtar', phone: '+91 94333 77665', email: 'farhan.a@gmail.com', city: 'Bhopal', education: 'B.Tech IT', status: 'NEW', currentTeamId: null, currentTeamName: null, currentBdeId: null, currentBdeName: null, source: 'Direct Website', createdAt: '2026-02-17' },
+  { id: 'lead-116', candidateName: 'Divya Agarwal', phone: '+91 93222 66554', email: 'divya.a@yahoo.com', city: 'Indore', education: 'MBA HR', status: 'NEW', currentTeamId: null, currentTeamName: null, currentBdeId: null, currentBdeName: null, source: 'Google Ads Search', createdAt: '2026-02-18' },
 ];
 
 const INITIAL_STATUS_HISTORY: LeadStatusHistory[] = [
@@ -341,7 +360,7 @@ function distribute(total: number, weights: number[]): number[] {
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentTheme, setCurrentTheme] = usePersistentState<ThemeMode>('theme', 'royal-violet');
-  const [authToken, setAuthToken] = usePersistentState<string>('authToken', '');
+  const [authToken, setAuthToken] = useState<string>(() => localStorage.getItem('enabler_token') || '');
   const [currentRole, setCurrentRoleState] = usePersistentState<UserRole>('currentRole', 'ADMIN');
   const [currentUserId, setCurrentUserId] = usePersistentState<string>('currentUserId', INITIAL_USERS[0].id);
   const [users, setUsers] = usePersistentState<User[]>('users', INITIAL_USERS);
@@ -362,6 +381,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [reports, setReports] = usePersistentState<ReportSubmission[]>('reports', []);
   const [leaveRequests, setLeaveRequests] = usePersistentState<LeaveRequest[]>('leaveRequests', []);
   const [poolEscalations, setPoolEscalations] = usePersistentState<PoolEscalation[]>('poolEscalations', []);
+  const [assignmentNotifications, setAssignmentNotifications] = usePersistentState<AssignmentNotification[]>(
+    'bdeAssignmentNotifications',
+    []
+  );
   const [notification, setNotification] = useState<AppNotification | null>(null);
 
   const notify = useCallback((type: AppNotificationType, message: string) => {
@@ -379,6 +402,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   useEffect(() => {
+    if (!authToken || authToken === 'local-demo') return;
+    let active = true;
+    apiRequest<User>('/auth/me')
+      .then((user) => {
+        if (!active) return;
+        if (user.status !== 'ACTIVE') throw new Error('Account is inactive');
+        setCurrentUserId(user.id);
+        setCurrentRoleState(user.role);
+      })
+      .catch((error: Error & { status?: number }) => {
+        if (!active) return;
+        if (error?.status !== 401 && error?.status !== 403) {
+          console.warn('Session verification unavailable:', error);
+          return;
+        }
+        localStorage.removeItem('enabler_token');
+        localStorage.removeItem('leadflow_token');
+        setAuthToken('');
+        notify('error', 'Session expired. Sign in again to continue.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [authToken, notify, setCurrentRoleState, setCurrentUserId]);
+
+  useEffect(() => {
     if (!notification) return;
     const timer = setTimeout(() => setNotification(null), 8000);
     return () => clearTimeout(timer);
@@ -391,7 +440,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const syncBackendData = async () => {
       try {
-        const [leadsRes, teamsRes, usersRes, attRes, finRes, folRes, settsRes] = await Promise.allSettled([
+        const [leadsRes, teamsRes, usersRes, attRes, finRes, folRes, settsRes, calcRes] = await Promise.allSettled([
           leadsService.getLeads(),
           teamsService.getTeams(),
           usersService.getUsers(),
@@ -399,6 +448,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           financeService.getTransactions(),
           followupsService.getFollowUps(),
           settingsService.getSettings(),
+          financeService.getCalculationLogs(),
         ]);
 
         if (usersRes.status === 'fulfilled') {
@@ -418,12 +468,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setAttendanceRecords(backendAttendance as any);
         }
         if (finRes.status === 'fulfilled') {
-          const backendTransactions = asArray<FinancialTransaction>(finRes.value, 'transactions');
-          setTransactions(backendTransactions as any);
+          const backendTransactions = asArray<FinancialTransaction & { companySharePct?: number; remainingSharePct?: number }>(finRes.value, 'transactions');
+          setTransactions(
+            backendTransactions.map((transaction) => ({
+              ...transaction,
+              companySharePercentage: transaction.companySharePercentage ?? transaction.companySharePct ?? 0,
+              remainingSharePercentage: transaction.remainingSharePercentage ?? transaction.remainingSharePct ?? 0,
+            })) as any
+          );
         }
         if (folRes.status === 'fulfilled') {
           const backendFollowUps = asArray<FollowUpItem>(folRes.value, 'followUps');
           setFollowUps(backendFollowUps as any);
+        }
+        if (calcRes.status === 'fulfilled') {
+          const backendCalcs = asArray<FinancialCalculationLog>(calcRes.value, 'logs');
+          if (backendCalcs.length > 0) {
+            setCalculationLogs(
+              backendCalcs.map((log: any) => ({
+                ...log,
+                createdAt: log.createdAt || log.timestamp || new Date().toISOString(),
+              }))
+            );
+          }
         }
         if (settsRes.status === 'fulfilled' && settsRes.value) {
           setSystemSettings((prev) => ({
@@ -458,6 +525,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     notifySyncError,
     setAttendanceRecords,
     setFollowUps,
+    setCalculationLogs,
     setLeads,
     setSystemSettings,
     setTeams,
@@ -488,6 +556,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ).length,
     convertedLeadsCount: leads.filter((lead) => lead.currentTeamId === team.id && lead.status === 'CONVERTED').length,
   }));
+  const managedTeamIds = isAdmin
+    ? teams.map((team) => team.id)
+    : isTeamLead
+    ? teams.filter((team) => team.teamLeadId === currentUser.id).map((team) => team.id)
+    : currentUser.teamId
+    ? [currentUser.teamId]
+    : [];
   const todayAttendance = attendanceRecords.find(
     (record) => record.userId === currentUser?.id && record.date === today()
   );
@@ -545,27 +620,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           mode: 'server',
         });
         return { ok: true, message: `Welcome back, ${result.user.name}.`, role: result.user.role };
-      } catch (error) {
+      } catch (error: any) {
+        // Fallback for offline backend or local development demo
         const localUser = users.find((user) => user.email.toLowerCase() === normalizedEmail);
-        if (!localUser) {
-          return {
-            ok: false,
-            message: error instanceof Error ? error.message : 'Sign-in failed. Please try again.',
-          };
-        }
-        if (localUser.status !== 'ACTIVE') {
-          return { ok: false, message: 'This account is inactive. Contact your administrator.' };
+        if (localUser) {
+          if (localUser.status !== 'ACTIVE') {
+            return { ok: false, message: 'This account is inactive. Contact your administrator.' };
+          }
+
+          setAuthToken('local-demo');
+          setCurrentUserId(localUser.id);
+          setCurrentRoleState(localUser.role);
+          notify('success', `Signed in as ${localUser.name} (${localUser.role}).`);
+          logAudit('LOGIN', 'SESSION', localUser.id, `${localUser.name} signed in locally`, {
+            role: localUser.role,
+            mode: 'local',
+          });
+          return { ok: true, message: `Signed in as ${localUser.name}.`, role: localUser.role };
         }
 
-        setAuthToken('local-demo');
-        setCurrentUserId(localUser.id);
-        setCurrentRoleState(localUser.role);
-        notify('warning', 'Server sign-in unavailable; signed in with the local directory.');
-        logAudit('LOGIN', 'SESSION', localUser.id, `${localUser.name} signed in locally`, {
-          role: localUser.role,
-          mode: 'local',
-        });
-        return { ok: true, message: `Signed in as ${localUser.name}.`, role: localUser.role };
+        if (typeof error?.status === 'number' && error.status >= 400 && error.status < 500) {
+          return {
+            ok: false,
+            message: error instanceof Error ? error.message : 'Invalid email or password.',
+          };
+        }
+
+        return {
+          ok: false,
+          message: error instanceof Error ? error.message : 'Sign-in failed. Please check your credentials.',
+        };
       }
     },
     [logAudit, notify, setAuthToken, setCurrentRoleState, setCurrentUserId, users]
@@ -573,6 +657,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = useCallback(() => {
     localStorage.removeItem('enabler_token');
+    localStorage.removeItem('leadflow_token');
     setAuthToken('');
     logAudit('LOGOUT', 'SESSION', currentUser.id, `${currentUser.name} signed out`, {
       role: currentRole,
@@ -606,19 +691,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
   }, [attendanceRecords, logAudit, setAttendanceRecords]);
-
-  const setCurrentRole = (role: UserRole) => {
-    if (role === currentRole) return;
-    const targetUser =
-      users.find((user) => user.role === role && user.status === 'ACTIVE') ||
-      users.find((user) => user.role === role);
-    setCurrentRoleState(role);
-    if (targetUser) setCurrentUserId(targetUser.id);
-    logAudit('ROLE_SWITCH', 'SESSION', role, `Role switched to ${role} as ${targetUser?.name || 'unknown user'}`, {
-      from: currentRole,
-      to: role,
-    });
-  };
 
   const switchUser = (userId: string): ActionResult => {
     const targetUser = users.find((user) => user.id === userId && user.status === 'ACTIVE');
@@ -787,6 +859,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     manualQuotas?: Record<string, number>
   ): number => {
     if (!isAdmin && !isTeamLead) return 0;
+    if (isTeamLead && !managedTeamIds.includes(teamId)) return 0;
     const effectiveMethod = method || (systemSettings.allocationMethod === 'MANUAL' ? 'EQUAL' : systemSettings.allocationMethod);
     const eligibleBdeIds = bdeIds.filter((bdeId) => {
       const bde = users.find((user) => user.id === bdeId);
@@ -855,6 +928,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     if (!updates.size) return 0;
+    const newAssignmentNotifications: AssignmentNotification[] = eligibleBdeIds
+      .map((bdeId, index) => {
+        const bde = users.find((user) => user.id === bdeId);
+        return {
+          id: uid('assign-notif'),
+          bdeId,
+          bdeName: bde?.name || 'BDE',
+          teamId,
+          teamName: bde?.teamName || teams.find((item) => item.id === teamId)?.name,
+          count: quotas[index],
+          assignedByName: currentUser.name,
+          reason: `Stage 2 ${effectiveMethod} allocation`,
+          timestamp: timestamp(),
+        };
+      })
+      .filter((item) => item.count > 0);
+    if (newAssignmentNotifications.length) {
+      setAssignmentNotifications((prev) => [...newAssignmentNotifications, ...prev].slice(0, 50));
+    }
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
     setReplenishmentAlerts((prev) => prev.filter((alert) => !eligibleBdeIds.includes(alert.bdeId)));
@@ -957,7 +1049,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetBde = users.find((user) => user.id === toBdeId);
     if (!sourceBde || !targetBde || targetBde.status !== 'ACTIVE' || targetBde.role !== 'BDE') return false;
     if (!targetBde.teamId || !targetBde.teamName) return false;
-    if (isTeamLead && (sourceBde.teamId !== currentUser?.teamId || targetBde.teamId !== currentUser?.teamId)) {
+    if (
+      isTeamLead &&
+      (!sourceBde.teamId ||
+        !targetBde.teamId ||
+        !managedTeamIds.includes(sourceBde.teamId) ||
+        !managedTeamIds.includes(targetBde.teamId))
+    ) {
       return false;
     }
     const affected = leads.filter(
@@ -991,6 +1089,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     });
 
+    setAssignmentNotifications((prev) =>
+      [
+        {
+          id: uid('assign-notif'),
+          bdeId: toBdeId,
+          bdeName: targetBde.name,
+          teamId: targetBde.teamId || undefined,
+          teamName: targetBde.teamName || undefined,
+          count: affected.length,
+          assignedByName: currentUser.name,
+          reason: `Reassigned from ${sourceBde.name}`,
+          timestamp: timestamp(),
+        },
+        ...prev,
+      ].slice(0, 50)
+    );
     setLeads((prev) => prev.map((lead) => updates.get(lead.id) || lead));
     setLeadAssignmentHistory((prev) => [...assignments, ...prev]);
     setReplenishmentAlerts((prev) => prev.filter((alert) => alert.bdeId !== fromBdeId));
@@ -1010,6 +1124,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setFollowUps((prev) => prev.map((item) => (item.id === followUpId ? { ...item, status: 'COMPLETED' } : item)));
     const lead = leads.find((item) => item.id === followUp.leadId);
     if (lead && lead.currentBdeId === currentUser.id && lead.status === 'FOLLOW_UP_REQUIRED') {
+      const hasRemainingFollowUps = followUps.some(
+        (item) =>
+          item.leadId === lead.id &&
+          item.id !== followUpId &&
+          (item.status === 'PENDING' || item.status === 'OVERDUE')
+      );
+      const remarks = `Follow-up completed: ${followUp.remarks || 'callback executed'}`;
       setLeadStatusHistory((prev) => [
         {
           id: uid('hist'),
@@ -1018,14 +1139,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           newStatus: 'CONTACTED',
           changedById: currentUser.id,
           changedByName: currentUser.name,
-          remarks: `Follow-up completed: ${followUp.remarks || 'callback executed'}`,
+          remarks,
           timestamp: timestamp(),
         },
         ...prev,
       ]);
       setLeads((prev) =>
-        prev.map((item) => (item.id === lead.id ? { ...item, status: 'CONTACTED', updatedAt: today() } : item))
+        prev.map((item) =>
+          item.id === lead.id
+            ? {
+                ...item,
+                status: 'CONTACTED',
+                nextFollowUpDate: hasRemainingFollowUps ? item.nextFollowUpDate : null,
+                updatedAt: today(),
+              }
+            : item
+        )
       );
+      leadsService
+        .updateLeadStatus(lead.id, {
+          status: 'CONTACTED',
+          remarks,
+          nextFollowUpDate: hasRemainingFollowUps ? undefined : null,
+          actor: { id: currentUser.id, name: currentUser.name, role: currentRole },
+        })
+        .catch((e) => notifySyncError('Backend lead status sync:', e));
     }
     logAudit('FOLLOW_UP_COMPLETE', 'FOLLOW_UP', followUpId, `Completed follow-up for ${followUp.candidateName}`, {
       leadId: followUp.leadId,
@@ -1124,7 +1262,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     reason: string,
     newPunchOutTime?: string
   ): boolean => {
-    if (!isAdmin && !(isTeamLead && attendanceRecords.find((record) => record.id === recordId)?.teamId === currentUser?.teamId)) {
+    const recordForScope = attendanceRecords.find((record) => record.id === recordId);
+    if (
+      !isAdmin &&
+      !(isTeamLead && recordForScope?.teamId && managedTeamIds.includes(recordForScope.teamId))
+    ) {
       return false;
     }
     const record = attendanceRecords.find((item) => item.id === recordId);
@@ -1171,7 +1313,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       previousPunchOutTime: record.punchOutTime,
       newPunchOutTime: revisedPunchOut,
     });
-    attendanceService.modifyAttendance(recordId, { status: newStatus, punchOutTime: revisedPunchOut || undefined, reason, actor: { id: currentUser.id, name: currentUser.name, role: currentRole } }).catch((e) => notifySyncError('Backend attendance modify sync:', e));
+    attendanceService.modifyAttendance(recordId, { status: newStatus, punchOutTime: revisedPunchOut || undefined, reason, actor: { id: currentUser.id, name: currentUser.name, role: currentRole, teamId: currentUser.teamId } }).catch((e) => notifySyncError('Backend attendance modify sync:', e));
     return true;
   };
 
@@ -1249,10 +1391,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     transactionId: string,
     status: FinancialTransaction['status'],
     notes?: string
-  ) => {
-    if (!isAdmin) return;
+  ): boolean => {
+    if (!isAdmin) return false;
     const transaction = transactions.find((item) => item.id === transactionId);
-    if (!transaction) return;
+    if (!transaction) return false;
     setTransactions((prev) =>
       prev.map((item) =>
         item.id === transactionId
@@ -1271,6 +1413,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status,
       notes,
     });
+    financeService.verifyTransaction(transactionId, status, notes, {
+      id: currentUser.id,
+      name: currentUser.name,
+      role: currentRole,
+    }).catch((e) => notifySyncError('Backend transaction verify sync:', e));
+    return true;
   };
 
   const logFinancialCalculation = (
@@ -1295,6 +1443,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       calcType,
       notes,
     });
+    financeService.saveCalculationLog({
+      calcType,
+      inputValues,
+      resultValues,
+      notes,
+      actor: { id: currentUser.id, name: currentUser.name, role: currentRole },
+    }).catch((e) => notifySyncError('Backend calculation log sync:', e));
   };
 
   const setCompanySharePct = (pct: number) => {
@@ -1304,6 +1459,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     logAudit('SETTINGS_UPDATE', 'SETTINGS', 'system', `Company share ratio set to ${safePct}%`, {
       companySharePercentage: safePct,
     });
+    settingsService.updateSettings(
+      { companySharePercentage: safePct, remainingSharePercentage: 100 - safePct },
+      { id: currentUser.id, name: currentUser.name, role: currentRole }
+    ).catch((e) => notifySyncError('Backend company ratio sync:', e));
   };
 
   const updateSystemSettings = (patch: Partial<SystemSettings>) => {
@@ -1417,9 +1576,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const normalizedEmail = email.trim().toLowerCase();
     if (users.some((user) => user.email.trim().toLowerCase() === normalizedEmail)) return false;
     if (role === 'ADMIN' && teamId) return false;
-    if (role !== 'ADMIN' && !teamId) return false;
-    const team = teams.find((item) => item.id === teamId);
-    if (role !== 'ADMIN' && !team) return false;
+    if (role === 'BDE' && !teamId) return false;
+    const team = teamId ? teams.find((item) => item.id === teamId) : undefined;
+    if (teamId && !team) return false;
+    if (role === 'TEAM_LEAD' && team?.teamLeadId) return false;
     const user: User = {
       id: uid('usr'),
       name: name.trim(),
@@ -1445,7 +1605,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const teamLead = users.find(
       (user) => user.id === teamLeadId && user.role === 'TEAM_LEAD' && user.status === 'ACTIVE'
     );
-    if (!teamLead || teams.some((team) => team.teamLeadId === teamLeadId)) return false;
+    if (!teamLead) return false;
+    if (teams.some((team) => team.teamLeadId === teamLeadId)) return false;
     const newTeam: Team = {
       id: uid('team'),
       name: name.trim(),
@@ -1467,26 +1628,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  const reassignUserTeam = (userId: string, teamId: string, teamName: string): boolean => {
+  const reassignUserTeam = (userId: string, teamId: string, _teamName: string): boolean => {
     if (!isAdmin) return false;
     const user = users.find((item) => item.id === userId);
-    if (!user) return false;
+    if (!user || user.role === 'ADMIN') return false;
+    const team = teamId ? teams.find((item) => item.id === teamId) : undefined;
+    if (teamId && !team) return false;
+    if (user.role !== 'TEAM_LEAD' && !team) return false;
+    if (user.role === 'TEAM_LEAD' && team?.teamLeadId && team.teamLeadId !== userId) return false;
+
+    const nextTeamId = team?.id;
+    const nextTeamName = team?.name || 'Unassigned';
     if (user.role === 'TEAM_LEAD') {
-      const previousTeam = teams.find((team) => team.teamLeadId === userId);
-      if (previousTeam && previousTeam.id !== teamId) {
-        setTeams((prev) =>
-          prev.map((team) => (team.id === previousTeam.id ? { ...team, teamLeadId: null, teamLeadName: 'Unassigned' } : team))
-        );
-      }
       setTeams((prev) =>
-        prev.map((team) => (team.id === teamId ? { ...team, teamLeadId: userId, teamLeadName: user.name } : team))
+        prev.map((item) => {
+          if (item.teamLeadId === userId && item.id !== nextTeamId) {
+            return { ...item, teamLeadId: null, teamLeadName: 'Unassigned' };
+          }
+          if (nextTeamId && item.id === nextTeamId) {
+            return { ...item, teamLeadId: userId, teamLeadName: user.name };
+          }
+          return item;
+        })
       );
     }
-    setUsers((prev) => prev.map((item) => (item.id === userId ? { ...item, teamId, teamName } : item)));
-    logAudit('USER_REASSIGN', 'USER', userId, `${user.name} moved to ${teamName}`, {
+    setUsers((prev) =>
+      prev.map((item) => (item.id === userId ? { ...item, teamId: nextTeamId, teamName: nextTeamName } : item))
+    );
+    logAudit('USER_REASSIGN', 'USER', userId, `${user.name} moved to ${nextTeamName}`, {
       fromTeam: user.teamName || 'Unassigned',
-      toTeam: teamName,
+      toTeam: nextTeamName,
     });
+    usersService.reassignTeam(userId, nextTeamId, {
+      id: currentUser.id,
+      name: currentUser.name,
+      role: currentRole,
+    }).catch((e) => notifySyncError('Backend user reassign sync:', e));
     return true;
   };
 
@@ -1523,7 +1700,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const escalatePoolEmpty = (teamId: string) => {
-    if (!isTeamLead) return;
+    if (!isTeamLead || !managedTeamIds.includes(teamId)) return;
     const team = teams.find((item) => item.id === teamId);
     if (poolEscalations.some((item) => item.teamId === teamId)) return;
     setPoolEscalations((prev) => [
@@ -1569,6 +1746,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setReplenishmentAlerts((prev) => prev.filter((alert) => alert.bdeId !== bdeId));
   };
 
+  const dismissAssignmentNotification = (id: string) => {
+    setAssignmentNotifications((prev) => prev.filter((item) => item.id !== id));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -1582,8 +1763,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logout,
         currentUser,
         currentRole,
-        setCurrentRole,
         switchUser,
+        managedTeamIds,
         teams,
         users,
         toggleUserStatus,
@@ -1623,6 +1804,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         requestLeadReplenishment,
         replenishmentAlerts,
         clearReplenishmentAlert,
+        assignmentNotifications,
+        dismissAssignmentNotification,
         reports,
         leaveRequests,
         submitReport,
@@ -1636,5 +1819,3 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     </AppContext.Provider>
   );
 };
-
-export { useApp } from './useApp';

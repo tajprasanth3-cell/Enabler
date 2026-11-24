@@ -115,12 +115,13 @@
       "email": "deepika.n@outlook.com",
       "city": "Bangalore",
       "education": "MBA Marketing",
-      "status": "CONTACTED",
+      "status": "INTERESTED",
       "currentTeamId": "team-1",
       "currentTeamName": "Team Alpha",
       "currentBdeId": "usr-4",
       "currentBdeName": "Prasanth",
-      "createdAt": "2026-02-11"
+      "createdAt": "2026-02-11",
+      "remarks": "intersted take to next step"
     },
     {
       "id": "lead-103",
@@ -143,13 +144,14 @@
       "email": "kavita.j@gmail.com",
       "city": "Pune",
       "education": "B.Com",
-      "status": "FOLLOW_UP_REQUIRED",
+      "status": "CONVERTED",
       "currentTeamId": "team-1",
       "currentTeamName": "Team Alpha",
       "currentBdeId": "usr-4",
       "currentBdeName": "Prasanth",
       "nextFollowUpDate": "2026-11-25 14:00",
-      "createdAt": "2026-02-12"
+      "createdAt": "2026-02-12",
+      "remarks": "yes"
     },
     {
       "id": "lead-105",
@@ -217,14 +219,15 @@
       "email": "naveen.k@gmail.com",
       "city": "Kolkata",
       "education": "BCA",
-      "status": "NEW",
+      "status": "CONVERTED",
       "currentTeamId": "team-2",
       "currentTeamName": "Team Beta",
       "currentBdeId": "usr-6",
       "currentBdeName": "Rohan Mehta",
       "createdAt": "2026-02-15",
       "assignedToTeamAt": "2026-11-23T08:44:49.303Z",
-      "assignedToBdeAt": "2026-11-23T10:11:39.573Z"
+      "assignedToBdeAt": "2026-11-23T10:11:39.573Z",
+      "remarks": "study"
     },
     {
       "id": "lead-110",
@@ -241,6 +244,159 @@
       "createdAt": "2026-02-15",
       "assignedToTeamAt": "2026-11-23T08:44:49.303Z",
       "assignedToBdeAt": "2026-11-23T10:11:39.573Z"
+    },
+    {
+      "id": "lead-1795431428296-244",
+      "candidateName": "lokesh",
+      "phone": "8977779998",
+      "email": "lokesh@gmail.com",
+      "city": "India",
+      "education": "Graduate",
+      "source": "CSV Upload",
+      "status": "NEW",
+      "currentTeamId": "team-2",
+      "currentTeamName": "Team Beta",
+      "currentBdeId": "usr-7",
+      "currentBdeName": "Ananya Sen",
+      "createdAt": "2026-11-23T10:57:08.296Z",
+      "assignedToTeamAt": "2026-11-23T11:00:30.487Z",
+      "assignedToBdeAt": "2026-11-23T11:00:50.973Z"
+    },
+    {
+      "id": "lead-1795504425610-541",
+      "candidateName": "Aarav Sharma",
+      "phone": "9876543210",
+      "email": "aarav.sharma@example.com",
+      "city": "Chennai",
+      "education": "B.Tech Computer Science",
+      "source": "CSV Upload",
+      "status": "NEW",
+      "currentTeamId": "team-1",
+      "currentTeamName": "Team Alpha",
+      "currentBdeId": "usr-4",
+      "currentBdeName": "Prasanth",
+      "createdAt": "2026-11-24T07:13:45.610Z",
+      "assignedToTeamAt": "2026-11-24T07:22:47.241Z",
+      "assignedToBdeAt": "2026-11-24T07:22:55.965Z"
+    },
+    {
+      "id": "lead-1795504425610-109",
+      "candidateName": "Priya Nair",
+      "phone": "9876543211",
+      "email": "priya.nair@example.com",
+      "city": "Bengaluru",
+      "education": "MBA Finance",
+      "source": "CSV Upload",
+      "status": "NEW",
+      "currentTeamId": "team-1",
+      "currentTeamName": "Team Alpha",
+      "currentBdeId": "usr-4",
+      "currentBdeName": "Prasanth",
+      "createdAt": "2026-11-24T07:13:45.610Z",
+      "assignedToTeamAt": "2026-11-24T07:22:47.241Z",
+      "assignedToBdeAt": "2026-11-24T07:22:55.965Z"
+    },
+    {
+      "id": "lead-1795504425610-913",
+      "candidateName": "Rohan Verma",
+      "phone": "9876543212",
+      "email": "rohan.verma@example.com",
+      "city": "Mumbai",
+      "education": "B.Com",
+      "source": "CSV Upload",
+      "status": "NEW",
+      "currentTeamId": "team-1",
+      "currentTeamName": "Team Alpha",
+      "currentBdeId": "usr-5",
+      "currentBdeName": "Sneha Gupta",
+      "createdAt": "2026-11-24T07:13:45.610Z",
+      "assignedToTeamAt": "2026-11-24T07:22:47.241Z",
+      "assignedToBdeAt": "2026-11-24T07:22:55.965Z"
+    },
+    {
+      "id": "lead-1795504425610-531",
+      "candidateName": "Ananya Iyer",
+      "phone": "9876543213",
+      "email": "ananya.iyer@example.com",
+      "city": "Hyderabad",
+      "education": "M.Sc Data Science",
+      "source": "CSV Upload",
+      "status": "CONVERTED",
+      "currentTeamId": "team-2",
+      "currentTeamName": "Team Beta",
+      "currentBdeId": "usr-6",
+      "currentBdeName": "Rohan Mehta",
+      "createdAt": "2026-11-24T07:13:45.610Z",
+      "assignedToTeamAt": "2026-11-24T07:22:47.241Z",
+      "assignedToBdeAt": "2026-11-24T07:22:55.976Z",
+      "remarks": "don"
+    },
+    {
+      "id": "lead-1795504425610-729",
+      "candidateName": "Vikram Singh",
+      "phone": "9876543214",
+      "email": "vikram.singh@example.com",
+      "city": "Delhi",
+      "education": "B.E. Mechanical",
+      "source": "CSV Upload",
+      "status": "INTERESTED",
+      "currentTeamId": "team-2",
+      "currentTeamName": "Team Beta",
+      "currentBdeId": "usr-6",
+      "currentBdeName": "Rohan Mehta",
+      "createdAt": "2026-11-24T07:13:45.610Z",
+      "assignedToTeamAt": "2026-11-24T07:22:47.241Z",
+      "assignedToBdeAt": "2026-11-24T07:22:55.976Z",
+      "remarks": "don"
+    },
+    {
+      "id": "lead-1795504425610-373",
+      "candidateName": "Meera Krishnan",
+      "phone": "9876543215",
+      "email": "meera.krishnan@example.com",
+      "city": "Pune",
+      "education": "BCA",
+      "source": "CSV Upload",
+      "status": "NEW",
+      "currentTeamId": "team-2",
+      "currentTeamName": "Team Beta",
+      "currentBdeId": "usr-7",
+      "currentBdeName": "Ananya Sen",
+      "createdAt": "2026-11-24T07:13:45.610Z",
+      "assignedToTeamAt": "2026-11-24T07:22:47.241Z",
+      "assignedToBdeAt": "2026-11-24T07:22:55.976Z"
+    },
+    {
+      "id": "lead-1795505152773-976",
+      "candidateName": "kishor",
+      "phone": "998778899",
+      "email": "kishor@gmail.com",
+      "city": "India",
+      "education": "Graduate",
+      "source": "CSV Upload",
+      "status": "NEW",
+      "currentTeamId": "team-1",
+      "currentTeamName": "Team Alpha",
+      "currentBdeId": "usr-5",
+      "currentBdeName": "Sneha Gupta",
+      "createdAt": "2026-11-24T07:25:52.773Z",
+      "assignedToTeamAt": "2026-11-24T08:27:32.194Z",
+      "assignedToBdeAt": "2026-11-24T08:29:27.540Z"
+    },
+    {
+      "id": "lead-1795512441075-494",
+      "candidateName": "ani",
+      "phone": "9987788899",
+      "email": "ani@gmail.com",
+      "city": "India",
+      "education": "Graduate",
+      "source": "CSV Upload",
+      "status": "NEW",
+      "currentTeamId": null,
+      "currentTeamName": null,
+      "currentBdeId": null,
+      "currentBdeName": null,
+      "createdAt": "2026-11-24T09:27:21.075Z"
     }
   ],
   "leadStatusHistory": [
@@ -263,6 +419,106 @@
       "changedByName": "Prasanth",
       "remarks": "yes",
       "timestamp": "11/23/2026, 3:41:01 PM"
+    },
+    {
+      "id": "hist-1795432532231",
+      "leadId": "lead-109",
+      "previousStatus": "NEW",
+      "newStatus": "CONTACTED",
+      "changedById": "usr-6",
+      "changedByName": "Rohan Mehta",
+      "remarks": "yes",
+      "timestamp": "11/23/2026, 4:45:32 PM"
+    },
+    {
+      "id": "hist-1795432557618",
+      "leadId": "lead-109",
+      "previousStatus": "CONTACTED",
+      "newStatus": "INTERESTED",
+      "changedById": "usr-6",
+      "changedByName": "Rohan Mehta",
+      "remarks": "toady join",
+      "timestamp": "11/23/2026, 4:45:57 PM"
+    },
+    {
+      "id": "hist-1795432614793",
+      "leadId": "lead-109",
+      "previousStatus": "INTERESTED",
+      "newStatus": "CONVERTED",
+      "changedById": "usr-6",
+      "changedByName": "Rohan Mehta",
+      "remarks": "study",
+      "timestamp": "11/23/2026, 4:46:54 PM"
+    },
+    {
+      "id": "hist-1795512888397",
+      "leadId": "lead-102",
+      "previousStatus": "CONTACTED",
+      "newStatus": "INTERESTED",
+      "changedById": "usr-4",
+      "changedByName": "Prasanth",
+      "remarks": "intersted take to next step",
+      "timestamp": "11/24/2026, 3:04:48 PM"
+    },
+    {
+      "id": "hist-1795512904942",
+      "leadId": "lead-104",
+      "previousStatus": "FOLLOW_UP_REQUIRED",
+      "newStatus": "CONVERTED",
+      "changedById": "usr-4",
+      "changedByName": "Prasanth",
+      "remarks": "yes",
+      "timestamp": "11/24/2026, 3:05:04 PM"
+    },
+    {
+      "id": "hist-1795512925114",
+      "leadId": "lead-1795504425610-531",
+      "previousStatus": "NEW",
+      "newStatus": "CONTACTED",
+      "changedById": "usr-6",
+      "changedByName": "Rohan Mehta",
+      "remarks": "cntct",
+      "timestamp": "11/24/2026, 3:05:25 PM"
+    },
+    {
+      "id": "hist-1795512940217",
+      "leadId": "lead-1795504425610-531",
+      "previousStatus": "CONTACTED",
+      "newStatus": "INTERESTED",
+      "changedById": "usr-6",
+      "changedByName": "Rohan Mehta",
+      "remarks": "call back",
+      "timestamp": "11/24/2026, 3:05:40 PM"
+    },
+    {
+      "id": "hist-1795512985635",
+      "leadId": "lead-1795504425610-729",
+      "previousStatus": "NEW",
+      "newStatus": "CONTACTED",
+      "changedById": "usr-6",
+      "changedByName": "Rohan Mehta",
+      "remarks": "ok conrt",
+      "timestamp": "11/24/2026, 3:06:25 PM"
+    },
+    {
+      "id": "hist-1795512997728",
+      "leadId": "lead-1795504425610-729",
+      "previousStatus": "CONTACTED",
+      "newStatus": "INTERESTED",
+      "changedById": "usr-6",
+      "changedByName": "Rohan Mehta",
+      "remarks": "don",
+      "timestamp": "11/24/2026, 3:06:37 PM"
+    },
+    {
+      "id": "hist-1795513009670",
+      "leadId": "lead-1795504425610-531",
+      "previousStatus": "INTERESTED",
+      "newStatus": "CONVERTED",
+      "changedById": "usr-6",
+      "changedByName": "Rohan Mehta",
+      "remarks": "don",
+      "timestamp": "11/24/2026, 3:06:49 PM"
     }
   ],
   "followUps": [
@@ -342,12 +598,12 @@
       "teamId": "team-2",
       "date": "2026-11-23",
       "punchInTime": "03:41 PM",
-      "punchOutTime": null,
-      "workingMinutes": 0,
+      "punchOutTime": "04:47 PM",
+      "workingMinutes": 66,
       "status": "LATE",
       "isModified": false,
       "createdAt": "2026-11-23T10:11:07.177Z",
-      "updatedAt": "2026-11-23T10:11:07.177Z"
+      "updatedAt": "2026-11-23T11:17:07.614Z"
     },
     {
       "id": "att-1795428682569",
@@ -362,9 +618,166 @@
       "isModified": false,
       "createdAt": "2026-11-23T10:11:22.569Z",
       "updatedAt": "2026-11-23T10:11:22.569Z"
+    },
+    {
+      "id": "att-1795432628287",
+      "userId": "usr-6",
+      "userName": "Rohan Mehta",
+      "teamId": "team-2",
+      "date": "2026-11-23",
+      "punchInTime": "04:47 PM",
+      "punchOutTime": null,
+      "workingMinutes": 0,
+      "status": "LATE",
+      "isModified": false,
+      "createdAt": "2026-11-23T11:17:08.287Z",
+      "updatedAt": "2026-11-23T11:17:08.287Z"
+    },
+    {
+      "id": "att-1795503921937",
+      "userId": "usr-4",
+      "userName": "Prasanth",
+      "teamId": "team-1",
+      "date": "2026-11-24",
+      "punchInTime": "12:35 PM",
+      "punchOutTime": "12:35 PM",
+      "workingMinutes": 0,
+      "status": "HALF_DAY",
+      "isModified": false,
+      "createdAt": "2026-11-24T07:05:21.937Z",
+      "updatedAt": "2026-11-24T07:05:23.504Z",
+      "earlyDeparture": true
+    },
+    {
+      "id": "att-1795503924064",
+      "userId": "usr-4",
+      "userName": "Prasanth",
+      "teamId": "team-1",
+      "date": "2026-11-24",
+      "punchInTime": "12:35 PM",
+      "punchOutTime": null,
+      "workingMinutes": 0,
+      "status": "LATE",
+      "isModified": false,
+      "createdAt": "2026-11-24T07:05:24.064Z",
+      "updatedAt": "2026-11-24T07:05:24.064Z"
+    },
+    {
+      "id": "att-1795503928959",
+      "userId": "usr-5",
+      "userName": "Sneha Gupta",
+      "teamId": "team-1",
+      "date": "2026-11-24",
+      "punchInTime": "12:35 PM",
+      "punchOutTime": "12:35 PM",
+      "workingMinutes": 0,
+      "status": "HALF_DAY",
+      "isModified": false,
+      "createdAt": "2026-11-24T07:05:28.960Z",
+      "updatedAt": "2026-11-24T07:05:29.817Z",
+      "earlyDeparture": true
+    },
+    {
+      "id": "att-1795503930286",
+      "userId": "usr-5",
+      "userName": "Sneha Gupta",
+      "teamId": "team-1",
+      "date": "2026-11-24",
+      "punchInTime": "12:35 PM",
+      "punchOutTime": null,
+      "workingMinutes": 0,
+      "status": "LATE",
+      "isModified": false,
+      "createdAt": "2026-11-24T07:05:30.286Z",
+      "updatedAt": "2026-11-24T07:05:30.286Z"
+    },
+    {
+      "id": "att-1795503933159",
+      "userId": "usr-6",
+      "userName": "Rohan Mehta",
+      "teamId": "team-2",
+      "date": "2026-11-24",
+      "punchInTime": "12:35 PM",
+      "punchOutTime": "12:35 PM",
+      "workingMinutes": 0,
+      "status": "HALF_DAY",
+      "isModified": false,
+      "createdAt": "2026-11-24T07:05:33.159Z",
+      "updatedAt": "2026-11-24T07:05:34.799Z",
+      "earlyDeparture": true
+    },
+    {
+      "id": "att-1795503935640",
+      "userId": "usr-6",
+      "userName": "Rohan Mehta",
+      "teamId": "team-2",
+      "date": "2026-11-24",
+      "punchInTime": "12:35 PM",
+      "punchOutTime": null,
+      "workingMinutes": 0,
+      "status": "LATE",
+      "isModified": false,
+      "createdAt": "2026-11-24T07:05:35.640Z",
+      "updatedAt": "2026-11-24T07:05:35.640Z"
+    },
+    {
+      "id": "att-1795503939545",
+      "userId": "usr-7",
+      "userName": "Ananya Sen",
+      "teamId": "team-2",
+      "date": "2026-11-24",
+      "punchInTime": "12:35 PM",
+      "punchOutTime": "12:35 PM",
+      "workingMinutes": 0,
+      "status": "HALF_DAY",
+      "isModified": false,
+      "createdAt": "2026-11-24T07:05:39.545Z",
+      "updatedAt": "2026-11-24T07:05:40.451Z",
+      "earlyDeparture": true
+    },
+    {
+      "id": "att-1795503941153",
+      "userId": "usr-7",
+      "userName": "Ananya Sen",
+      "teamId": "team-2",
+      "date": "2026-11-24",
+      "punchInTime": "12:35 PM",
+      "punchOutTime": null,
+      "workingMinutes": 0,
+      "status": "LATE",
+      "isModified": false,
+      "createdAt": "2026-11-24T07:05:41.153Z",
+      "updatedAt": "2026-11-24T07:05:41.153Z"
     }
   ],
   "transactions": [
+    {
+      "id": "tx-1795453409776",
+      "leadId": "lead-105",
+      "candidateName": "Manish Pandey",
+      "bdeId": "usr-4",
+      "bdeName": "Prasanth",
+      "teamId": "team-1",
+      "teamName": "Team Alpha",
+      "grossAmount": 80000,
+      "investmentCost": 20000,
+      "companySharePct": 30,
+      "companySharePercentage": 30,
+      "remainingSharePct": 70,
+      "remainingSharePercentage": 70,
+      "companyShareAmount": 24000,
+      "remainingShareAmount": 56000,
+      "netProfit": 60000,
+      "profitSharePercentage": 30,
+      "companyProfitShareAmount": 18000,
+      "remainingProfitShareAmount": 42000,
+      "status": "CONFIRMED",
+      "confirmedById": "usr-1",
+      "confirmedByName": "Vikram Sharma",
+      "confirmedAt": "2026-11-23T17:03:29.811Z",
+      "notes": "Automated test deal enrollment fee | Payment verified via bank wire transfer",
+      "createdAt": "2026-11-23T17:03:29.776Z"
+    },
     {
       "id": "tx-1",
       "leadId": "lead-105",
@@ -384,10 +797,52 @@
       "confirmedById": "usr-1",
       "confirmedByName": "Vikram Sharma",
       "confirmedAt": "2026-02-14 04:00 PM",
-      "createdAt": "2026-02-14 03:30 PM"
+      "createdAt": "2026-02-14 03:30 PM",
+      "companySharePercentage": 30,
+      "remainingSharePercentage": 70,
+      "companyProfitShareAmount": 10500,
+      "remainingProfitShareAmount": 24500
     }
   ],
   "financialCalculationLogs": [
+    {
+      "id": "calc-1795453409763",
+      "calcType": "PROFIT_SHARE",
+      "inputValues": {
+        "grossAmount": 100000,
+        "investmentCost": 40000,
+        "profitSharePercentage": 30
+      },
+      "resultValues": {
+        "netProfit": 60000,
+        "isProfitable": true,
+        "companyProfitShare": 18000,
+        "remainingProfitShare": 42000
+      },
+      "calculatedById": "usr-1",
+      "calculatedByName": "Vikram Sharma",
+      "notes": "Test profit share calculation",
+      "timestamp": "2026-11-23T17:03:29.763Z",
+      "createdAt": "2026-11-23T17:03:29.763Z"
+    },
+    {
+      "id": "calc-1795453409612",
+      "calcType": "REVENUE_SHARE_30_70",
+      "inputValues": {
+        "grossAmount": 100000,
+        "companyPct": 30,
+        "remainingPct": 70
+      },
+      "resultValues": {
+        "companyShare": 30000,
+        "remainingShare": 70000
+      },
+      "calculatedById": "usr-1",
+      "calculatedByName": "Vikram Sharma",
+      "notes": "Test 30:70 split calculation",
+      "timestamp": "2026-11-23T17:03:29.612Z",
+      "createdAt": "2026-11-23T17:03:29.612Z"
+    },
     {
       "id": "fcalc-1",
       "calcType": "REVENUE_SPLIT",
@@ -419,6 +874,7 @@
     "gracePeriodMinutes": 15,
     "allocationMethod": "WORKLOAD_BASED",
     "workdayEndTime": "18:30",
+    "earlyExitGracePeriodMinutes": 15,
     "halfDayThresholdHours": 4.5,
     "fullDayThresholdHours": 8,
     "followUpReminderMinutes": 30,
@@ -463,6 +919,787 @@
     }
   },
   "auditLogs": [
+    {
+      "id": "audit-1795513009673-809",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "lead-1795504425610-531",
+      "targetType": "LEAD",
+      "summary": "Lead Ananya Iyer updated from INTERESTED to CONVERTED",
+      "details": {
+        "previousStatus": "INTERESTED",
+        "newStatus": "CONVERTED",
+        "remarks": "don"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T09:36:49.673Z"
+    },
+    {
+      "id": "audit-1795512997731-619",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "lead-1795504425610-729",
+      "targetType": "LEAD",
+      "summary": "Lead Vikram Singh updated from CONTACTED to INTERESTED",
+      "details": {
+        "previousStatus": "CONTACTED",
+        "newStatus": "INTERESTED",
+        "remarks": "don"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T09:36:37.731Z"
+    },
+    {
+      "id": "audit-1795512985638-909",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "lead-1795504425610-729",
+      "targetType": "LEAD",
+      "summary": "Lead Vikram Singh updated from NEW to CONTACTED",
+      "details": {
+        "previousStatus": "NEW",
+        "newStatus": "CONTACTED",
+        "remarks": "ok conrt"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T09:36:25.638Z"
+    },
+    {
+      "id": "audit-1795512940221-113",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "lead-1795504425610-531",
+      "targetType": "LEAD",
+      "summary": "Lead Ananya Iyer updated from CONTACTED to INTERESTED",
+      "details": {
+        "previousStatus": "CONTACTED",
+        "newStatus": "INTERESTED",
+        "remarks": "call back"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T09:35:40.221Z"
+    },
+    {
+      "id": "audit-1795512925116-684",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "lead-1795504425610-531",
+      "targetType": "LEAD",
+      "summary": "Lead Ananya Iyer updated from NEW to CONTACTED",
+      "details": {
+        "previousStatus": "NEW",
+        "newStatus": "CONTACTED",
+        "remarks": "cntct"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T09:35:25.117Z"
+    },
+    {
+      "id": "audit-1795512904944-178",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-4",
+      "actorName": "Prasanth",
+      "actorRole": "BDE",
+      "targetId": "lead-104",
+      "targetType": "LEAD",
+      "summary": "Lead Kavita Joshi updated from FOLLOW_UP_REQUIRED to CONVERTED",
+      "details": {
+        "previousStatus": "FOLLOW_UP_REQUIRED",
+        "newStatus": "CONVERTED",
+        "remarks": "yes"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T09:35:04.944Z"
+    },
+    {
+      "id": "audit-1795512888469-277",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-4",
+      "actorName": "Prasanth",
+      "actorRole": "BDE",
+      "targetId": "lead-102",
+      "targetType": "LEAD",
+      "summary": "Lead Deepika Nair updated from CONTACTED to INTERESTED",
+      "details": {
+        "previousStatus": "CONTACTED",
+        "newStatus": "INTERESTED",
+        "remarks": "intersted take to next step"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T09:34:48.470Z"
+    },
+    {
+      "id": "audit-1795512441076-410",
+      "action": "LEAD_INGESTED",
+      "category": "LEAD",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "BATCH",
+      "summary": "Ingested 1 new candidate leads (0 duplicates skipped)",
+      "details": {
+        "added": 1,
+        "duplicates": 0,
+        "totalRows": 1,
+        "actorId": "usr-1"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T09:27:21.076Z"
+    },
+    {
+      "id": "audit-1795508967543-381",
+      "action": "LEAD_ALLOCATED_STAGE2",
+      "category": "ALLOCATION",
+      "actorId": "usr-2",
+      "actorName": "Priya Patel",
+      "actorRole": "TEAM_LEAD",
+      "targetId": "team-1",
+      "targetType": "TEAM",
+      "summary": "Allocated 1 leads from Team Pool to 1 BDEs (exact distribution)",
+      "details": {
+        "teamId": "team-1",
+        "bdeIds": [
+          "usr-5"
+        ],
+        "countPerBde": 1,
+        "distribution": {
+          "usr-5": 1
+        },
+        "method": "WORKLOAD_BASED",
+        "totalAllocated": 1,
+        "actorId": "usr-2"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T08:29:27.543Z"
+    },
+    {
+      "id": "audit-1795508852197-887",
+      "action": "LEAD_ALLOCATED_STAGE1",
+      "category": "ALLOCATION",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "TEAMS",
+      "summary": "Allocated 1 leads across 1 teams (exact quotas via EQUAL)",
+      "details": {
+        "teamIds": [
+          "team-1"
+        ],
+        "countPerTeam": 1,
+        "teamQuotas": {
+          "team-1": 1
+        },
+        "method": "EQUAL",
+        "totalAllocated": 1,
+        "distribution": {
+          "team-1": 1
+        },
+        "actorId": "usr-1"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T08:27:32.197Z"
+    },
+    {
+      "id": "audit-1795505152773-526",
+      "action": "LEAD_INGESTED",
+      "category": "LEAD",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "BATCH",
+      "summary": "Ingested 1 new candidate leads (0 duplicates skipped)",
+      "details": {
+        "added": 1,
+        "duplicates": 0,
+        "totalRows": 1,
+        "actorId": "usr-1"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:25:52.773Z"
+    },
+    {
+      "id": "audit-1795504975978-928",
+      "action": "LEAD_ALLOCATED_STAGE2",
+      "category": "ALLOCATION",
+      "actorId": "usr-2",
+      "actorName": "Priya Patel",
+      "actorRole": "TEAM_LEAD",
+      "targetId": "team-2",
+      "targetType": "TEAM",
+      "summary": "Allocated 3 leads from Team Pool to 2 BDEs (exact distribution)",
+      "details": {
+        "teamId": "team-2",
+        "bdeIds": [
+          "usr-6",
+          "usr-7"
+        ],
+        "countPerBde": 3,
+        "distribution": {
+          "usr-6": 2,
+          "usr-7": 1
+        },
+        "method": "EQUAL",
+        "totalAllocated": 3,
+        "actorId": "usr-2"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:22:55.978Z"
+    },
+    {
+      "id": "audit-1795504975969-96",
+      "action": "LEAD_ALLOCATED_STAGE2",
+      "category": "ALLOCATION",
+      "actorId": "usr-2",
+      "actorName": "Priya Patel",
+      "actorRole": "TEAM_LEAD",
+      "targetId": "team-1",
+      "targetType": "TEAM",
+      "summary": "Allocated 3 leads from Team Pool to 2 BDEs (exact distribution)",
+      "details": {
+        "teamId": "team-1",
+        "bdeIds": [
+          "usr-4",
+          "usr-5"
+        ],
+        "countPerBde": 3,
+        "distribution": {
+          "usr-4": 2,
+          "usr-5": 1
+        },
+        "method": "EQUAL",
+        "totalAllocated": 3,
+        "actorId": "usr-2"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:22:55.969Z"
+    },
+    {
+      "id": "audit-1795504967245-581",
+      "action": "LEAD_ALLOCATED_STAGE1",
+      "category": "ALLOCATION",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "TEAMS",
+      "summary": "Allocated 6 leads across 2 teams (exact quotas via EQUAL)",
+      "details": {
+        "teamIds": [
+          "team-1",
+          "team-2"
+        ],
+        "countPerTeam": 3,
+        "teamQuotas": {
+          "team-1": 3,
+          "team-2": 3
+        },
+        "method": "EQUAL",
+        "totalAllocated": 6,
+        "distribution": {
+          "team-1": 3,
+          "team-2": 3
+        },
+        "actorId": "usr-1"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:22:47.245Z"
+    },
+    {
+      "id": "audit-1795504425610-878",
+      "action": "LEAD_INGESTED",
+      "category": "LEAD",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "BATCH",
+      "summary": "Ingested 6 new candidate leads (0 duplicates skipped)",
+      "details": {
+        "added": 6,
+        "duplicates": 0,
+        "totalRows": 6,
+        "actorId": "usr-1"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:13:45.611Z"
+    },
+    {
+      "id": "audit-1795503941155-805",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-7",
+      "actorName": "Ananya Sen",
+      "actorRole": "BDE",
+      "targetId": "att-1795503941153",
+      "targetType": "ATTENDANCE",
+      "summary": "Ananya Sen punched in at 12:35 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "12:35 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:41.155Z"
+    },
+    {
+      "id": "audit-1795503940453-703",
+      "action": "ATTENDANCE_PUNCH_OUT",
+      "category": "ATTENDANCE",
+      "actorId": "usr-7",
+      "actorName": "Ananya Sen",
+      "actorRole": "BDE",
+      "targetId": "att-1795503939545",
+      "targetType": "ATTENDANCE",
+      "summary": "Ananya Sen punched out at 12:35 PM (Duration: 0 mins, Status: HALF_DAY)",
+      "details": {
+        "punchOutTime": "12:35 PM",
+        "workingMinutes": 0,
+        "status": "HALF_DAY",
+        "earlyDeparture": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:40.453Z"
+    },
+    {
+      "id": "audit-1795503939548-630",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-7",
+      "actorName": "Ananya Sen",
+      "actorRole": "BDE",
+      "targetId": "att-1795503939545",
+      "targetType": "ATTENDANCE",
+      "summary": "Ananya Sen punched in at 12:35 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "12:35 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:39.548Z"
+    },
+    {
+      "id": "audit-1795503935642-323",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "att-1795503935640",
+      "targetType": "ATTENDANCE",
+      "summary": "Rohan Mehta punched in at 12:35 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "12:35 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:35.642Z"
+    },
+    {
+      "id": "audit-1795503934801-717",
+      "action": "ATTENDANCE_PUNCH_OUT",
+      "category": "ATTENDANCE",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "att-1795503933159",
+      "targetType": "ATTENDANCE",
+      "summary": "Rohan Mehta punched out at 12:35 PM (Duration: 0 mins, Status: HALF_DAY)",
+      "details": {
+        "punchOutTime": "12:35 PM",
+        "workingMinutes": 0,
+        "status": "HALF_DAY",
+        "earlyDeparture": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:34.801Z"
+    },
+    {
+      "id": "audit-1795503933162-907",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "att-1795503933159",
+      "targetType": "ATTENDANCE",
+      "summary": "Rohan Mehta punched in at 12:35 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "12:35 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:33.162Z"
+    },
+    {
+      "id": "audit-1795503930289-599",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-5",
+      "actorName": "Sneha Gupta",
+      "actorRole": "BDE",
+      "targetId": "att-1795503930286",
+      "targetType": "ATTENDANCE",
+      "summary": "Sneha Gupta punched in at 12:35 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "12:35 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:30.289Z"
+    },
+    {
+      "id": "audit-1795503929819-48",
+      "action": "ATTENDANCE_PUNCH_OUT",
+      "category": "ATTENDANCE",
+      "actorId": "usr-5",
+      "actorName": "Sneha Gupta",
+      "actorRole": "BDE",
+      "targetId": "att-1795503928959",
+      "targetType": "ATTENDANCE",
+      "summary": "Sneha Gupta punched out at 12:35 PM (Duration: 0 mins, Status: HALF_DAY)",
+      "details": {
+        "punchOutTime": "12:35 PM",
+        "workingMinutes": 0,
+        "status": "HALF_DAY",
+        "earlyDeparture": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:29.819Z"
+    },
+    {
+      "id": "audit-1795503928961-728",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-5",
+      "actorName": "Sneha Gupta",
+      "actorRole": "BDE",
+      "targetId": "att-1795503928959",
+      "targetType": "ATTENDANCE",
+      "summary": "Sneha Gupta punched in at 12:35 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "12:35 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:28.961Z"
+    },
+    {
+      "id": "audit-1795503924066-553",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-4",
+      "actorName": "Prasanth",
+      "actorRole": "BDE",
+      "targetId": "att-1795503924064",
+      "targetType": "ATTENDANCE",
+      "summary": "Prasanth punched in at 12:35 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "12:35 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:24.066Z"
+    },
+    {
+      "id": "audit-1795503923506-969",
+      "action": "ATTENDANCE_PUNCH_OUT",
+      "category": "ATTENDANCE",
+      "actorId": "usr-4",
+      "actorName": "Prasanth",
+      "actorRole": "BDE",
+      "targetId": "att-1795503921937",
+      "targetType": "ATTENDANCE",
+      "summary": "Prasanth punched out at 12:35 PM (Duration: 0 mins, Status: HALF_DAY)",
+      "details": {
+        "punchOutTime": "12:35 PM",
+        "workingMinutes": 0,
+        "status": "HALF_DAY",
+        "earlyDeparture": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:23.506Z"
+    },
+    {
+      "id": "audit-1795503921943-968",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-4",
+      "actorName": "Prasanth",
+      "actorRole": "BDE",
+      "targetId": "att-1795503921937",
+      "targetType": "ATTENDANCE",
+      "summary": "Prasanth punched in at 12:35 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "12:35 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-24T07:05:21.943Z"
+    },
+    {
+      "id": "audit-1795453409813-860",
+      "action": "TRANSACTION_CONFIRMED",
+      "category": "FINANCE",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetId": "tx-1795453409776",
+      "targetType": "TRANSACTION",
+      "summary": "Updated transaction tx-1795453409776 status from CONFIRMED to CONFIRMED",
+      "details": {
+        "oldStatus": "CONFIRMED",
+        "newStatus": "CONFIRMED",
+        "notes": "Payment verified via bank wire transfer"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T17:03:29.813Z"
+    },
+    {
+      "id": "audit-1795453409800-753",
+      "action": "TRANSACTION_CONFIRMED",
+      "category": "FINANCE",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetId": "tx-1795453409776",
+      "targetType": "TRANSACTION",
+      "summary": "Recorded verified deal inflow of ₹80,000 for candidate Manish Pandey (Company Share: ₹24,000, Net Profit: ₹60,000)",
+      "details": {
+        "grossAmount": 80000,
+        "investmentCost": 20000,
+        "companyShareAmount": 24000,
+        "remainingShareAmount": 56000,
+        "netProfit": 60000,
+        "companyProfitShareAmount": 18000,
+        "remainingProfitShareAmount": 42000,
+        "leadId": "lead-105"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T17:03:29.800Z"
+    },
+    {
+      "id": "audit-1795453409765-14",
+      "action": "FINANCIAL_CALCULATION",
+      "category": "FINANCE",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetId": "calc-1795453409763",
+      "targetType": "CALCULATION",
+      "summary": "Calculated profit split for ₹100,000 (Cost: ₹40,000, Net Profit: ₹60,000)",
+      "details": {
+        "gross": 100000,
+        "cost": 40000,
+        "netProfit": 60000,
+        "pPct": 30,
+        "companyProfitShare": 18000,
+        "remainingProfitShare": 42000
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T17:03:29.765Z"
+    },
+    {
+      "id": "audit-1795453409746-95",
+      "action": "FINANCIAL_CALCULATION",
+      "category": "FINANCE",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetId": "calc-1795453409612",
+      "targetType": "CALCULATION",
+      "summary": "Calculated 30:70 split for ₹100,000 (Company: ₹30,000)",
+      "details": {
+        "gross": 100000,
+        "compPct": 30,
+        "remPct": 70,
+        "companyShare": 30000,
+        "remainingShare": 70000
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T17:03:29.746Z"
+    },
+    {
+      "id": "audit-1795432628288-565",
+      "action": "ATTENDANCE_PUNCH_IN",
+      "category": "ATTENDANCE",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "att-1795432628287",
+      "targetType": "ATTENDANCE",
+      "summary": "Rohan Mehta punched in at 04:47 PM (Status: LATE)",
+      "details": {
+        "punchInTime": "04:47 PM",
+        "status": "LATE",
+        "isLate": true
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T11:17:08.288Z"
+    },
+    {
+      "id": "audit-1795432627615-372",
+      "action": "ATTENDANCE_PUNCH_OUT",
+      "category": "ATTENDANCE",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "att-1795428667177",
+      "targetType": "ATTENDANCE",
+      "summary": "Rohan Mehta punched out at 04:47 PM (Duration: 66 mins)",
+      "details": {
+        "punchOutTime": "04:47 PM",
+        "workingMinutes": 66
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T11:17:07.615Z"
+    },
+    {
+      "id": "audit-1795432614795-473",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "lead-109",
+      "targetType": "LEAD",
+      "summary": "Lead Naveen Kumar updated from INTERESTED to CONVERTED",
+      "details": {
+        "previousStatus": "INTERESTED",
+        "newStatus": "CONVERTED",
+        "remarks": "study"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T11:16:54.795Z"
+    },
+    {
+      "id": "audit-1795432557620-629",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "lead-109",
+      "targetType": "LEAD",
+      "summary": "Lead Naveen Kumar updated from CONTACTED to INTERESTED",
+      "details": {
+        "previousStatus": "CONTACTED",
+        "newStatus": "INTERESTED",
+        "remarks": "toady join"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T11:15:57.620Z"
+    },
+    {
+      "id": "audit-1795432532303-233",
+      "action": "LEAD_STATUS_CHANGED",
+      "category": "LEAD",
+      "actorId": "usr-6",
+      "actorName": "Rohan Mehta",
+      "actorRole": "BDE",
+      "targetId": "lead-109",
+      "targetType": "LEAD",
+      "summary": "Lead Naveen Kumar updated from NEW to CONTACTED",
+      "details": {
+        "previousStatus": "NEW",
+        "newStatus": "CONTACTED",
+        "remarks": "yes"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T11:15:32.303Z"
+    },
+    {
+      "id": "audit-1795431650974-291",
+      "action": "LEAD_ALLOCATED_STAGE2",
+      "category": "ALLOCATION",
+      "actorId": "usr-2",
+      "actorName": "Priya Patel",
+      "actorRole": "TEAM_LEAD",
+      "targetId": "team-2",
+      "targetType": "TEAM",
+      "summary": "Allocated 1 leads from Team Pool to 1 BDEs (exact distribution)",
+      "details": {
+        "teamId": "team-2",
+        "bdeIds": [
+          "usr-7"
+        ],
+        "countPerBde": 1,
+        "distribution": {
+          "usr-7": 1
+        },
+        "method": "EQUAL",
+        "totalAllocated": 1,
+        "actorId": "usr-2"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T11:00:50.974Z"
+    },
+    {
+      "id": "audit-1795431630489-934",
+      "action": "LEAD_ALLOCATED_STAGE1",
+      "category": "ALLOCATION",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "TEAMS",
+      "summary": "Allocated 1 leads across 1 teams (exact quotas via EQUAL)",
+      "details": {
+        "teamIds": [
+          "team-2"
+        ],
+        "countPerTeam": 1,
+        "teamQuotas": {
+          "team-2": 1
+        },
+        "method": "EQUAL",
+        "totalAllocated": 1,
+        "distribution": {
+          "team-2": 1
+        },
+        "actorId": "usr-1"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T11:00:30.489Z"
+    },
+    {
+      "id": "audit-1795431428296-447",
+      "action": "LEAD_INGESTED",
+      "category": "LEAD",
+      "actorId": "usr-1",
+      "actorName": "Vikram Sharma",
+      "actorRole": "ADMIN",
+      "targetType": "BATCH",
+      "summary": "Ingested 1 new candidate leads (0 duplicates skipped)",
+      "details": {
+        "added": 1,
+        "duplicates": 0,
+        "totalRows": 1,
+        "actorId": "usr-1"
+      },
+      "ipAddress": "127.0.0.1",
+      "timestamp": "2026-11-23T10:57:08.296Z"
+    },
     {
       "id": "audit-1795428699575-367",
       "action": "LEAD_ALLOCATED_STAGE2",

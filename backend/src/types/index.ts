@@ -30,8 +30,8 @@ export interface User {
 export interface Team {
   id: string;
   name: string;
-  teamLeadId: string;
-  teamLeadName: string;
+  teamLeadId?: string | null;
+  teamLeadName?: string | null;
   bdeCount: number;
   activeLeadsCount: number;
   convertedLeadsCount: number;
@@ -55,7 +55,7 @@ export interface Lead {
   currentBdeName?: string | null;
   assignedToTeamAt?: string | null;
   assignedToBdeAt?: string | null;
-  nextFollowUpDate?: string;
+  nextFollowUpDate?: string | null;
   remarks?: string;
   dealValue?: number;
   createdAt: string;
@@ -105,7 +105,8 @@ export interface AttendanceRecord {
   punchInTime: string | null;
   punchOutTime: string | null;
   workingMinutes: number;
-  status: 'PRESENT' | 'LATE' | 'HALF_DAY' | 'ABSENT';
+  status: 'PRESENT' | 'LATE' | 'HALF_DAY' | 'ABSENT' | 'MISSING_PUNCH_OUT';
+  earlyDeparture?: boolean;
   isModified: boolean;
   modifiedBy?: string;
   modifiedByName?: string;
@@ -125,26 +126,33 @@ export interface FinancialTransaction {
   grossAmount: number;
   investmentCost: number;
   companySharePct: number;
+  companySharePercentage?: number;
   remainingSharePct: number;
+  remainingSharePercentage?: number;
   companyShareAmount: number;
   remainingShareAmount: number;
   netProfit: number;
-  status: 'PENDING_VERIFICATION' | 'CONFIRMED' | 'REJECTED';
-  confirmedById?: string;
-  confirmedByName?: string;
-  confirmedAt?: string;
+  profitSharePercentage?: number;
+  companyProfitShareAmount?: number;
+  remainingProfitShareAmount?: number;
+  status: 'PENDING_VERIFICATION' | 'CONFIRMED' | 'REJECTED' | 'REFUNDED' | 'PENDING';
+  confirmedById?: string | null;
+  confirmedByName?: string | null;
+  confirmedAt?: string | null;
+  notes?: string;
   createdAt: string;
 }
 
 export interface FinancialCalculationLog {
   id: string;
-  calcType: 'REVENUE_SPLIT' | 'PROFIT_SHARE' | 'CUSTOM_PERCENT' | 'DISCOUNT_NET';
+  calcType: string;
   inputValues: Record<string, any>;
   resultValues: Record<string, any>;
   calculatedById: string;
   calculatedByName: string;
   notes?: string;
-  timestamp: string;
+  timestamp?: string;
+  createdAt?: string;
 }
 
 export interface SystemSettings {
@@ -160,6 +168,7 @@ export interface SystemSettings {
   gracePeriodMinutes: number;
   allocationMethod: 'EQUAL' | 'WORKLOAD_BASED' | 'MANUAL';
   workdayEndTime: string;
+  earlyExitGracePeriodMinutes: number;
   halfDayThresholdHours: number;
   fullDayThresholdHours: number;
   followUpReminderMinutes: number;
@@ -182,6 +191,7 @@ export type AuditAction =
   | 'REPLENISHMENT_REQUESTED'
   | 'REPLENISHMENT_RESOLVED'
   | 'USER_CREATED'
+  | 'USER_REASSIGN'
   | 'USER_STATUS_TOGGLED'
   | 'TEAM_CREATED'
   | 'SETTINGS_UPDATED'

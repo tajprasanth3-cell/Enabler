@@ -105,8 +105,12 @@ export const TeamManagement: React.FC = () => {
           return (
             <motion.div
               key={t.id}
-              whileHover={{ y: -3 }}
-              className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4 relative overflow-hidden"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              whileHover={{ y: -5, scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
+              className="glass-panel interactive-card rounded-2xl p-4 sm:p-5 space-y-4 relative overflow-hidden cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <div>

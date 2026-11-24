@@ -41,10 +41,9 @@ export const createTeam = (req: AuthenticatedRequest, res: Response) => {
   if (teamLead.status !== 'ACTIVE') {
     return errorResponse(res, 'Selected team lead must be active', 400);
   }
-  if (db.teams.some((t) => t.teamLeadId === teamLeadId)) {
-    return errorResponse(res, 'Selected team lead already leads another team', 409);
+  if (db.teams.some((team) => team.teamLeadId === teamLeadId)) {
+    return errorResponse(res, 'Selected team lead already leads a team', 409);
   }
-
   const bodyActor = req.body.actor as { id: string; name: string; role: UserRole } | undefined;
   const currentActor = req.user || bodyActor || null;
   const auditActor = currentActor || { id: 'system', name: 'System', role: 'ADMIN' as UserRole };

@@ -3,7 +3,6 @@ import { useApp } from '../../context/useApp';
 import { motion } from 'framer-motion';
 import {
   FiUploadCloud,
-  FiFileText,
   FiAlertCircle,
   FiCheckCircle,
   FiLayers,
@@ -212,6 +211,7 @@ export const LeadIngestion: React.FC = () => {
       return;
     }
     setAllocationError(null);
+    notify('success', `Allocated ${allocated} lead${allocated === 1 ? '' : 's'} across ${selectedTeams.length} team${selectedTeams.length === 1 ? '' : 's'}.`);
     setShowAllocModal(false);
   };
 
@@ -222,18 +222,18 @@ export const LeadIngestion: React.FC = () => {
   });
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
-        <div>
-          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
+      <div className="flex flex-col gap-5 border-b border-[#E2E8F0] pb-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#059669]">
             <FiUploadCloud className="text-sm" />
             <span>Lead Ingestion & Stage 1 Allocation</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
+          <h1 className="break-words text-2xl font-black leading-tight tracking-tight text-[#0F172A] sm:text-3xl">
             Data Ingestion & Team Distribution
           </h1>
-          <p className="text-[#64748B] text-sm mt-1">
+          <p className="mt-2 max-w-3xl text-xs leading-relaxed text-[#64748B] sm:text-sm">
             Import candidate records from CSV, deduplicate against the pool and within the batch, and distribute to team pools.
           </p>
         </div>
@@ -260,16 +260,19 @@ export const LeadIngestion: React.FC = () => {
       {/* Upload & Duplicate Validation Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* CSV Ingestion */}
-        <div className="lg:col-span-2 glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-              <FiFileText className="text-[#059669]" />
-              <span>Bulk Data Upload (CSV Only)</span>
-            </h3>
-            <span className="text-xs text-[#059669] font-semibold bg-[#ECFDF5] px-2.5 py-1 rounded-full border border-[#A7F3D0]">
-              Dedupe: Pool + Batch + Candidate ID
-            </span>
-          </div>
+        <div className="lg:col-span-2 glass-panel rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
+                  <span>Bulk Data Upload (CSV)</span>
+                </h3>
+                <span className="text-[10px] text-[#64748B]">Batch ingestion pipeline</span>
+              </div>
+              <span className="text-xs text-[#059669] font-semibold bg-[#ECFDF5] px-2.5 py-1 rounded-full border border-[#A7F3D0]">
+                Dedupe: Pool + Batch + Candidate ID
+              </span>
+            </div>
 
           <div className="border-2 border-dashed border-[#CBD5E1] hover:border-[#10B981] rounded-2xl p-4 sm:p-5 text-center transition-all bg-[#F8FAFC]">
             <FiUploadCloud className="mx-auto text-4xl text-[#059669] mb-2" />
@@ -358,54 +361,59 @@ export const LeadIngestion: React.FC = () => {
               </button>
             </motion.div>
           )}
+          </div>
         </div>
 
         {/* Quick Add Single Candidate */}
-        <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
-          <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#10B981]" />
-            <span>Quick Add Candidate</span>
-          </h3>
-          <form onSubmit={handleManualAdd} className="space-y-3 text-xs">
+        <div className="glass-panel rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+          <div className="space-y-4">
             <div>
-              <label className="block text-[#64748B] mb-1 font-semibold">Full Name *</label>
-              <input
-                type="text"
-                required
-                value={candidateName}
-                onChange={(e) => setCandidateName(e.target.value)}
-                placeholder="e.g. Alok Verma"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
-              />
+              <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-1.5">
+                <span>Quick Add Candidate</span>
+              </h3>
+              <span className="text-[10px] text-[#64748B]">Single record entry</span>
             </div>
-            <div>
-              <label className="block text-[#64748B] mb-1 font-semibold">Phone Number *</label>
-              <input
-                type="text"
-                required
-                value={candidatePhone}
-                onChange={(e) => setCandidatePhone(e.target.value)}
-                placeholder="e.g. +91 99888 77665"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
-              />
-            </div>
-            <div>
-              <label className="block text-[#64748B] mb-1 font-semibold">Email</label>
-              <input
-                type="email"
-                value={candidateEmail}
-                onChange={(e) => setCandidateEmail(e.target.value)}
-                placeholder="candidate@email.com"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full py-2.5 rounded-xl bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] font-bold border border-[#A7F3D0] transition-all cursor-pointer shadow-xs"
-            >
-              Add Candidate
-            </button>
-          </form>
+            <form onSubmit={handleManualAdd} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-[#64748B] mb-1 font-semibold">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={candidateName}
+                  onChange={(e) => setCandidateName(e.target.value)}
+                  placeholder="e.g. Alok Verma"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-[#64748B] mb-1 font-semibold">Phone Number *</label>
+                <input
+                  type="text"
+                  required
+                  value={candidatePhone}
+                  onChange={(e) => setCandidatePhone(e.target.value)}
+                  placeholder="e.g. +91 99888 77665"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-[#64748B] mb-1 font-semibold">Email</label>
+                <input
+                  type="email"
+                  value={candidateEmail}
+                  onChange={(e) => setCandidateEmail(e.target.value)}
+                  placeholder="candidate@email.com"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981] focus:bg-white"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-2.5 rounded-xl bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] font-bold border border-[#A7F3D0] transition-all cursor-pointer shadow-xs"
+              >
+                Add Candidate
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -418,13 +426,13 @@ export const LeadIngestion: React.FC = () => {
             <span className="text-xs text-[#64748B] font-semibold">({leads.length} Total Records)</span>
           </div>
 
-          <div className="flex items-center gap-2 text-xs">
-            <FiFilter className="text-[#64748B]" />
-            <span className="text-[#64748B] font-semibold">Filter Team:</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <FiFilter className="shrink-0 text-[#64748B]" />
+            <span className="shrink-0 font-semibold text-[#64748B]">Filter Team:</span>
             <select
               value={filterTeam}
               onChange={(e) => setFilterTeam(e.target.value)}
-              className="bg-white border border-[#E2E8F0] rounded-xl py-1.5 px-3 text-[#0F172A] font-medium focus:outline-none focus:border-[#10B981]"
+              className="min-w-0 max-w-full rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-medium text-[#0F172A] focus:border-[#10B981] focus:outline-none w-full sm:w-auto sm:max-w-[240px]"
             >
               <option value="ALL">All Leads</option>
               <option value="UNASSIGNED">Unassigned Pool ({unassignedCount})</option>
@@ -438,50 +446,50 @@ export const LeadIngestion: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[980px] border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                <th className="py-3.5 px-3">Lead ID</th>
-                <th className="py-3.5 px-3">Candidate Name</th>
-                <th className="py-3.5 px-3">Contact</th>
-                <th className="py-3.5 px-3">City / Degree</th>
-                <th className="py-3.5 px-3">Assigned Team</th>
-                <th className="py-3.5 px-3">Assigned BDE</th>
-                <th className="py-3.5 px-3">Lifecycle Status</th>
+              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
+                <th className="px-4 py-3.5 sm:px-5">Lead ID</th>
+                <th className="px-4 py-3.5 sm:px-5">Candidate Name</th>
+                <th className="px-4 py-3.5 sm:px-5">Contact</th>
+                <th className="px-4 py-3.5 sm:px-5">City / Degree</th>
+                <th className="min-w-[160px] px-4 py-3.5 sm:px-5">Assigned Team</th>
+                <th className="px-4 py-3.5 sm:px-5">Assigned BDE</th>
+                <th className="px-4 py-3.5 sm:px-5">Lifecycle Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
               {filteredLeads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-[#F8FAFC] transition-colors">
-                  <td className="py-3 px-3 font-mono text-[#64748B]">{lead.id}</td>
-                  <td className="py-3 px-3 font-bold text-[#0F172A]">{lead.candidateName}</td>
-                  <td className="py-3 px-3 text-[#475569]">
+                  <td className="px-4 py-3.5 sm:px-5 font-mono text-[#64748B]">{lead.id}</td>
+                  <td className="px-4 py-3.5 sm:px-5 font-bold text-[#0F172A]">{lead.candidateName}</td>
+                  <td className="px-4 py-3.5 sm:px-5 text-[#475569]">
                     <div className="font-semibold text-[#0F172A]">{lead.phone}</div>
                     <div className="text-[10px] text-[#64748B]">{lead.email || '—'}</div>
                   </td>
-                  <td className="py-3 px-3 text-[#475569]">
+                  <td className="px-4 py-3.5 sm:px-5 text-[#475569]">
                     <div>{lead.city}</div>
                     <div className="text-[10px] text-[#64748B]">{lead.education}</div>
                   </td>
-                  <td className="py-3 px-3 font-bold">
+                  <td className="min-w-[160px] px-4 py-3.5 font-bold sm:px-5">
                     {lead.currentTeamName ? (
-                      <span className="text-[#059669] bg-[#ECFDF5] px-2.5 py-0.5 rounded-full border border-[#A7F3D0]">
+                      <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[#A7F3D0] bg-[#ECFDF5] px-3 py-1 text-[11px] font-bold text-[#059669]">
                         {lead.currentTeamName}
                       </span>
                     ) : (
-                      <span className="text-[#D97706] bg-[#FFFBEB] px-2.5 py-0.5 rounded-full border border-[#FDE68A]">
+                      <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-3 py-1 text-[11px] font-bold text-[#D97706]">
                         Unassigned Pool
                       </span>
                     )}
                   </td>
-                  <td className="py-3 px-3 text-[#475569]">
+                  <td className="px-4 py-3.5 sm:px-5 text-[#475569]">
                     {lead.currentBdeName ? (
                       <span className="font-medium text-[#0F172A]">{lead.currentBdeName}</span>
                     ) : (
                       <span className="text-[#64748B] italic">In Team Pool</span>
                     )}
                   </td>
-                  <td className="py-3 px-3">
+                  <td className="px-4 py-3.5 sm:px-5">
                     <StatusBadge status={lead.status} />
                   </td>
                 </tr>
@@ -497,23 +505,23 @@ export const LeadIngestion: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel w-full max-w-lg space-y-5 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-2xl sm:p-6"
           >
-            <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] pb-4">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
                 <FiSend className="text-[#059669]" />
                 <span>Stage 1: Allocate Leads to Teams</span>
               </h3>
               <button
                 onClick={() => setShowAllocModal(false)}
-                className="text-[#64748B] hover:text-[#0F172A] text-lg font-bold cursor-pointer"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg font-bold text-[#64748B] cursor-pointer hover:text-[#0F172A]"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleExecuteStage1Allocation} className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] font-semibold">
+              <div className="rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-4 font-semibold text-[#065F46]">
                 Total Unassigned Leads in Admin Pool: <strong>{unassignedCount}</strong>
               </div>
 
@@ -523,7 +531,7 @@ export const LeadIngestion: React.FC = () => {
                   {teams.map((t) => (
                     <label
                       key={t.id}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] cursor-pointer hover:bg-white transition-colors"
+                      className="flex flex-wrap items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 cursor-pointer transition-colors hover:bg-white"
                     >
                       <input
                         type="checkbox"
@@ -537,8 +545,8 @@ export const LeadIngestion: React.FC = () => {
                         }}
                         className="accent-[#10B981]"
                       />
-                      <span className="font-bold text-[#0F172A]">{t.name}</span>
-                      <span className="text-[#64748B] text-[11px]">(TL: {t.teamLeadName})</span>
+                      <span className="whitespace-nowrap font-bold text-[#0F172A]">{t.name}</span>
+                      <span className="text-[11px] text-[#64748B]">(TL: {t.teamLeadName})</span>
                     </label>
                   ))}
                 </div>
@@ -573,7 +581,7 @@ export const LeadIngestion: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] text-[#64748B] text-[11px]">
+              <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 text-[11px] text-[#64748B]">
                 Total allocation: <strong className="text-[#0F172A]">{plannedAllocation}</strong> of{' '}
                 {unassignedCount} pooled leads will be distributed into {selectedTeams.length} team
                 pool{selectedTeams.length === 1 ? '' : 's'}.
@@ -586,13 +594,13 @@ export const LeadIngestion: React.FC = () => {
               )}
 
               {allocationError && (
-                <div className="p-3 rounded-xl bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] text-[11px] font-semibold flex items-start gap-2">
+                <div className="flex items-start gap-2 rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-3.5 text-[11px] font-semibold text-[#DC2626]">
                   <FiAlertCircle className="text-sm shrink-0" />
                   <span>{allocationError}</span>
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+              <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
                 <button
                   type="button"
                   onClick={() => setShowAllocModal(false)}

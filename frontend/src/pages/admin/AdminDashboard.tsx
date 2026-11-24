@@ -102,69 +102,101 @@ export const AdminDashboard: React.FC = () => {
       {/* KPI Cards Grid with Interactive Spring Hovers */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
         <motion.div
-          whileHover={{ y: -3 }}
-          className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.05 }}
+          whileHover={{ y: -5, scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel stat-card-animated p-5 rounded-2xl relative overflow-hidden min-w-0 cursor-pointer flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span>Total Leads Uploaded</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Total Leads Uploaded
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-0.5 truncate">{totalUploaded}</div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiLayers className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#0F172A] mt-2 truncate">{totalUploaded}</div>
-          <div className="text-xs text-[#059669] font-bold mt-1 flex items-center gap-1">
+          <div className="text-xs text-[#059669] font-bold mt-3 flex items-center gap-1">
             <FiArrowUpRight />
             <span>{totalAllocated} Allocated ({totalUploaded - totalAllocated} in Pool)</span>
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -3 }}
-          className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          whileHover={{ y: -5, scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel stat-card-animated p-5 rounded-2xl relative overflow-hidden min-w-0 cursor-pointer flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span>Successful Conversions</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Successful Conversions
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-0.5 truncate">{totalConverted}</div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiCheckCircle className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#059669] mt-2 truncate">{totalConverted}</div>
-          <div className="text-xs text-[#64748B] mt-1 font-medium">
+          <div className="text-xs text-[#64748B] mt-3 font-medium">
             Closed across {teams.length} Teams
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -3 }}
-          className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          whileHover={{ y: -5, scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel stat-card-animated p-5 rounded-2xl relative overflow-hidden min-w-0 cursor-pointer flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span>Org Conversion Rate</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Org Conversion Rate
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-0.5 truncate">{overallConversionPct}%</div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiTrendingUp className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#0F172A] mt-2 truncate">{overallConversionPct}%</div>
-          <div className="text-[11px] text-[#64748B] mt-1 font-mono">
+          <div className="text-[11px] text-[#64748B] mt-3 font-mono">
             (Conversions ÷ Allocated) × 100
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -3 }}
-          className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          whileHover={{ y: -5, scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel stat-card-animated p-5 rounded-2xl relative overflow-hidden min-w-0 cursor-pointer flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span>Confirmed Revenue</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Confirmed Revenue
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-0.5 truncate">
+                ₹{totalRevenueConfirmed.toLocaleString('en-IN')}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiDollarSign className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#0F172A] mt-2 truncate">
-            ₹{totalRevenueConfirmed.toLocaleString('en-IN')}
-          </div>
-          <div className="text-xs text-[#059669] font-bold mt-1 truncate">
-            Company Share at current configured ratio ({companySharePct}%): ₹{((totalRevenueConfirmed * companySharePct) / 100).toLocaleString('en-IN')}
+          <div className="text-xs text-[#059669] font-bold mt-3 truncate">
+            Company Share ({companySharePct}%): ₹{((totalRevenueConfirmed * companySharePct) / 100).toLocaleString('en-IN')}
           </div>
           <div className="text-[11px] text-[#64748B] mt-0.5">
             Across {confirmedTransactions.length} confirmed transaction{confirmedTransactions.length === 1 ? '' : 's'}
@@ -190,17 +222,17 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[860px] text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                <th className="py-3 px-3">Team Name</th>
-                <th className="py-3 px-3">Team Lead</th>
-                <th className="py-3 px-3">Active BDEs</th>
-                <th className="py-3 px-3">Active Leads in Team Pool</th>
-                <th className="py-3 px-3">Active with BDEs</th>
-                <th className="py-3 px-3">Conversions</th>
-                <th className="py-3 px-3">Conversion %</th>
-                <th className="py-3 px-3">Status</th>
+                <th className="py-3.5 px-4">Team Name</th>
+                <th className="py-3.5 px-4">Team Lead</th>
+                <th className="py-3.5 px-4">Active BDEs</th>
+                <th className="py-3.5 px-4">Active Leads in Team Pool</th>
+                <th className="py-3.5 px-4">Active with BDEs</th>
+                <th className="py-3.5 px-4">Conversions</th>
+                <th className="py-3.5 px-4">Conversion %</th>
+                <th className="py-3.5 px-4">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
@@ -215,14 +247,14 @@ export const AdminDashboard: React.FC = () => {
 
                 return (
                   <tr key={t.id} className="hover:bg-[#F8FAFC] transition-colors">
-                    <td className="py-3.5 px-3 font-bold text-[#0F172A]">{t.name}</td>
-                    <td className="py-3.5 px-3 text-[#475569]">{t.teamLeadName}</td>
-                    <td className="py-3.5 px-3 text-[#475569] font-medium">{bdeCount} Execs</td>
-                    <td className="py-3.5 px-3 font-bold text-[#D97706]">{teamPool} Unassigned</td>
-                    <td className="py-3.5 px-3 font-bold text-[#059669]">{bdeAssigned} Distributed</td>
-                    <td className="py-3.5 px-3 font-bold text-[#0F172A]">{conversions}</td>
-                    <td className="py-3.5 px-3 font-black text-[#059669]">{convPct}%</td>
-                    <td className="py-3.5 px-3">
+                    <td className="py-3.5 px-4 font-bold text-[#0F172A]">{t.name}</td>
+                    <td className="py-3.5 px-4 text-[#475569]">{t.teamLeadName}</td>
+                    <td className="py-3.5 px-4 text-[#475569] font-medium">{bdeCount} Execs</td>
+                    <td className="py-3.5 px-4 font-bold text-[#D97706]">{teamPool} Unassigned</td>
+                    <td className="py-3.5 px-4 font-bold text-[#059669]">{bdeAssigned} Distributed</td>
+                    <td className="py-3.5 px-4 font-bold text-[#0F172A]">{conversions}</td>
+                    <td className="py-3.5 px-4 font-black text-[#059669]">{convPct}%</td>
+                    <td className="py-3.5 px-4">
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
                         {t.status}
                       </span>

@@ -75,6 +75,18 @@ export function calculateProfitShare(
 }
 
 /**
+ * Custom Percentage Calculator
+ */
+export function calculateCustomPercentage(
+  baseValue: number,
+  percentage: number
+): { calculatedAmount: number; remainderAmount: number } {
+  const calculatedAmount = Number(((baseValue * percentage) / 100).toFixed(2));
+  const remainderAmount = Number((baseValue - calculatedAmount).toFixed(2));
+  return { calculatedAmount, remainderAmount };
+}
+
+/**
  * Discount and Final Price Calculator
  */
 export function calculateDiscount(

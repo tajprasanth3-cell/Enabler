@@ -134,7 +134,7 @@ export const BDEWorkingQueue: React.FC = () => {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -149,7 +149,7 @@ export const BDEWorkingQueue: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-[#059669] bg-[#ECFDF5] px-3 py-1.5 rounded-xl border border-[#A7F3D0]">
-            {filteredLeads.length} of {openLeads.length} Open Leads
+            {filteredLeads.length} shown · {openLeads.length} open
           </span>
         </div>
       </div>
@@ -191,7 +191,7 @@ export const BDEWorkingQueue: React.FC = () => {
       {/* Main Calling Queue Container */}
       <div className="glass-panel rounded-2xl p-4 sm:p-6 space-y-4">
         {/* Search, Filter & View Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2.5 flex-1">
             {/* Search Bar */}
             <div className="relative flex-1 sm:flex-initial min-w-[220px]">
@@ -336,35 +336,35 @@ export const BDEWorkingQueue: React.FC = () => {
         {/* VIEW MODE B: TABLE */}
         {viewMode === 'TABLE' && filteredLeads.length > 0 && (
           <div className="overflow-x-auto rounded-xl border border-[#E2E8F0]">
-            <table className="w-full text-left text-xs border-collapse min-w-[700px]">
+            <table className="w-full min-w-[860px] text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                  <th className="py-3 px-3">Lead ID</th>
-                  <th className="py-3 px-3">Candidate Name</th>
-                  <th className="py-3 px-3">Contact</th>
-                  <th className="py-3 px-3">City / Qualification</th>
-                  <th className="py-3 px-3">Calling Status</th>
-                  <th className="py-3 px-3">Next Action</th>
-                  <th className="py-3 px-3 text-right">Quick Actions</th>
+                  <th className="py-3.5 px-4">Lead ID</th>
+                  <th className="py-3.5 px-4">Candidate Name</th>
+                  <th className="py-3.5 px-4">Contact</th>
+                  <th className="py-3.5 px-4">City / Qualification</th>
+                  <th className="py-3.5 px-4">Calling Status</th>
+                  <th className="py-3.5 px-4">Next Action</th>
+                  <th className="py-3.5 px-4 text-right">Quick Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E8F0]">
                 {filteredLeads.map((lead: Lead) => (
                   <tr key={lead.id} className="hover:bg-[#F8FAFC] transition-colors">
-                    <td className="py-3.5 px-3 font-mono text-[#64748B]">{lead.id}</td>
-                    <td className="py-3.5 px-3 font-bold text-[#0F172A]">{lead.candidateName}</td>
-                    <td className="py-3.5 px-3 text-[#0F172A] font-mono">
+                    <td className="py-3.5 px-4 font-mono text-[#64748B]">{lead.id}</td>
+                    <td className="py-3.5 px-4 font-bold text-[#0F172A]">{lead.candidateName}</td>
+                    <td className="py-3.5 px-4 text-[#0F172A] font-mono">
                       <div className="font-semibold">{lead.phone}</div>
                       <div className="text-[10px] text-[#64748B]">{lead.email || '—'}</div>
                     </td>
-                    <td className="py-3.5 px-3 text-[#475569]">
+                    <td className="py-3.5 px-4 text-[#475569]">
                       <div>{lead.city}</div>
                       <div className="text-[10px] text-[#64748B]">{lead.education}</div>
                     </td>
-                    <td className="py-3.5 px-3">
+                    <td className="py-3.5 px-4">
                       <StatusBadge status={lead.status} />
                     </td>
-                    <td className="py-3.5 px-3 text-[#475569]">
+                    <td className="py-3.5 px-4 text-[#475569]">
                       {lead.nextFollowUpDate ? (
                         <span className="text-[#065F46] font-bold bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]">
                           {formatFollowUpDate(lead.nextFollowUpDate)}
@@ -373,7 +373,7 @@ export const BDEWorkingQueue: React.FC = () => {
                         <span className="text-[#64748B]">—</span>
                       )}
                     </td>
-                    <td className="py-3.5 px-3 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <div className="inline-flex items-center gap-1.5 justify-end">
                         <a
                           href={`tel:${lead.phone.replace(/\s+/g, '')}`}

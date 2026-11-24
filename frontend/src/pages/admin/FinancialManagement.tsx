@@ -5,6 +5,7 @@ import {
   calculateProfitShare,
   calculateDiscount,
   calculateGrowth,
+  calculateCustomPercentage,
 } from '../../utils/calculations';
 import { motion } from 'framer-motion';
 import {
@@ -28,6 +29,7 @@ export const FinancialManagement: React.FC = () => {
     companySharePct,
     setCompanySharePct,
     confirmPaymentTransaction,
+    updateTransactionStatus,
     logFinancialCalculation,
     systemSettings,
   } = useApp();
@@ -55,6 +57,10 @@ export const FinancialManagement: React.FC = () => {
   const [growthCurr, setGrowthCurr] = useState<number>(450000);
   const growthResult = calculateGrowth(growthPrev, growthCurr);
 
+  const [customBase, setCustomBase] = useState<number>(100000);
+  const [customPct, setCustomPct] = useState<number>(18);
+  const customResult = calculateCustomPercentage(customBase, customPct);
+
   // Modal to confirm payment on converted lead
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string>('');
@@ -67,6 +73,11 @@ export const FinancialManagement: React.FC = () => {
   const convertedLeads = leads.filter(
     (l) => l.status === 'CONVERTED' && !transactions.some((t) => t.leadId === l.id)
   );
+
+  const effectiveLeadId =
+    selectedLeadId && convertedLeads.some((l) => l.id === selectedLeadId)
+      ? selectedLeadId
+      : convertedLeads[0]?.id || '';
 
   // Summary Metrics
   const confirmedTransactions = transactions.filter((t) => t.status === 'CONFIRMED');
@@ -128,6 +139,16 @@ export const FinancialManagement: React.FC = () => {
     setFeedback({ type: 'success', message: 'Sales growth calculation saved to the audit log.' });
   };
 
+  const handleSaveCustomCalculation = () => {
+    logFinancialCalculation(
+      'CUSTOM_PERCENTAGE',
+      { baseValue: customBase, percentage: customPct },
+      { calculatedAmount: customResult.calculatedAmount, remainderAmount: customResult.remainderAmount },
+      `Custom percentage calculation: ${customPct}% of ₹${customBase.toLocaleString()}`
+    );
+    setFeedback({ type: 'success', message: 'Custom percentage calculation saved to the audit log.' });
+  };
+
   const handleSaveDefaultRatio = () => {
     const safePct = Math.min(95, Math.max(5, Number.isFinite(calcCompanySharePct) ? calcCompanySharePct : 30));
     setCalcCompanySharePct(safePct);
@@ -140,7 +161,8 @@ export const FinancialManagement: React.FC = () => {
 
   const handleConfirmPayment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLeadId) {
+    const targetLeadId = selectedLeadId || effectiveLeadId;
+    if (!targetLeadId) {
       setFeedback({ type: 'error', message: 'Select a converted lead before confirming payment.' });
       return;
     }
@@ -156,8 +178,8 @@ export const FinancialManagement: React.FC = () => {
       });
       return;
     }
-    const lead = convertedLeads.find((item) => item.id === selectedLeadId);
-    const confirmed = confirmPaymentTransaction(selectedLeadId, txGrossAmount, txInvestmentCost, txNotes);
+    const lead = convertedLeads.find((item) => item.id === targetLeadId);
+    const confirmed = confirmPaymentTransaction(targetLeadId, txGrossAmount, txInvestmentCost, txNotes);
     if (!confirmed) {
       setFeedback({
         type: 'error',
@@ -170,7 +192,7 @@ export const FinancialManagement: React.FC = () => {
       message: `Payment for ${lead?.candidateName || 'the converted lead'} confirmed and posted to the ledger.`,
     });
     setShowConfirmModal(false);
-    const nextLead = convertedLeads.find((item) => item.id !== selectedLeadId);
+    const nextLead = convertedLeads.find((item) => item.id !== targetLeadId);
     if (nextLead) setSelectedLeadId(nextLead.id);
   };
 
@@ -209,86 +231,139 @@ export const FinancialManagement: React.FC = () => {
 
       {feedback && (
         <div
-          className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${
-            feedback.type === 'success'
-              ? 'bg-[#ECFDF5] border-[#A7F3D0] text-[#047857]'
-              : 'bg-[#FEF2F2] border-[#FECACA] text-[#DC2626]'
-          }`}
+          className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${feedback.type === 'success'
+            ? 'bg-[#ECFDF5] border-[#A7F3D0] text-[#047857]'
+            : 'bg-[#FEF2F2] border-[#FECACA] text-[#DC2626]'
+            }`}
         >
           {feedback.type === 'success' ? <FiCheckCircle /> : <FiAlertCircle />}
           <span>{feedback.message}</span>
         </div>
       )}
 
-      {/* Summary KPI Cards */}
+      {/* Summary KPI Cards with Spring Hover, Thematic Background Images & Soft Frosted Glass */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-        <motion.div whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0">
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span>Total Confirmed Revenue</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05 }}
+          whileHover={{ y: -5, scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0 cursor-default shadow-xs hover:shadow-lg transition-all flex flex-col justify-between"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Total Confirmed Revenue
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-0.5 truncate">
+                ₹{totalRecordedRevenue.toLocaleString('en-IN')}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiDollarSign className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#0F172A] mt-2 truncate">
-            ₹{totalRecordedRevenue.toLocaleString('en-IN')}
-          </div>
-          <div className="text-xs text-[#059669] mt-1 flex items-center gap-1 font-semibold">
+          <div className="text-xs text-[#059669] mt-3 flex items-center gap-1 font-semibold">
             <FiCheckCircle />
             <span>{confirmedTransactions.length} Confirmed Transactions</span>
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0">
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span>Company Share (stored: {ratioText(storedCompanyRatios)})</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          whileHover={{ y: -5, scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0 cursor-default shadow-xs hover:shadow-lg transition-all flex flex-col justify-between"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Company Share ({ratioText(storedCompanyRatios)})
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-0.5 truncate">
+                ₹{totalCompanyShare.toLocaleString('en-IN')}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiPieChart className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#059669] mt-2 truncate">
-            ₹{totalCompanyShare.toLocaleString('en-IN')}
+          <div className="text-xs text-[#64748B] mt-3 font-medium truncate">
+            Ratio recorded on each transaction
           </div>
-          <div className="text-xs text-[#64748B] mt-1 font-medium">Ratio recorded on each confirmed transaction</div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0">
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span>Remaining Share (stored: {ratioText(storedRemainingRatios)})</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.15 }}
+          whileHover={{ y: -5, scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0 cursor-default shadow-xs hover:shadow-lg transition-all flex flex-col justify-between"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Remaining Share ({ratioText(storedRemainingRatios)})
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-0.5 truncate">
+                ₹{totalRemainingShare.toLocaleString('en-IN')}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiLayers className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#0F172A] mt-2 truncate">
-            ₹{totalRemainingShare.toLocaleString('en-IN')}
+          <div className="text-xs text-[#64748B] mt-3 font-medium truncate">
+            Frontline Operations / Partner Pool
           </div>
-          <div className="text-xs text-[#64748B] mt-1 font-medium">Partner / Operations Pool (as recorded)</div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -3 }} className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0">
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span>Calculated Net Profit</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.2 }}
+          whileHover={{ y: -5, scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel p-5 rounded-2xl relative overflow-hidden min-w-0 cursor-default shadow-xs hover:shadow-lg transition-all flex flex-col justify-between"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Calculated Net Profit
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-0.5 truncate">
+                ₹{totalCalculatedProfit.toLocaleString('en-IN')}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiTrendingUp className="text-base" />
             </div>
           </div>
-          <div className="text-3xl font-black text-[#059669] mt-2 truncate">
-            ₹{totalCalculatedProfit.toLocaleString('en-IN')}
+          <div className="text-xs text-[#64748B] mt-3 font-medium truncate">
+            Revenue minus Direct Investment
           </div>
-          <div className="text-xs text-[#64748B] mt-1 font-medium">Revenue minus Direct Investment</div>
         </motion.div>
       </div>
 
       {/* Interactive Calculators Workspace */}
-      <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.25 }}
+        className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4"
+      >
         {/* Calculator Tabs */}
         <div className="tab-strip flex border-b border-[#E2E8F0] pb-3 gap-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('30_70')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === '30_70'
-                ? 'shimmer-button text-white shadow-xs'
-                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
-            }`}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 whitespace-nowrap transition-all cursor-pointer ${activeTab === '30_70'
+              ? 'shimmer-button text-white shadow-xs'
+              : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
+              }`}
           >
             <FiPieChart />
             <span>30:70 Revenue Sharing Calculator</span>
@@ -296,11 +371,10 @@ export const FinancialManagement: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('PROFIT')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === 'PROFIT'
-                ? 'shimmer-button text-white shadow-xs'
-                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
-            }`}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 whitespace-nowrap transition-all cursor-pointer ${activeTab === 'PROFIT'
+              ? 'shimmer-button text-white shadow-xs'
+              : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
+              }`}
           >
             <FiTrendingUp />
             <span>Profit Sharing Calculator</span>
@@ -308,11 +382,10 @@ export const FinancialManagement: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('ADDITIONAL')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === 'ADDITIONAL'
-                ? 'shimmer-button text-white shadow-xs'
-                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
-            }`}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 whitespace-nowrap transition-all cursor-pointer ${activeTab === 'ADDITIONAL'
+              ? 'shimmer-button text-white shadow-xs'
+              : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
+              }`}
           >
             <FiPercent />
             <span>Discount & Growth Calculators</span>
@@ -389,9 +462,15 @@ export const FinancialManagement: React.FC = () => {
               </div>
             </div>
 
-            {/* Output Calculation Cards */}
+            {/* Output Calculation Cards with Animated Interactive Lift */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0]">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ y: -4, scale: 1.015 }}
+                transition={{ duration: 0.25 }}
+                className="p-5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] shadow-xs hover:shadow-md transition-shadow cursor-default"
+              >
                 <div className="text-xs text-[#059669] font-bold uppercase tracking-wider">
                   Company Share ({revResult.companyPercentage}%)
                 </div>
@@ -401,9 +480,15 @@ export const FinancialManagement: React.FC = () => {
                 <div className="text-xs text-[#64748B] mt-1">
                   Formula: ₹{revInput.toLocaleString()} × ({revResult.companyPercentage} ÷ 100)
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ y: -4, scale: 1.015 }}
+                transition={{ duration: 0.25, delay: 0.05 }}
+                className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] shadow-xs hover:shadow-md transition-shadow cursor-default"
+              >
                 <div className="text-xs text-[#64748B] font-bold uppercase tracking-wider">
                   Remaining Share ({revResult.remainingPercentage}%)
                 </div>
@@ -413,7 +498,7 @@ export const FinancialManagement: React.FC = () => {
                 <div className="text-xs text-[#64748B] mt-1">
                   Formula: ₹{revInput.toLocaleString()} − ₹{revResult.companyShare.toLocaleString()}
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             <div className="flex justify-end">
@@ -477,14 +562,17 @@ export const FinancialManagement: React.FC = () => {
               </div>
             </div>
 
-            {/* Profit Results */}
+            {/* Profit Results with Animated Interactive Lift */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div
-                className={`p-5 rounded-xl border ${
-                  profitResult.isProfitable
-                    ? 'bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46]'
-                    : 'bg-[#FEF2F2] border-[#FECACA] text-[#DC2626]'
-                }`}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ y: -4, scale: 1.015 }}
+                transition={{ duration: 0.25 }}
+                className={`p-5 rounded-xl border shadow-xs hover:shadow-md transition-shadow cursor-default ${profitResult.isProfitable
+                  ? 'bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46]'
+                  : 'bg-[#FEF2F2] border-[#FECACA] text-[#DC2626]'
+                  }`}
               >
                 <div className="text-xs font-bold uppercase tracking-wider">
                   Calculated Net Profit
@@ -495,9 +583,15 @@ export const FinancialManagement: React.FC = () => {
                 <div className="text-xs mt-1 font-medium">
                   {profitResult.isProfitable ? 'Positive Net Margin' : 'Negative Margin / Loss'}
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ y: -4, scale: 1.015 }}
+                transition={{ duration: 0.25, delay: 0.05 }}
+                className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] shadow-xs hover:shadow-md transition-shadow cursor-default"
+              >
                 <div className="text-xs text-[#059669] font-bold uppercase tracking-wider">
                   Company Profit Share ({profitSharePct}%)
                 </div>
@@ -507,9 +601,15 @@ export const FinancialManagement: React.FC = () => {
                 <div className="text-xs text-[#64748B] mt-1 font-medium">
                   Applied to Net Profit
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ y: -4, scale: 1.015 }}
+                transition={{ duration: 0.25, delay: 0.1 }}
+                className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] shadow-xs hover:shadow-md transition-shadow cursor-default"
+              >
                 <div className="text-xs text-[#64748B] font-bold uppercase tracking-wider">
                   Remaining Share ({100 - profitSharePct}%)
                 </div>
@@ -519,7 +619,7 @@ export const FinancialManagement: React.FC = () => {
                 <div className="text-xs text-[#64748B] mt-1 font-medium">
                   Residual Profit Balance
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             <div className="flex justify-end">
@@ -534,14 +634,64 @@ export const FinancialManagement: React.FC = () => {
           </motion.div>
         )}
 
-        {/* Tab 3: Discount & Growth Calculators */}
+        {/* Tab 3: Discount, Growth & Custom Percentage Calculators */}
         {activeTab === 'ADDITIONAL' && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Custom Percentage Calculator */}
+            <div className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-4">
+              <div className="flex items-center gap-2 text-[#059669] font-bold text-sm">
+                <FiPercent />
+                <span>Custom Percentage Calculator</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-[#64748B] font-semibold mb-1">Base Amount (₹)</label>
+                  <input
+                    type="number"
+                    value={customBase}
+                    onChange={(e) => setCustomBase(Math.max(0, Number(e.target.value)))}
+                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-[#64748B] font-semibold mb-1">Rate %</label>
+                  <input
+                    type="number"
+                    value={customPct}
+                    onChange={(e) => setCustomPct(Math.min(100, Math.max(0, Number(e.target.value))))}
+                    className="w-full bg-white border border-[#E2E8F0] rounded-lg p-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981]"
+                  />
+                </div>
+              </div>
+              <div className="p-3 bg-white rounded-lg border border-[#E2E8F0] flex justify-between items-center text-xs shadow-xs">
+                <div>
+                  <div className="text-[#64748B] font-medium">Applied Amount ({customPct}%):</div>
+                  <div className="text-[#059669] font-bold text-sm">
+                    ₹{customResult.calculatedAmount.toLocaleString()}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[#64748B] font-medium">Remainder:</div>
+                  <div className="text-[#0F172A] font-bold text-sm">
+                    ₹{customResult.remainderAmount.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleSaveCustomCalculation}
+                className="w-full px-4 py-2.5 rounded-xl bg-white hover:bg-[#ECFDF5] text-[#0F172A] text-xs font-bold flex items-center justify-center gap-2 border border-[#E2E8F0] transition-all cursor-pointer shadow-xs"
+              >
+                <FiFileText className="text-[#059669]" />
+                <span>Save Percentage to Audit Log</span>
+              </button>
+            </div>
+
             {/* Discount Calculator */}
             <div className="p-5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-4">
               <div className="flex items-center gap-2 text-[#059669] font-bold text-sm">
                 <FiPercent />
-                <span>Discount & Net Pricing Calculator</span>
+                <span>Discount & Net Pricing</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -623,9 +773,8 @@ export const FinancialManagement: React.FC = () => {
                 <div className="text-right">
                   <div className="text-[#64748B] font-medium">Growth Rate:</div>
                   <div
-                    className={`font-bold text-sm ${
-                      growthResult.growthPercentage >= 0 ? 'text-[#059669]' : 'text-[#DC2626]'
-                    }`}
+                    className={`font-bold text-sm ${growthResult.growthPercentage >= 0 ? 'text-[#059669]' : 'text-[#DC2626]'
+                      }`}
                   >
                     {growthResult.growthPercentage >= 0 ? '+' : ''}
                     {growthResult.growthPercentage}%
@@ -643,257 +792,334 @@ export const FinancialManagement: React.FC = () => {
             </div>
           </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* Confirmed Financial Transactions Ledger */}
-      <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-[#0F172A] font-bold text-base">
-            <FiCheckCircle className="text-[#059669]" />
-            <span>Confirmed Financial Transactions Ledger (Lead Conversions)</span>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.2 }}
+        whileHover={{ y: -2 }}
+        className="glass-panel interactive-card card-frosted-cover finance-table-card rounded-2xl p-4 sm:p-5"
+      >
+        <div className="card-frosted-bg" style={{ backgroundImage: "url('/cards/revenue-finance.jpg')" }} aria-hidden="true" />
+        <div className="card-frosted-glass" aria-hidden="true" />
+        <div className="relative z-10 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-3">
+              <img
+                src="/cards/revenue-finance.jpg"
+                alt="Confirmed revenue transactions"
+                className="h-9 w-9 rounded-xl object-cover border border-[#E2E8F0] shadow-xs shrink-0"
+              />
+              <div className="flex min-w-0 items-center gap-2 text-[#0F172A] font-bold text-sm sm:text-base">
+                <FiCheckCircle className="text-[#059669] shrink-0" />
+                <span className="break-words">Confirmed Financial Transactions Ledger (Lead Conversions)</span>
+              </div>
+            </div>
+            <span className="shrink-0 whitespace-nowrap text-[11px] sm:text-xs text-[#059669] font-bold bg-[#ECFDF5] px-2.5 py-1 rounded-full border border-[#A7F3D0]">
+              {confirmedTransactions.length} Confirmed Inflows
+            </span>
           </div>
-          <span className="text-xs text-[#059669] font-medium bg-[#ECFDF5] px-2.5 py-1 rounded-full border border-[#A7F3D0]">
-            {confirmedTransactions.length} Confirmed Inflows
-          </span>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                <th className="py-3.5 px-3">Transaction ID</th>
-                <th className="py-3.5 px-3">Candidate / Deal</th>
-                <th className="py-3.5 px-3">BDE / Team</th>
-                <th className="py-3.5 px-3">Gross Revenue</th>
-                <th className="py-3.5 px-3">Net Profit</th>
-                <th className="py-3.5 px-3">Company Share (stored ratio)</th>
-                <th className="py-3.5 px-3">Remaining Share</th>
-                <th className="py-3.5 px-3">Company Profit Share</th>
-                <th className="py-3.5 px-3">Remaining Profit Share</th>
-                <th className="py-3.5 px-3">Confirmed Date</th>
-                <th className="py-3.5 px-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E2E8F0]">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-[#F8FAFC] transition-colors">
-                  <td className="py-3.5 px-3 font-mono text-[#64748B]">{tx.id}</td>
-                  <td className="py-3.5 px-3 font-bold text-[#0F172A]">{tx.candidateName}</td>
-                  <td className="py-3.5 px-3 text-[#475569]">
-                    <div className="font-semibold text-[#0F172A]">{tx.bdeName}</div>
-                    <div className="text-[10px] text-[#64748B]">{tx.teamName}</div>
-                  </td>
-                  <td className="py-3.5 px-3 font-bold text-[#059669]">
-                    ₹{tx.grossAmount.toLocaleString()}
-                  </td>
-                  <td className="py-3.5 px-3 font-bold text-[#0F172A]">
-                    ₹{tx.netProfit.toLocaleString()}
-                  </td>
-                  <td className="py-3.5 px-3 font-bold text-[#059669]">
-                    ₹{tx.companyShareAmount.toLocaleString()} ({tx.companySharePercentage}%)
-                  </td>
-                  <td className="py-3.5 px-3 font-bold text-[#64748B]">
-                    ₹{tx.remainingShareAmount.toLocaleString()} ({tx.remainingSharePercentage}%)
-                  </td>
-                  <td className="py-3.5 px-3 font-bold text-[#059669]">
-                    {tx.companyProfitShareAmount != null
-                      ? `₹${tx.companyProfitShareAmount.toLocaleString()} (${tx.profitSharePercentage ?? 0}%)`
-                      : '—'}
-                  </td>
-                  <td className="py-3.5 px-3 font-bold text-[#64748B]">
-                    {tx.remainingProfitShareAmount != null
-                      ? `₹${tx.remainingProfitShareAmount.toLocaleString()}`
-                      : '—'}
-                  </td>
-                  <td className="py-3.5 px-3 text-[#64748B]">{tx.confirmedAt || '—'}</td>
-                  <td className="py-3.5 px-3">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                        tx.status === 'CONFIRMED'
-                          ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]'
-                          : 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]'
-                      }`}
+          <div className="finance-table-surface -mx-2 overflow-x-auto px-2 pb-1">
+            <table className="w-full min-w-[1180px] text-left text-[11px] sm:text-xs border-collapse">
+        <thead>
+          <tr className="border-b border-[#CBD5E1] text-[#334155] font-black bg-[#E2E8F0]">
+            <th className="whitespace-nowrap py-3.5 px-3">Transaction ID</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Candidate / Deal</th>
+            <th className="whitespace-nowrap py-3.5 px-3">BDE / Team</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Gross Revenue</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Net Profit</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Company Share (stored ratio)</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Remaining Share</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Company Profit Share</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Remaining Profit Share</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Confirmed Date</th>
+            <th className="whitespace-nowrap py-3.5 px-3">Status</th>
+            <th className="whitespace-nowrap py-3.5 px-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#CBD5E1]">
+          {transactions.map((tx) => (
+            <tr key={tx.id} className="hover:bg-[#F1F5F9] transition-colors">
+              <td className="py-3.5 px-3 font-mono font-bold text-[#334155]">{tx.id}</td>
+              <td className="py-3.5 px-3 font-bold text-[#0F172A]">{tx.candidateName}</td>
+              <td className="py-3.5 px-3 font-semibold text-[#334155]">
+                <div className="font-bold text-[#0F172A]">{tx.bdeName}</div>
+                <div className="text-[10px] font-semibold text-[#475569]">{tx.teamName}</div>
+              </td>
+              <td className="py-3.5 px-3 font-black text-[#047857]">
+                ₹{tx.grossAmount.toLocaleString()}
+              </td>
+              <td className="py-3.5 px-3 font-bold text-[#0F172A]">
+                ₹{tx.netProfit.toLocaleString()}
+              </td>
+              <td className="py-3.5 px-3 font-black text-[#047857]">
+                ₹{tx.companyShareAmount.toLocaleString()} ({tx.companySharePercentage}%)
+              </td>
+              <td className="py-3.5 px-3 font-bold text-[#334155]">
+                ₹{tx.remainingShareAmount.toLocaleString()} ({tx.remainingSharePercentage}%)
+              </td>
+              <td className="py-3.5 px-3 font-black text-[#047857]">
+                {tx.companyProfitShareAmount != null
+                  ? `₹${tx.companyProfitShareAmount.toLocaleString()} (${tx.profitSharePercentage ?? 0}%)`
+                  : '—'}
+              </td>
+              <td className="py-3.5 px-3 font-bold text-[#334155]">
+                {tx.remainingProfitShareAmount != null
+                  ? `₹${tx.remainingProfitShareAmount.toLocaleString()}`
+                  : '—'}
+              </td>
+              <td className="py-3.5 px-3 font-semibold text-[#475569]">{tx.confirmedAt || '—'}</td>
+              <td className="py-3.5 px-3">
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${tx.status === 'CONFIRMED'
+                    ? 'bg-[#ECFDF5] text-[#047857] border-[#A7F3D0] font-black'
+                    : tx.status === 'REJECTED' || tx.status === 'REFUNDED'
+                      ? 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'
+                      : 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]'
+                    }`}
+                >
+                  {tx.status}
+                </span>
+              </td>
+              <td className="py-3.5 px-3 text-right">
+                {tx.status !== 'CONFIRMED' ? (
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateTransactionStatus(tx.id, 'CONFIRMED', 'Admin manually verified transaction');
+                        setFeedback({ type: 'success', message: `Transaction ${tx.id} marked as CONFIRMED.` });
+                      }}
+                      className="px-2 py-1 rounded bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0] text-[10px] font-bold cursor-pointer"
                     >
-                      {tx.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      Confirm
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateTransactionStatus(tx.id, 'REJECTED', 'Admin rejected transaction');
+                        setFeedback({ type: 'error', message: `Transaction ${tx.id} marked as REJECTED.` });
+                      }}
+                      className="px-2 py-1 rounded bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA] text-[10px] font-bold cursor-pointer"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateTransactionStatus(tx.id, 'REFUNDED', 'Admin processed refund');
+                      setFeedback({ type: 'error', message: `Transaction ${tx.id} marked as REFUNDED.` });
+                    }}
+                    className="px-2 py-1 rounded bg-[#F8FAFC] hover:bg-[#F1F5F9] text-[#475569] hover:text-[#DC2626] border border-[#E2E8F0] text-[10px] font-bold cursor-pointer"
+                  >
+                    Refund
+                  </button>
+                )}
+              </td>
+            </tr>
+            ))}
+          </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Financial Calculation History Table */}
-      <div className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-[#0F172A] font-bold text-base">
-            <FiClock className="text-[#059669]" />
-            <span>Calculation Audit Trail & Saved Projections</span>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.28 }}
+        whileHover={{ y: -2 }}
+        className="glass-panel interactive-card card-frosted-cover finance-table-card rounded-2xl p-4 sm:p-5"
+      >
+        <div className="card-frosted-bg" style={{ backgroundImage: "url('/cards/growth-rate.jpg')" }} aria-hidden="true" />
+        <div className="card-frosted-glass" aria-hidden="true" />
+        <div className="relative z-10 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-3">
+              <img
+                src="/cards/growth-rate.jpg"
+                alt="Saved growth projections"
+                className="h-9 w-9 rounded-xl object-cover border border-[#E2E8F0] shadow-xs shrink-0"
+              />
+              <div className="flex min-w-0 items-center gap-2 text-[#0F172A] font-bold text-sm sm:text-base">
+                <FiClock className="text-[#059669] shrink-0" />
+                <span className="break-words">Calculation Audit Trail &amp; Saved Projections</span>
+              </div>
+            </div>
+            <span className="shrink-0 text-[11px] sm:text-xs text-[#475569] font-bold">
+              Stored history with actor &amp; timestamps
+            </span>
           </div>
-          <span className="text-xs text-[#64748B]">Stored history with actor & timestamps</span>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                <th className="py-3 px-3">Timestamp</th>
-                <th className="py-3 px-3">Calculation Type</th>
-                <th className="py-3 px-3">Inputs</th>
-                <th className="py-3 px-3">Outputs</th>
-                <th className="py-3 px-3">Operator</th>
-                <th className="py-3 px-3">Notes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E2E8F0]">
-              {calculationLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-[#F8FAFC] text-[#475569]">
-                  <td className="py-2.5 px-3 text-[#64748B] font-mono">{log.createdAt}</td>
-                  <td className="py-2.5 px-3 font-mono text-[#059669] font-bold">{log.calcType}</td>
-                  <td className="py-2.5 px-3 text-[11px] font-mono text-[#475569]">
-                    {JSON.stringify(log.inputValues)}
-                  </td>
-                  <td className="py-2.5 px-3 text-[11px] font-mono text-[#059669] font-bold">
-                    {JSON.stringify(log.resultValues)}
-                  </td>
-                  <td className="py-2.5 px-3 font-semibold text-[#0F172A]">{log.calculatedByName}</td>
-                  <td className="py-2.5 px-3 text-[#64748B]">{log.notes || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="finance-table-surface -mx-2 overflow-x-auto px-2 pb-1">
+            <table className="w-full min-w-[820px] text-left text-[11px] sm:text-xs border-collapse">
+        <thead>
+          <tr className="border-b border-[#CBD5E1] text-[#334155] font-black bg-[#E2E8F0]">
+            <th className="whitespace-nowrap py-3 px-3">Timestamp</th>
+            <th className="whitespace-nowrap py-3 px-3">Calculation Type</th>
+            <th className="whitespace-nowrap py-3 px-3">Inputs</th>
+            <th className="whitespace-nowrap py-3 px-3">Outputs</th>
+            <th className="whitespace-nowrap py-3 px-3">Operator</th>
+            <th className="whitespace-nowrap py-3 px-3">Notes</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#CBD5E1]">
+          {calculationLogs.map((log) => (
+            <tr key={log.id} className="hover:bg-[#F1F5F9] text-[#1E293B] font-semibold">
+              <td className="py-2.5 px-3 font-mono font-bold text-[#334155]">{log.createdAt}</td>
+              <td className="py-2.5 px-3 font-mono font-black text-[#047857]">{log.calcType}</td>
+              <td className="min-w-[220px] break-all py-2.5 px-3 text-[11px] font-mono font-bold text-[#0F172A]">
+                {JSON.stringify(log.inputValues)}
+              </td>
+              <td className="min-w-[220px] break-all py-2.5 px-3 text-[11px] font-mono font-bold text-[#0F172A]">
+                {JSON.stringify(log.resultValues)}
+              </td>
+              <td className="py-2.5 px-3 font-bold text-[#0F172A]">{log.calculatedByName}</td>
+              <td className="py-2.5 px-3 font-semibold text-[#475569]">{log.notes || '—'}</td>
+            </tr>
+            ))}
+          </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Modal: Confirm Payment Transaction on Converted Lead */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-[#0F172A]/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
-          >
-            <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
-              <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
-                <FiDollarSign className="text-[#059669]" />
-                <span>Confirm Payment for Converted Lead</span>
-              </h3>
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="text-[#64748B] hover:text-[#0F172A] text-lg font-bold cursor-pointer"
+  {
+    showConfirmModal && (
+      <div className="fixed inset-0 bg-[#0F172A]/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
+        >
+          <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+            <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
+              <FiDollarSign className="text-[#059669]" />
+              <span>Confirm Payment for Converted Lead</span>
+            </h3>
+            <button
+              onClick={() => setShowConfirmModal(false)}
+              className="text-[#64748B] hover:text-[#0F172A] text-lg font-bold cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleConfirmPayment} className="space-y-4 text-xs">
+            {feedback?.type === 'error' && (
+              <div className="p-3 rounded-xl bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] font-bold flex items-center gap-2">
+                <FiAlertCircle />
+                <span>{feedback.message}</span>
+              </div>
+            )}
+            <div>
+              <label className="block text-[#0F172A] font-bold mb-1">
+                Select Converted Candidate
+              </label>
+              <select
+                value={effectiveLeadId}
+                onChange={(e) => setSelectedLeadId(e.target.value)}
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-semibold focus:outline-none focus:border-[#10B981] focus:bg-white"
               >
-                ✕
-              </button>
+                {convertedLeads.map((lead) => (
+                  <option key={lead.id} value={lead.id}>
+                    {lead.candidateName} ({lead.phone}) - Closed by {lead.currentBdeName || 'BDE'}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <form onSubmit={handleConfirmPayment} className="space-y-4 text-xs">
-              {feedback?.type === 'error' && (
-                <div className="p-3 rounded-xl bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] font-bold flex items-center gap-2">
-                  <FiAlertCircle />
-                  <span>{feedback.message}</span>
-                </div>
-              )}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[#0F172A] font-bold mb-1">
-                  Select Converted Candidate
-                </label>
-                <select
-                  value={selectedLeadId}
-                  onChange={(e) => setSelectedLeadId(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] text-xs font-semibold focus:outline-none focus:border-[#10B981] focus:bg-white"
-                >
-                  {convertedLeads.map((lead) => (
-                    <option key={lead.id} value={lead.id}>
-                      {lead.candidateName} ({lead.phone}) - Closed by {lead.currentBdeName || 'BDE'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[#0F172A] font-bold mb-1">Gross Payment (₹)</label>
-                  <input
-                    type="number"
-                    value={txGrossAmount}
-                    onChange={(e) => setTxGrossAmount(Number(e.target.value))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[#0F172A] font-bold mb-1">Investment / Direct Cost (₹)</label>
-                  <input
-                    type="number"
-                    value={txInvestmentCost}
-                    onChange={(e) => setTxInvestmentCost(Number(e.target.value))}
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
-                  />
-                </div>
-              </div>
-
-              <div className="p-3.5 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-1.5">
-                <div className="flex justify-between text-[#64748B]">
-                  <span>Net Profit:</span>
-                  <span className="text-[#0F172A] font-bold">₹{txProfitPreview.netProfit.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-[#64748B]">
-                  <span>Company Share ({txSharePreview.companyPercentage}%):</span>
-                  <span className="text-[#059669] font-bold">₹{txSharePreview.companyShare.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-[#64748B]">
-                  <span>Remaining Share ({txSharePreview.remainingPercentage}%):</span>
-                  <span className="text-[#64748B] font-bold">₹{txSharePreview.remainingShare.toLocaleString()}</span>
-                </div>
-                {txProfitPreview.isProfitable && (
-                  <>
-                    <div className="flex justify-between text-[#64748B]">
-                      <span>Profit Split - Company ({systemSettings.profitSharePercentage}%):</span>
-                      <span className="text-[#059669] font-bold">
-                        ₹{txProfitPreview.companyProfitShare.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-[#64748B]">
-                      <span>Profit Split - Remaining:</span>
-                      <span className="text-[#64748B] font-bold">
-                        ₹{txProfitPreview.remainingProfitShare.toLocaleString()}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-[#0F172A] font-bold mb-1">Transaction Notes</label>
+                <label className="block text-[#0F172A] font-bold mb-1">Gross Payment (₹)</label>
                 <input
-                  type="text"
-                  value={txNotes}
-                  onChange={(e) => setTxNotes(e.target.value)}
-                  placeholder="e.g. UPI Ref / Bank wire confirmed"
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981] focus:bg-white"
+                  type="number"
+                  value={txGrossAmount}
+                  onChange={(e) => setTxGrossAmount(Number(e.target.value))}
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
                 />
               </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmModal(false)}
-                  className="px-4 py-2 rounded-xl bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] text-xs font-bold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl shimmer-button text-white text-xs font-bold shadow-md cursor-pointer"
-                >
-                  Confirm & Post Transaction
-                </button>
+              <div>
+                <label className="block text-[#0F172A] font-bold mb-1">Investment / Direct Cost (₹)</label>
+                <input
+                  type="number"
+                  value={txInvestmentCost}
+                  onChange={(e) => setTxInvestmentCost(Number(e.target.value))}
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-bold focus:outline-none focus:border-[#10B981] focus:bg-white"
+                />
               </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-    </div>
+            </div>
+
+            <div className="p-3.5 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-1.5">
+              <div className="flex justify-between text-[#64748B]">
+                <span>Net Profit:</span>
+                <span className="text-[#0F172A] font-bold">₹{txProfitPreview.netProfit.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-[#64748B]">
+                <span>Company Share ({txSharePreview.companyPercentage}%):</span>
+                <span className="text-[#059669] font-bold">₹{txSharePreview.companyShare.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-[#64748B]">
+                <span>Remaining Share ({txSharePreview.remainingPercentage}%):</span>
+                <span className="text-[#64748B] font-bold">₹{txSharePreview.remainingShare.toLocaleString()}</span>
+              </div>
+              {txProfitPreview.isProfitable && (
+                <>
+                  <div className="flex justify-between text-[#64748B]">
+                    <span>Profit Split - Company ({systemSettings.profitSharePercentage}%):</span>
+                    <span className="text-[#059669] font-bold">
+                      ₹{txProfitPreview.companyProfitShare.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[#64748B]">
+                    <span>Profit Split - Remaining:</span>
+                    <span className="text-[#64748B] font-bold">
+                      ₹{txProfitPreview.remainingProfitShare.toLocaleString()}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[#0F172A] font-bold mb-1">Transaction Notes</label>
+              <input
+                type="text"
+                value={txNotes}
+                onChange={(e) => setTxNotes(e.target.value)}
+                placeholder="e.g. UPI Ref / Bank wire confirmed"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] focus:outline-none focus:border-[#10B981] focus:bg-white"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 rounded-xl bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] text-xs font-bold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl shimmer-button text-white text-xs font-bold shadow-md cursor-pointer"
+              >
+                Confirm & Post Transaction
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    )
+  }
+    </div >
   );
 };
 

@@ -55,9 +55,9 @@ const SHORT_LABELS: Record<string, string> = {
 };
 
 export const Sidebar: React.FC = () => {
-  const { currentRole, currentUser, replenishmentAlerts, unassignedAdminLeadsCount, isBdeExhausted } = useApp();
+  const { currentRole, managedTeamIds, replenishmentAlerts, unassignedAdminLeadsCount, isBdeExhausted } = useApp();
   const location = useLocation();
-  const teamAlerts = replenishmentAlerts.filter((alert) => alert.teamId === currentUser.teamId);
+  const teamAlerts = replenishmentAlerts.filter((alert) => managedTeamIds.includes(alert.teamId));
   const [tabletNavPath, setTabletNavPath] = useState<string | null>(null);
   const tabletExpanded = tabletNavPath === location.pathname;
 

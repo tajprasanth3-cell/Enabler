@@ -254,6 +254,14 @@ export const allocateStage2 = (req: AuthenticatedRequest, res: Response) => {
   if (!team) {
     return errorResponse(res, 'Team not found', 404);
   }
+  if (currentActor?.role === 'TEAM_LEAD') {
+    const managesTeam =
+      db.teams.some((item) => item.id === teamId && item.teamLeadId === currentActor.id) ||
+      currentActor.teamId === teamId;
+    if (!managesTeam) {
+      return errorResponse(res, 'Team leads can only allocate leads to teams they manage', 403);
+    }
+  }
 
   const targetBdes = bdeIds.map((bId) => db.users.find((u) => u.id === bId));
   const missingIndex = targetBdes.findIndex((bde) => !bde);
@@ -406,6 +414,9 @@ export const updateLeadStatus = (req: AuthenticatedRequest, res: Response) => {
   if (dealValue !== undefined) {
     lead.dealValue = Number(dealValue);
   }
+  if (nextFollowUpDate === null) {
+    lead.nextFollowUpDate = undefined;
+  }
   if (followUpTime) {
     lead.nextFollowUpDate = followUpTime;
 
@@ -468,6 +479,13 @@ export const reassignLeads = (req: AuthenticatedRequest, res: Response) => {
   if (!fromBde || !toBde) {
     return errorResponse(res, 'Source or destination BDE not found', 404);
   }
+  if (fromBde.role !== 'BDE' || toBde.role !== 'BDE' || toBde.status !== 'ACTIVE') {
+    return errorResponse(res, 'Both users must be BDEs and the target BDE must be active', 400);
+  }
+  const targetTeam = toBde.teamId ? db.teams.find((team) => team.id === toBde.teamId) : undefined;
+  if (!toBde.teamId || !targetTeam) {
+    return errorResponse(res, 'Target BDE is not assigned to a valid team', 400);
+  }
 
   const currentActor = resolveActor(req, req.body.actor);
   if (currentActor?.role === 'TEAM_LEAD') {
@@ -483,10 +501,13 @@ export const reassignLeads = (req: AuthenticatedRequest, res: Response) => {
     (l) => l.currentBdeId === fromBdeId && OPEN_LEAD_STATUSES.includes(l.status)
   );
 
+  const reassignmentNote = `Reassigned from ${fromBde.name}: ${reason}`;
   openLeads.forEach((l) => {
     l.currentBdeId = toBde.id;
     l.currentBdeName = toBde.name;
-    l.remarks = `Reassigned from ${fromBde.name}: ${reason}`;
+    l.currentTeamId = toBde.teamId;
+    l.currentTeamName = toBde.teamName || targetTeam.name;
+    l.remarks = l.remarks ? `${l.remarks}\n${reassignmentNote}` : reassignmentNote;
   });
   db.save();
 

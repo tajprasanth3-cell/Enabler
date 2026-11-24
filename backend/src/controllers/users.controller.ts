@@ -36,11 +36,17 @@ export const createUser = (req: AuthenticatedRequest, res: Response) => {
   }
 
   const team = teamId ? db.teams.find((t) => t.id === teamId) : undefined;
-  if ((role === 'BDE' || role === 'TEAM_LEAD') && !team) {
-    return errorResponse(res, 'A valid teamId is required for BDE and TEAM_LEAD users', 400);
+  if (role === 'BDE' && !team) {
+    return errorResponse(res, 'A valid teamId is required for BDE users', 400);
+  }
+  if (teamId && !team) {
+    return errorResponse(res, 'A valid teamId is required', 400);
   }
   if (role === 'ADMIN' && (teamId || team)) {
     return errorResponse(res, 'ADMIN users must not be assigned to a team', 400);
+  }
+  if (role === 'TEAM_LEAD' && team?.teamLeadId) {
+    return errorResponse(res, 'Selected team already has a team lead', 409);
   }
 
   const bodyActor = req.body.actor as { id: string; name: string; role: UserRole } | undefined;
@@ -60,6 +66,10 @@ export const createUser = (req: AuthenticatedRequest, res: Response) => {
   };
 
   db.users.push(newUser);
+  if (role === 'TEAM_LEAD' && team) {
+    team.teamLeadId = newUser.id;
+    team.teamLeadName = newUser.name;
+  }
   db.save();
 
   // Audit log user creation
@@ -115,4 +125,66 @@ export const toggleUserStatus = (req: AuthenticatedRequest, res: Response) => {
   );
 
   return successResponse(res, user, `User status updated to ${user.status}`);
+};
+
+export const reassignUserTeam = (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const { teamId } = req.body;
+
+  const user = db.users.find((u) => u.id === id);
+  if (!user) {
+    return errorResponse(res, 'User not found', 404);
+  }
+  if (user.role === 'ADMIN') {
+    return errorResponse(res, 'ADMIN users cannot be assigned to a team', 400);
+  }
+
+  const team = teamId ? db.teams.find((t) => t.id === teamId) : undefined;
+  if (teamId && !team) {
+    return errorResponse(res, 'Selected team was not found', 400);
+  }
+  if (user.role !== 'TEAM_LEAD' && !team) {
+    return errorResponse(res, 'A valid teamId is required for BDE users', 400);
+  }
+  if (user.role === 'TEAM_LEAD' && team?.teamLeadId && team.teamLeadId !== user.id) {
+    return errorResponse(res, 'Selected team already has a team lead', 409);
+  }
+
+  const bodyActor = req.body.actor as { id: string; name: string; role: UserRole } | undefined;
+  const currentActor = req.user || bodyActor || null;
+  const auditActor = currentActor || { id: 'system', name: 'System', role: 'ADMIN' as UserRole };
+  const fromTeam = user.teamName || 'Unassigned';
+
+  if (user.role === 'TEAM_LEAD') {
+    db.teams.forEach((item) => {
+      if (item.teamLeadId === user.id && item.id !== team?.id) {
+        item.teamLeadId = null;
+        item.teamLeadName = 'Unassigned';
+        item.updatedAt = new Date().toISOString();
+      }
+      if (team && item.id === team.id) {
+        item.teamLeadId = user.id;
+        item.teamLeadName = user.name;
+        item.updatedAt = new Date().toISOString();
+      }
+    });
+  }
+
+  user.teamId = team?.id;
+  user.teamName = team?.name;
+  db.save();
+
+  AuditService.log(
+    'USER_REASSIGN',
+    'USER',
+    auditActor,
+    `${user.name} moved from ${fromTeam} to ${team?.name || 'Unassigned'}`,
+    {
+      targetId: user.id,
+      targetType: 'USER',
+      details: { fromTeam, toTeam: team?.name || 'Unassigned', teamId: team?.id || null, actorId: currentActor?.id ?? null },
+    }
+  );
+
+  return successResponse(res, user, 'User team assignment updated');
 };

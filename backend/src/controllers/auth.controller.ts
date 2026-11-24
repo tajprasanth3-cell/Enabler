@@ -47,6 +47,9 @@ export const getCurrentUser = (req: Request, res: Response) => {
     if (!user) {
       return errorResponse(res, 'User not found', 404);
     }
+    if (user.status !== 'ACTIVE') {
+      return errorResponse(res, 'Account is inactive', 403);
+    }
     return successResponse(res, user, 'Current user retrieved');
   } catch (err) {
     return errorResponse(res, 'Invalid or expired session token', 401);

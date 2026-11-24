@@ -22,9 +22,10 @@ export const updateSettings = (req: AuthenticatedRequest, res: Response) => {
     maxLeadsPerBde,
     shiftStartTime,
     gracePeriodMinutes,
-    allocationMethod,
-    workdayEndTime,
-    halfDayThresholdHours,
+  allocationMethod,
+  workdayEndTime,
+  earlyExitGracePeriodMinutes,
+  halfDayThresholdHours,
     fullDayThresholdHours,
     followUpReminderMinutes,
     statuses,
@@ -96,6 +97,10 @@ export const updateSettings = (req: AuthenticatedRequest, res: Response) => {
 
   if (workdayEndTime !== undefined) {
     db.settings.workdayEndTime = String(workdayEndTime);
+  }
+
+  if (earlyExitGracePeriodMinutes !== undefined) {
+    db.settings.earlyExitGracePeriodMinutes = Number(earlyExitGracePeriodMinutes);
   }
 
   if (halfDayThresholdHours !== undefined) {

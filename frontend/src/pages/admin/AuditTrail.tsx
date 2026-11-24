@@ -117,10 +117,12 @@ export const AuditTrail: React.FC = () => {
   const [actionFilter, setActionFilter] = useState('ALL');
   const [statusSearch, setStatusSearch] = useState('');
   const [backendLogs, setBackendLogs] = useState<any[]>([]);
-  const [loadingBackendLogs, setLoadingBackendLogs] = useState(false);
+  const [loadingBackendLogs, setLoadingBackendLogs] = useState(true);
+  const [backendError, setBackendError] = useState('');
 
   const fetchBackendAudit = useCallback(async () => {
     setLoadingBackendLogs(true);
+    setBackendError('');
     try {
       const res = await auditService.getAuditLogs({ limit: 100 });
       if (res && res.logs) {
@@ -128,14 +130,36 @@ export const AuditTrail: React.FC = () => {
       }
     } catch (e) {
       console.warn('Backend audit fetch error:', e);
+      setBackendError('Could not load backend audit logs. Showing local activity only.');
     } finally {
       setLoadingBackendLogs(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchBackendAudit();
-  }, [fetchBackendAudit]);
+    let active = true;
+    auditService
+      .getAuditLogs({ limit: 100 })
+      .then((res) => {
+        if (active && res?.logs) {
+          setBackendLogs(res.logs);
+        }
+      })
+      .catch((e) => {
+        if (active) {
+          console.warn('Backend audit fetch error:', e);
+          setBackendError('Could not load backend audit logs. Showing local activity only.');
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoadingBackendLogs(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const combinedActivity = useMemo(() => {
     const backendAdapted: AuditEvent[] = backendLogs.map((log) => ({
@@ -213,7 +237,7 @@ export const AuditTrail: React.FC = () => {
             <FiShield />
             <span>Enterprise Compliance & Governance</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">System Audit Trail</h1>
+          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight break-words">System Audit Trail</h1>
           <p className="text-[#64748B] text-sm mt-1">
             Immutable, append-only record of all system events — status changes, allocations, biometric timesheet corrections,
             and 30:70 financial split calculations with actor identity, timestamp, IP, and payload diffs.
@@ -235,11 +259,25 @@ export const AuditTrail: React.FC = () => {
         </div>
       </div>
 
+      {backendError && (
+        <div role="alert" className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 text-xs font-semibold text-[#B45309]">
+          {backendError}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {kpis.map((kpi) => {
+        {kpis.map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
-            <motion.div key={kpi.label} whileHover={{ y: -2 }} className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
+            <motion.div
+              key={kpi.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: idx * 0.05 }}
+              whileHover={{ y: -5, scale: 1.02 }}
+              whileTap={{ scale: 0.985 }}
+              className="glass-panel stat-card-animated p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs cursor-pointer"
+            >
               <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
                 <span>{kpi.label}</span>
                 <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">

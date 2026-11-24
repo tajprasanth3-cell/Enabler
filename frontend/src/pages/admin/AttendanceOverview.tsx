@@ -42,12 +42,15 @@ const statusClass = (status: AttendanceRecord['status']): string => {
 };
 
 export const AttendanceOverview: React.FC = () => {
-  const { attendanceRecords, adjustAttendance, attendanceCorrections, systemSettings, currentRole, currentUser } =
+  const { attendanceRecords, adjustAttendance, attendanceCorrections, systemSettings, currentRole, teams, managedTeamIds } =
     useApp();
 
   const isTeamLead = currentRole === 'TEAM_LEAD';
+  const managedTeamNames = teams
+    .filter((team) => managedTeamIds.includes(team.id))
+    .map((team) => team.name);
   const scopedRecords = isTeamLead
-    ? attendanceRecords.filter((record) => record.teamId === (currentUser.teamId || ''))
+    ? attendanceRecords.filter((record) => managedTeamIds.includes(record.teamId || ''))
     : attendanceRecords;
   const correctionFor = (recordId: string) => attendanceCorrections.find((item) => item.recordId === recordId);
 
@@ -59,7 +62,11 @@ export const AttendanceOverview: React.FC = () => {
 
   const handleExecuteAdjustment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedRecord || !adjustmentReason.trim()) return;
+    if (!selectedRecord) return;
+    if (!adjustmentReason.trim()) {
+      setFeedback({ type: 'error', message: 'An audit reason is required for every correction.' });
+      return;
+    }
     const newPunchOutTime = revisedPunchOut ? new Date(revisedPunchOut).toISOString() : undefined;
     const adjusted = adjustAttendance(selectedRecord.id, revisedStatus, adjustmentReason, newPunchOutTime);
     if (!adjusted) {
@@ -69,7 +76,7 @@ export const AttendanceOverview: React.FC = () => {
       });
       return;
     }
-    setFeedback({ type: 'success', message: 'Timesheet correction applied and logged locally.' });
+    setFeedback({ type: 'success', message: 'Timesheet correction applied and recorded in the audit trail.' });
     setSelectedRecord(null);
   };
 
@@ -82,14 +89,14 @@ export const AttendanceOverview: React.FC = () => {
     <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
             <FiClock />
             <span>Attendance & Timesheet Governance</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
+          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight break-words">
             {isTeamLead
-              ? `${currentUser.teamName || 'Your Team'} Attendance Monitoring`
+              ? `${managedTeamNames.join(' & ') || 'Your Teams'} Attendance Monitoring`
               : 'Organization-Wide Attendance Monitoring'}
           </h1>
           <p className="text-[#64748B] text-sm mt-1">
@@ -102,31 +109,59 @@ export const AttendanceOverview: React.FC = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.05 }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel stat-card-animated p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs cursor-pointer"
+        >
           <div className="text-xs text-[#64748B] font-bold">Punched In On-Time (Present)</div>
           <div className="text-3xl font-black text-[#059669] mt-2">{presentCount}</div>
           <div className="text-xs text-[#64748B] mt-1 font-medium">Within configured grace window</div>
-        </div>
+        </motion.div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel stat-card-animated p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs cursor-pointer"
+        >
           <div className="text-xs text-[#64748B] font-bold">Late Arrivals</div>
           <div className="text-3xl font-black text-[#D97706] mt-2">{lateCount}</div>
           <div className="text-xs text-[#64748B] mt-1 font-medium">Arrived past shift start + grace</div>
-        </div>
+        </motion.div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel stat-card-animated p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs cursor-pointer"
+        >
           <div className="text-xs text-[#64748B] font-bold">Half-Day Records</div>
           <div className="text-3xl font-black text-[#64748B] mt-2">{halfDayCount}</div>
           <div className="text-xs text-[#64748B] mt-1 font-medium">
             Under {systemSettings.halfDayThresholdHours} hour threshold
           </div>
-        </div>
+        </motion.div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          whileTap={{ scale: 0.985 }}
+          className="glass-panel stat-card-animated p-5 rounded-2xl border border-[#CBD5E1] bg-white shadow-xs cursor-pointer"
+        >
           <div className="text-xs text-[#64748B] font-bold">Missing Punch-Out</div>
           <div className="text-3xl font-black text-[#BE185D] mt-2">{missingPunchOutCount}</div>
           <div className="text-xs text-[#64748B] mt-1 font-medium">Past dates without a recorded punch-out</div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Attendance Table */}
@@ -147,7 +182,7 @@ export const AttendanceOverview: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[960px] text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
                 <th className="py-3.5 px-4">Date</th>

@@ -17,6 +17,8 @@ export const Navbar: React.FC = () => {
     currentUser,
     currentRole,
     users,
+    teams,
+    managedTeamIds,
     switchUser,
     notify,
     punchState,
@@ -46,11 +48,14 @@ export const Navbar: React.FC = () => {
     ? currentUser.name.replace(/\s*\(.*?\)/g, '').trim()
     : 'User';
 
+  const managedTeamNames = teams
+    .filter((team) => managedTeamIds.includes(team.id))
+    .map((team) => team.name);
   const userRoleTitle =
     currentUser.role === 'ADMIN'
       ? 'Super Administrator'
       : currentUser.role === 'TEAM_LEAD'
-      ? `${currentUser.teamName || 'Team'} Lead`
+      ? `${managedTeamNames.join(' & ') || 'Team'} Lead`
       : `${currentUser.teamName || 'Team'} BDE`;
 
   return (
@@ -117,7 +122,7 @@ export const Navbar: React.FC = () => {
         {/* Right side: Identity Switcher & Profile Container */}
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <label
-            title="Switch between the configured Alpha/Beta users"
+            title="Local preview only — does not change the signed-in account"
             className="flex min-w-0 items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-1 text-xs shadow-inner"
           >
             <FiUser className="shrink-0 text-[#059669]" />

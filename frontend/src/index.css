@@ -86,6 +86,9 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', 'Helvetica Neue', sans-serif;
     background-color: var(--bg-main);
     color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
 
@@ -166,17 +169,80 @@
   }
 }
 
-/* Ambient Canvas with Floating Light Green & Midnight Glow */
+/* Ambient Canvas with High-End Enterprise Architectural Imagery & Soft Glow */
 .ambient-bg {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
+  inset: 0;
+  z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background-color: var(--bg-main);
+  background-color: #F8FAFC;
+}
+
+.ambient-image-layer {
+  position: absolute;
+  inset: 0;
+  background-image: url('/background-corporate.jpg'), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2560&q=80');
+  background-size: cover;
+  background-position: center 25%;
+  background-repeat: no-repeat;
+  opacity: 0.22;
+  filter: contrast(110%) saturate(105%);
+}
+
+.ambient-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.55) 0%, rgba(248, 250, 252, 0.75) 60%, rgba(241, 245, 249, 0.88) 100%);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+}
+
+.login-background-image {
+  position: absolute;
+  inset: 0;
+  background-image: url('/background-corporate.jpg'), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2560&q=80');
+  background-size: cover;
+  background-position: center 25%;
+  background-repeat: no-repeat;
+  opacity: 0.26;
+  filter: contrast(110%) saturate(105%);
+}
+
+.login-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 45% 20%, rgba(255, 255, 255, 0.62) 0%, rgba(248, 250, 252, 0.80) 55%, rgba(241, 245, 249, 0.92) 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.login-visual-card {
+  position: absolute;
+  inset: -1.5rem -1.75rem;
+  z-index: -1;
+  border-radius: 2.5rem;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.25) 45%, rgba(15, 23, 42, 0.12) 100%), url('/cards/leads-pipeline.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.18;
+  filter: saturate(120%) contrast(105%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.login-mobile-banner {
+  background-image: linear-gradient(90deg, rgba(16, 185, 129, 0.55), rgba(124, 58, 237, 0.35)), url('/cards/team-collab.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: saturate(115%);
+}
+
+@media (max-width: 1023px) {
+
+  .login-background-image::before,
+  .login-background-image::after {
+    display: none;
+  }
 }
 
 .orb {
@@ -232,16 +298,117 @@
    ========================================================================== */
 
 .glass-panel {
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-card);
-  box-shadow: 0 2px 14px -2px rgba(15, 23, 42, 0.04), 0 1px 3px -1px rgba(15, 23, 42, 0.02);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass-panel:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 24px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
+}
+
+.card-frosted-cover {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-frosted-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.14;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card-frosted-cover:hover .card-frosted-bg {
+  transform: scale(1.06);
+  opacity: 0.22;
+}
+
+.card-frosted-glass {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.88) 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.finance-table-card .card-frosted-bg {
+  opacity: 0.18;
+}
+
+.finance-table-card:hover .card-frosted-bg {
+  opacity: 0.26;
+}
+
+.finance-table-card .card-frosted-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(226, 232, 240, 0.72) 100%);
+}
+
+.finance-table-surface {
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.5rem;
+  box-shadow: inset 0 0 0 1px rgba(203, 213, 225, 0.9);
+}
+
+/* Interactive Card with Smooth Micro-Lift & Soft Emerald Aura */
+.card-animated,
+.interactive-card {
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-animated:hover,
+.interactive-card:hover {
+  transform: translateY(-4px) scale(1.012);
   border-color: #A7F3D0;
-  box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
-  transform: translateY(-2px);
+  box-shadow: 0 14px 28px -4px rgba(16, 185, 129, 0.16), 0 6px 14px -2px rgba(15, 23, 42, 0.05);
+}
+
+.card-animated:active,
+.interactive-card:active {
+  transform: scale(0.985);
+}
+
+/* Stat & KPI Card with Ambient Subtle Shimmer on Hover */
+.stat-card-animated {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+.stat-card-animated::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.08), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.75s ease;
+  pointer-events: none;
+}
+
+.stat-card-animated:hover::after {
+  left: 150%;
+}
+
+.stat-card-animated:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 14px 32px -4px rgba(16, 185, 129, 0.16), 0 6px 12px -2px rgba(15, 23, 42, 0.05);
+  border-color: #A7F3D0;
 }
 
 .glow-cobalt,
@@ -275,13 +442,14 @@
 .shimmer-green:hover,
 .bde-theme .shimmer-button:hover {
   box-shadow: 0 6px 24px rgba(16, 185, 129, 0.46) !important;
-  transform: translateY(-1px);
 }
 
 .bde-theme .glass-panel {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 2px 14px -2px rgba(15, 23, 42, 0.04), 0 1px 3px -1px rgba(15, 23, 42, 0.02);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
 }
 
 .bde-theme .glass-panel:hover {
@@ -450,6 +618,80 @@ body,
 
   .mobile-bottom-nav {
     padding-bottom: 0;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE PAGE RULES — MOBILE & TABLET
+   Scoped to <main> so every routed page inherits the same behaviour.
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  main {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1rem;
+  }
+
+  main h1 {
+    font-size: 1.5rem !important;
+    line-height: 1.2 !important;
+  }
+
+  main h1,
+  main h2,
+  main h3,
+  main p,
+  main th,
+  main td {
+    overflow-wrap: anywhere;
+  }
+
+  main table {
+    font-size: 0.6875rem;
+  }
+
+  main th,
+  main td {
+    padding: 0.75rem 0.875rem !important;
+  }
+
+  main button,
+  main select,
+  main input {
+    max-width: 100%;
+  }
+
+  main button.whitespace-nowrap {
+    white-space: normal !important;
+  }
+
+  main .overflow-x-auto {
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  main {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  main th,
+  main td {
+    padding: 0.875rem 1rem !important;
+  }
+
+  main button.whitespace-nowrap {
+    white-space: normal !important;
+  }
+
+  main .overflow-x-auto {
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

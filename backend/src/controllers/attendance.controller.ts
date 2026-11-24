@@ -151,9 +151,23 @@ export const punchOut = (req: AuthenticatedRequest, res: Response) => {
     punchInMinutes !== null && punchOutMinutes !== null && punchOutMinutes >= punchInMinutes
       ? punchOutMinutes - punchInMinutes
       : 0;
+  const halfDayThresholdMinutes = db.settings.halfDayThresholdHours * 60;
+  const status: AttendanceRecord['status'] =
+    workingMinutes < halfDayThresholdMinutes
+      ? 'HALF_DAY'
+      : record.status === 'LATE'
+        ? 'LATE'
+        : 'PRESENT';
+  const shiftEndMinutes = parseTimeToMinutes(db.settings.workdayEndTime);
+  const earlyDeparture =
+    punchOutMinutes !== null &&
+    shiftEndMinutes !== null &&
+    punchOutMinutes < shiftEndMinutes - db.settings.earlyExitGracePeriodMinutes;
 
   record.punchOutTime = timeNow;
   record.workingMinutes = workingMinutes;
+  record.status = status;
+  record.earlyDeparture = earlyDeparture;
   record.updatedAt = new Date().toISOString();
   db.save();
 
@@ -165,11 +179,11 @@ export const punchOut = (req: AuthenticatedRequest, res: Response) => {
     'ATTENDANCE_PUNCH_OUT',
     'ATTENDANCE',
     currentActor,
-    `${record.userName} punched out at ${timeNow} (Duration: ${workingMinutes} mins)`,
+    `${record.userName} punched out at ${timeNow} (Duration: ${workingMinutes} mins, Status: ${status})`,
     {
       targetId: record.id,
       targetType: 'ATTENDANCE',
-      details: { punchOutTime: timeNow, workingMinutes },
+      details: { punchOutTime: timeNow, workingMinutes, status, earlyDeparture },
       ipAddress: ipAddress || '127.0.0.1',
     }
   );
@@ -198,8 +212,13 @@ export const modifyAttendance = (req: AuthenticatedRequest, res: Response) => {
   if (!currentActor) {
     return errorResponse(res, 'Actor identity is required for attendance adjustments', 401);
   }
-  if (currentActor.role === 'TEAM_LEAD' && (!currentActor.teamId || record.teamId !== currentActor.teamId)) {
-    return errorResponse(res, 'Team leads can only adjust attendance for their own team', 403);
+  if (currentActor.role === 'TEAM_LEAD') {
+    const managesRecord =
+      db.teams.some((team) => team.id === record.teamId && team.teamLeadId === currentActor.id) ||
+      record.teamId === currentActor.teamId;
+    if (!managesRecord) {
+      return errorResponse(res, 'Team leads can only adjust attendance for teams they manage', 403);
+    }
   }
   if (currentActor.role !== 'TEAM_LEAD' && currentActor.role !== 'ADMIN') {
     return errorResponse(res, 'Only admins and team leads can adjust attendance', 403);
@@ -209,7 +228,12 @@ export const modifyAttendance = (req: AuthenticatedRequest, res: Response) => {
   const originalPunchIn = record.punchInTime;
   const originalPunchOut = record.punchOutTime;
 
-  if (revisedStatus) record.status = revisedStatus;
+  if (revisedStatus !== undefined) {
+    if (!['PRESENT', 'LATE', 'HALF_DAY', 'ABSENT', 'MISSING_PUNCH_OUT'].includes(revisedStatus)) {
+      return errorResponse(res, 'Invalid attendance status', 400);
+    }
+    record.status = revisedStatus;
+  }
   if (revisedPunchIn !== undefined) record.punchInTime = revisedPunchIn;
   if (revisedPunchOut !== undefined) record.punchOutTime = revisedPunchOut;
 

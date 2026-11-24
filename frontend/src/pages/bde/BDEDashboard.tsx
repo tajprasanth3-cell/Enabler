@@ -341,76 +341,109 @@ export const BDEDashboard: React.FC = () => {
           ========================================================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4">
         <motion.div
-          whileHover={{ y: -2 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.05 }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          whileTap={{ scale: 0.985 }}
           onClick={() => navigate(APP_ROUTES.BDE.LEADS_QUEUE)}
-          className="glass-panel p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#A7F3D0] transition-all min-w-0"
+          className="glass-panel stat-card-animated p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#A7F3D0] transition-all min-w-0 flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span className="truncate">Lifetime Assigned Leads</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Lifetime Assigned Leads
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-0.5 truncate">{myLeads.length}</div>
+            </div>
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiPhoneCall className="text-base" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-[#0F172A] mt-2">{myLeads.length}</div>
-          <div className="text-xs text-[#059669] mt-1 font-semibold flex items-center gap-1">
+          <div className="text-xs text-[#059669] mt-3 font-semibold flex items-center gap-1">
             <FiLayers />
             <span>All assignments</span>
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -2 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          whileTap={{ scale: 0.985 }}
           onClick={() => navigate(APP_ROUTES.BDE.LEADS_QUEUE)}
-          className="glass-panel p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#A7F3D0] transition-all min-w-0"
+          className="glass-panel stat-card-animated p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#A7F3D0] transition-all min-w-0 flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span className="truncate">Pending / To Call</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Pending / To Call
+              </span>
+              <div
+                className={`text-2xl sm:text-3xl font-black mt-0.5 truncate ${
+                  pendingLeads.length === 0 ? 'text-[#D97706]' : 'text-[#0F172A]'
+                }`}
+              >
+                {pendingLeads.length}
+              </div>
+            </div>
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiClock className="text-base" />
             </div>
           </div>
-          <div
-            className={`text-2xl sm:text-3xl font-black mt-2 ${pendingLeads.length === 0 ? 'text-[#D97706]' : 'text-[#0F172A]'
-              }`}
-          >
-            {pendingLeads.length}
-          </div>
-          <div className="text-xs text-[#64748B] mt-1">
+          <div className="text-xs text-[#64748B] mt-3">
             {pendingLeads.length === 0 ? 'Queue Done' : 'Open leads in queue'}
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -2 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          whileTap={{ scale: 0.985 }}
           onClick={() => navigate(APP_ROUTES.BDE.PERFORMANCE)}
-          className="glass-panel p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#A7F3D0] transition-all min-w-0"
+          className="glass-panel stat-card-animated p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#A7F3D0] transition-all min-w-0 flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span className="truncate">Conversions</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Conversions
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-0.5 truncate">{convertedLeads.length}</div>
+            </div>
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiCheckCircle className="text-base" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-2">{convertedLeads.length}</div>
-          <div className="text-xs text-[#64748B] mt-1 font-medium flex items-center gap-1">
+          <div className="text-xs text-[#64748B] mt-3 font-medium flex items-center gap-1">
             <FiAward />
             <span>Closed Enrollments</span>
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ y: -2 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          whileTap={{ scale: 0.985 }}
           onClick={() => navigate(APP_ROUTES.BDE.PERFORMANCE)}
-          className="glass-panel p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#A7F3D0] transition-all min-w-0"
+          className="glass-panel stat-card-animated p-4 sm:p-5 rounded-2xl cursor-pointer hover:border-[#A7F3D0] transition-all min-w-0 flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-[#64748B] text-xs font-bold">
-            <span className="truncate">Conversion Rate</span>
-            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
+                Conversion Rate
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-0.5 truncate">{myConversionRate}%</div>
+            </div>
+            <div className="p-2 rounded-xl bg-[#ECFDF5] text-[#059669] shrink-0 shadow-2xs">
               <FiTrendingUp className="text-base" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-[#059669] mt-2">{myConversionRate}%</div>
-          <div className="text-xs text-[#64748B] mt-1 font-medium">Lifetime win rate</div>
+          <div className="text-xs text-[#64748B] mt-3 font-medium">Lifetime win rate</div>
         </motion.div>
       </div>
 

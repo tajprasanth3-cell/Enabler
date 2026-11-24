@@ -54,6 +54,14 @@ export const UserManagement: React.FC = () => {
   const bdeCount = users.filter((u) => u.role === 'BDE').length;
   const tlCount = users.filter((u) => u.role === 'TEAM_LEAD').length;
   const adminCount = users.filter((u) => u.role === 'ADMIN').length;
+  const unledTeams = teams.filter((team) => !team.teamLeadId);
+  const newUserTeamOptions = newUserRole === 'TEAM_LEAD' ? unledTeams : teams;
+
+  const handleRoleChange = (role: UserRole) => {
+    setNewUserRole(role);
+    const options = role === 'TEAM_LEAD' ? teams.filter((team) => !team.teamLeadId) : teams;
+    setNewUserTeam(options[0]?.id || '');
+  };
 
   const handleAddUserSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,11 +71,23 @@ export const UserManagement: React.FC = () => {
       showToast('error', 'Name and email are required.');
       return;
     }
+    if (newUserRole === 'BDE' && !newUserTeam) {
+      showToast('error', 'BDE executives must be assigned to a team.');
+      return;
+    }
+    if (newUserRole === 'TEAM_LEAD' && newUserTeam) {
+      const targetTeam = teams.find((team) => team.id === newUserTeam);
+      if (targetTeam?.teamLeadId) {
+        showToast('error', `${targetTeam.name} already has a team lead.`);
+        return;
+      }
+    }
 
-    const teamId = newUserRole === 'ADMIN' ? undefined : newUserTeam;
+    const teamId =
+      newUserRole === 'ADMIN' || (newUserRole === 'TEAM_LEAD' && !newUserTeam) ? undefined : newUserTeam;
     const created = createUser(name, email, newUserRole, teamId, newUserPhone.trim() || undefined);
     if (!created) {
-      showToast('error', 'Could not add employee: an employee with this email already exists.');
+      showToast('error', 'Could not add employee: check the email and team assignment.');
       return;
     }
 
@@ -96,9 +116,26 @@ export const UserManagement: React.FC = () => {
   };
 
   const handleReassignTeam = (user: User, teamId: string) => {
+    if (!teamId) {
+      if (user.role !== 'TEAM_LEAD') {
+        showToast('error', 'BDE executives must remain assigned to a team.');
+        return;
+      }
+      if (!reassignUserTeam(user.id, '', 'Unassigned')) {
+        showToast('error', `Could not unassign ${user.name}.`);
+        return;
+      }
+      showToast('success', `${user.name} is now unassigned.`);
+      return;
+    }
+
     const team = teams.find((item) => item.id === teamId);
     if (!team) {
       showToast('error', 'Selected team was not found.');
+      return;
+    }
+    if (user.role === 'TEAM_LEAD' && team.teamLeadId && team.teamLeadId !== user.id) {
+      showToast('error', `${team.name} already has a team lead.`);
       return;
     }
     if (!reassignUserTeam(user.id, team.id, team.name)) {
@@ -329,12 +366,14 @@ export const UserManagement: React.FC = () => {
                       onChange={(e) => handleReassignTeam(u, e.target.value)}
                       className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2 py-1.5 text-[11px] font-semibold text-[#475569] focus:outline-none focus:border-[#10B981]"
                     >
-                      <option value="">Unassigned</option>
-                      {teams.map((team) => (
-                        <option key={team.id} value={team.id}>
-                          {team.name}
-                        </option>
-                      ))}
+                      {u.role === 'TEAM_LEAD' && <option value="">Unassigned</option>}
+                      {teams
+                        .filter((team) => u.role !== 'TEAM_LEAD' || !team.teamLeadId || team.teamLeadId === u.id)
+                        .map((team) => (
+                          <option key={team.id} value={team.id}>
+                            {team.name}
+                          </option>
+                        ))}
                     </select>
                   )}
                   <span
@@ -440,7 +479,7 @@ export const UserManagement: React.FC = () => {
                   <label className="block text-[#0F172A] font-bold mb-1">System Role *</label>
                   <select
                     value={newUserRole}
-                    onChange={(e) => setNewUserRole(e.target.value as UserRole)}
+                    onChange={(e) => handleRoleChange(e.target.value as UserRole)}
                     className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                   >
                     <option value="BDE">BDE Executive</option>
@@ -451,13 +490,16 @@ export const UserManagement: React.FC = () => {
 
                 {newUserRole !== 'ADMIN' && (
                   <div>
-                    <label className="block text-[#0F172A] font-bold mb-1">Assign Team *</label>
+                    <label className="block text-[#0F172A] font-bold mb-1">
+                      {newUserRole === 'TEAM_LEAD' ? 'Assign Team (optional)' : 'Assign Team *'}
+                    </label>
                     <select
                       value={newUserTeam}
                       onChange={(e) => setNewUserTeam(e.target.value)}
                       className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-2.5 text-[#0F172A] font-semibold focus:outline-none focus:border-[#10B981]"
                     >
-                      {teams.map((t) => (
+                      {newUserRole === 'TEAM_LEAD' && <option value="">Unassigned</option>}
+                      {newUserTeamOptions.map((t) => (
                         <option key={t.id} value={t.id}>
                           {t.name}
                         </option>

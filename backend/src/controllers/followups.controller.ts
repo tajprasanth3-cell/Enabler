@@ -121,7 +121,12 @@ export const updateFollowUp = (req: Request, res: Response) => {
   };
 
   const oldStatus = item.status;
-  if (status) item.status = status;
+  if (status !== undefined) {
+    if (!['PENDING', 'COMPLETED', 'OVERDUE'].includes(status)) {
+      return errorResponse(res, 'Invalid follow-up status', 400);
+    }
+    item.status = status;
+  }
   if (scheduledTime) item.scheduledTime = scheduledTime;
   if (remarks !== undefined) item.remarks = remarks;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useApp } from '../../context/useApp';
 import type { User } from '../../types';
 import { calculateConversionRate } from '../../utils/calculations';
@@ -19,6 +19,7 @@ export const TLDistribution: React.FC = () => {
     leads,
     users,
     teams,
+    managedTeamIds,
     systemSettings,
     allocateStage2TeamToBdes,
     replenishmentAlerts,
@@ -32,20 +33,34 @@ export const TLDistribution: React.FC = () => {
 
   const maxLeadsPerBde = systemSettings.maxLeadsPerBde;
 
-  const activeTeamIds = selectedTeamId === 'ALL' ? teams.map((t) => t.id) : [selectedTeamId];
+  const managedTeams = teams.filter((team) => managedTeamIds.includes(team.id));
+  const managedTeamNames = managedTeams.map((team) => team.name);
+  const effectiveTeamIds =
+    selectedTeamId === 'ALL'
+      ? managedTeamIds
+      : managedTeamIds.includes(selectedTeamId)
+      ? [selectedTeamId]
+      : [];
+  const teamNameFor = (teamId?: string | null) =>
+    teams.find((team) => team.id === teamId)?.name || 'Unassigned';
   const activeTeamName =
     selectedTeamId === 'ALL'
-      ? 'All Teams (Team Alpha & Beta)'
-      : teams.find((t) => t.id === selectedTeamId)?.name || 'Team';
+      ? managedTeamNames.length > 0
+        ? `All Teams (${managedTeamNames.join(' & ')})`
+        : 'All Teams (Unassigned)'
+      : teamNameFor(selectedTeamId);
 
-  const teamLeads = leads.filter((l) => activeTeamIds.includes(l.currentTeamId || ''));
+  const teamLeads = leads.filter((l) => effectiveTeamIds.includes(l.currentTeamId || ''));
   const teamPoolLeads = teamLeads.filter(
     (l) => !l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)
   );
 
-  const teamBdes = users.filter((u) => activeTeamIds.includes(u.teamId || '') && u.role === 'BDE');
-  const openLeadsForBde = (bdeId: string) =>
-    leads.filter((l) => l.currentBdeId === bdeId && OPEN_LEAD_STATUSES.includes(l.status)).length;
+  const teamBdes = users.filter((u) => effectiveTeamIds.includes(u.teamId || '') && u.role === 'BDE');
+  const openLeadsForBde = useCallback(
+    (bdeId: string) =>
+      leads.filter((l) => l.currentBdeId === bdeId && OPEN_LEAD_STATUSES.includes(l.status)).length,
+    [leads]
+  );
   const bdeCapacity = (bdeId: string) => Math.max(0, maxLeadsPerBde - openLeadsForBde(bdeId));
   const bdeIneligibilityReason = (bdeId: string) => {
     const bde = teamBdes.find((item) => item.id === bdeId);
@@ -55,7 +70,7 @@ export const TLDistribution: React.FC = () => {
     return '';
   };
 
-  const teamAlerts = replenishmentAlerts.filter((alert) => activeTeamIds.includes(alert.teamId));
+  const teamAlerts = replenishmentAlerts.filter((alert) => effectiveTeamIds.includes(alert.teamId));
 
   const [actionStatus, setActionStatus] = useState('');
   const [actionError, setActionError] = useState('');
@@ -72,6 +87,23 @@ export const TLDistribution: React.FC = () => {
   const [reassignFromBde, setReassignFromBde] = useState('');
   const [reassignToBde, setReassignToBde] = useState('');
   const [reassignError, setReassignError] = useState('');
+
+  const [workloadFilter, setWorkloadFilter] = useState<'ALL' | 'AVAILABLE' | 'EMPTY' | 'CAPPED'>('ALL');
+
+  const availableBdeCount = teamBdes.filter((b) => {
+    const p = openLeadsForBde(b.id);
+    return p < maxLeadsPerBde && p > 0;
+  }).length;
+  const emptyBdeCount = teamBdes.filter((b) => openLeadsForBde(b.id) === 0).length;
+  const cappedBdeCount = teamBdes.filter((b) => openLeadsForBde(b.id) >= maxLeadsPerBde).length;
+
+  const filteredTeamBdes = teamBdes.filter((bde) => {
+    const pending = openLeadsForBde(bde.id);
+    if (workloadFilter === 'AVAILABLE') return pending < maxLeadsPerBde && pending > 0;
+    if (workloadFilter === 'EMPTY') return pending === 0;
+    if (workloadFilter === 'CAPPED') return pending >= maxLeadsPerBde;
+    return true;
+  });
 
   const clampBatch = (value: number, cap: number) =>
     Number.isFinite(value) ? Math.max(0, Math.min(Math.floor(value), Math.max(0, cap))) : 0;
@@ -92,9 +124,20 @@ export const TLDistribution: React.FC = () => {
     setActionStatus('');
     setActionError('');
     if (teamPoolLeads.length === 0) {
-      const targetTeamId = selectedTeamId === 'ALL' ? 'team-1' : selectedTeamId;
-      escalatePoolEmpty(targetTeamId);
+      effectiveTeamIds.forEach((teamId) => {
+        const hasPool = leads.some(
+          (lead) =>
+            lead.currentTeamId === teamId &&
+            !lead.currentBdeId &&
+            OPEN_LEAD_STATUSES.includes(lead.status)
+        );
+        if (!hasPool) escalatePoolEmpty(teamId);
+      });
       setActionError(`${activeTeamName}'s pool is empty. Admin has been notified.`);
+      return;
+    }
+    if (selectedTeamId === 'ALL') {
+      setActionError('Select a specific team to distribute pooled leads.');
       return;
     }
     const eligibleIds = teamBdes.filter((b) => !bdeIneligibilityReason(b.id)).map((b) => b.id);
@@ -108,6 +151,11 @@ export const TLDistribution: React.FC = () => {
   const handleExecuteStage2 = (e: React.FormEvent) => {
     e.preventDefault();
     setAllocationError('');
+
+    if (selectedTeamId === 'ALL' || !managedTeamIds.includes(selectedTeamId)) {
+      setAllocationError('Select a specific managed team to distribute pooled leads.');
+      return;
+    }
 
     const eligibleIds = selectedBdes.filter((id) => !bdeIneligibilityReason(id));
     if (!eligibleIds.length) {
@@ -133,7 +181,7 @@ export const TLDistribution: React.FC = () => {
     }
 
     let totalAllocated = 0;
-    const targetTeams = selectedTeamId === 'ALL' ? teams : teams.filter((t) => t.id === selectedTeamId);
+    const targetTeams = managedTeams.filter((t) => t.id === selectedTeamId);
     targetTeams.forEach((t) => {
       const teamEligibleBdes = eligibleIds.filter((bId) => {
         const b = users.find((u) => u.id === bId);
@@ -148,7 +196,7 @@ export const TLDistribution: React.FC = () => {
           allocationMethod === 'MANUAL' ? manualBatchQuotas : undefined
         );
         totalAllocated += count;
-        clearPoolEscalation(t.id);
+        if (count > 0) clearPoolEscalation(t.id);
       }
     });
 
@@ -163,7 +211,11 @@ export const TLDistribution: React.FC = () => {
   const handleQuickReplenish = (bde: User) => {
     setActionStatus('');
     setActionError('');
-    const targetTeamId = bde.teamId || 'team-1';
+    const targetTeamId = bde.teamId;
+    if (!targetTeamId || !managedTeamIds.includes(targetTeamId)) {
+      setActionError(`${bde.name} is not assigned to a team you manage.`);
+      return;
+    }
     const targetTeamPool = leads.filter(
       (l) => l.currentTeamId === targetTeamId && !l.currentBdeId && OPEN_LEAD_STATUSES.includes(l.status)
     );
@@ -174,7 +226,7 @@ export const TLDistribution: React.FC = () => {
     }
     if (targetTeamPool.length === 0) {
       escalatePoolEmpty(targetTeamId);
-      const tName = teams.find((t) => t.id === targetTeamId)?.name || 'Team';
+      const tName = teamNameFor(targetTeamId);
       setActionError(`${tName}'s pool is empty. Admin has been notified; no leads were added.`);
       return;
     }
@@ -218,29 +270,29 @@ export const TLDistribution: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 sm:space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
-        <div className="max-w-2xl min-w-0">
-          <div className="flex items-center gap-2 text-[#059669] text-xs font-bold uppercase tracking-wider mb-1">
+      <div className="flex flex-col gap-4 border-b border-[#E2E8F0] pb-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#059669]">
             <FiUsers />
-            <span>Frontline Workforce Balancing · Alpha &amp; Beta Governance</span>
+            <span>Frontline Workforce Balancing · {managedTeamNames.join(' & ') || 'Unassigned'}</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
+          <h1 className="break-words text-2xl font-black leading-tight tracking-tight text-[#0F172A] sm:text-3xl">
             {activeTeamName}: BDE Distribution Matrix
           </h1>
-          <p className="text-[#64748B] text-xs sm:text-sm mt-1 leading-relaxed">
+          <p className="mt-1 text-xs leading-relaxed text-[#64748B] sm:text-sm">
             Monitor executive queue depth, distribute pooled leads to BDEs, and reassign workloads during team leave.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 shrink-0 self-start lg:self-center">
           {/* Team Switcher Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#F1F5F9] border border-[#E2E8F0] shadow-2xs">
+          <div className="inline-flex items-center gap-1 rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] p-1 shadow-2xs">
             <button
               type="button"
               onClick={() => setSelectedTeamId('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer ${
                 selectedTeamId === 'ALL'
                   ? 'bg-white text-[#059669] shadow-xs'
                   : 'text-[#64748B] hover:text-[#0F172A]'
@@ -248,12 +300,12 @@ export const TLDistribution: React.FC = () => {
             >
               All Teams
             </button>
-            {teams.map((t) => (
+            {managedTeams.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setSelectedTeamId(t.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer ${
                   selectedTeamId === t.id
                     ? 'bg-white text-[#059669] shadow-xs'
                     : 'text-[#64748B] hover:text-[#0F172A]'
@@ -266,17 +318,27 @@ export const TLDistribution: React.FC = () => {
 
           <button
             onClick={openReassignModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] text-xs font-bold shadow-xs cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-[#CBD5E1] bg-white px-3.5 py-2 text-xs font-bold text-[#0F172A] shadow-xs cursor-pointer hover:bg-[#F8FAFC] transition-colors"
           >
             <FiRepeat className="text-[#059669]" />
-            <span>Reassign Leads (Absence / Leave)</span>
+            <span>Reassign Leads</span>
           </button>
           <button
             onClick={openStage2Modal}
-            className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl shimmer-button text-white font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
+            disabled={selectedTeamId === 'ALL' || teamPoolLeads.length === 0}
+            title={selectedTeamId === 'ALL' ? 'Select a specific team to allocate leads' : undefined}
+            className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold text-white shadow-md transition-colors ${
+              selectedTeamId === 'ALL' || teamPoolLeads.length === 0
+                ? 'bg-[#94A3B8] cursor-not-allowed opacity-75'
+                : 'shimmer-button cursor-pointer'
+            }`}
           >
             <FiSend />
-            <span>Batch Distribute ({teamPoolLeads.length} in Pool)</span>
+            <span>
+              {selectedTeamId === 'ALL'
+                ? 'Select a Team'
+                : `Batch Distribute (${teamPoolLeads.length} in Pool)`}
+            </span>
           </button>
         </div>
       </div>
@@ -284,7 +346,7 @@ export const TLDistribution: React.FC = () => {
       {/* Action Banner */}
       {(actionStatus || actionError) && (
         <div
-          className={`p-3.5 rounded-xl text-xs font-semibold border flex items-center justify-between ${
+          className={`flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-xs font-semibold sm:px-5 ${
             actionError
               ? 'bg-[#FEF2F2] border-[#FECACA] text-[#B91C1C]'
               : 'bg-[#ECFDF5] border-[#A7F3D0] text-[#047857]'
@@ -308,7 +370,7 @@ export const TLDistribution: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="p-4 sm:p-5 rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] space-y-3 shadow-xs"
+          className="space-y-4 rounded-2xl border border-[#FDE68A] bg-[#FFFBEB] p-4 shadow-xs sm:p-5"
         >
           <div className="flex items-center gap-2 text-[#D97706] font-bold text-sm">
             <FiAlertTriangle className="text-lg text-[#D97706] animate-bounce" />
@@ -321,7 +383,7 @@ export const TLDistribution: React.FC = () => {
               return (
                 <div
                   key={alert.bdeId}
-                  className="flex items-center justify-between gap-4 p-3 rounded-xl bg-white border border-[#E2E8F0] text-xs shadow-xs"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-[#E2E8F0] bg-white p-3.5 text-xs shadow-xs"
                 >
                   <div>
                     <span className="font-bold text-[#0F172A]">{alert.bdeName}</span>
@@ -330,7 +392,7 @@ export const TLDistribution: React.FC = () => {
                   <button
                     onClick={() => bde && handleQuickReplenish(bde)}
                     disabled={!bde || !!reason}
-                    className="px-3 py-1.5 rounded-lg shimmer-button text-white font-bold text-xs cursor-pointer shadow-xs disabled:opacity-40"
+                    className="rounded-lg px-3.5 py-2 text-xs font-bold text-white shadow-xs shimmer-button cursor-pointer disabled:opacity-40"
                   >
                     Quick Replenish (+5)
                   </button>
@@ -343,30 +405,79 @@ export const TLDistribution: React.FC = () => {
 
       {/* Workload Matrix Table */}
       <div className="glass-panel rounded-2xl border border-[#CBD5E1] bg-white overflow-hidden shadow-xs">
-        <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
-          <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-            <FiUserCheck className="text-[#059669]" />
-            <span>BDE Workload Balancing & Quota Matrix ({teamBdes.length} Executives)</span>
-          </h3>
-          <span className="text-xs text-[#64748B] font-semibold">Max Threshold: {maxLeadsPerBde} leads</span>
+        <div className="flex flex-col gap-3 border-b border-[#E2E8F0] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2 mr-2">
+              <FiUserCheck className="text-[#059669]" />
+              <span>BDE Workload Balancing ({teamBdes.length} Executives)</span>
+            </h3>
+            {/* Workload Filter Tabs */}
+            <div className="inline-flex items-center gap-1 rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setWorkloadFilter('ALL')}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                  workloadFilter === 'ALL'
+                    ? 'bg-white text-[#059669] shadow-xs'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+              >
+                All ({teamBdes.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setWorkloadFilter('AVAILABLE')}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                  workloadFilter === 'AVAILABLE'
+                    ? 'bg-white text-[#059669] shadow-xs'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+              >
+                Available Capacity ({availableBdeCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setWorkloadFilter('EMPTY')}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                  workloadFilter === 'EMPTY'
+                    ? 'bg-white text-[#D97706] shadow-xs'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+              >
+                Queue Empty ({emptyBdeCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setWorkloadFilter('CAPPED')}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                  workloadFilter === 'CAPPED'
+                    ? 'bg-white text-[#DC2626] shadow-xs'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+              >
+                At Cap ({cappedBdeCount})
+              </button>
+            </div>
+          </div>
+          <span className="text-xs text-[#64748B] font-semibold shrink-0">Max Threshold: {maxLeadsPerBde} leads</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[960px] border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                <th className="py-3.5 px-4">Executive Name</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 text-center">Total Assigned</th>
-                <th className="py-3.5 px-4 text-center">Active Queue</th>
-                <th className="py-3.5 px-4 text-center">Conversions</th>
-                <th className="py-3.5 px-4 text-center">Win Rate %</th>
-                <th className="py-3.5 px-4">Workload Status</th>
-                <th className="py-3.5 px-4 text-right">Quick Allocation</th>
+              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
+                <th className="px-4 py-3.5 sm:px-5">Executive Name</th>
+                <th className="px-4 py-3.5 sm:px-5">Status</th>
+                <th className="px-4 py-3.5 sm:px-5 text-center">Total Assigned</th>
+                <th className="px-4 py-3.5 sm:px-5 text-center">Active Queue</th>
+                <th className="px-4 py-3.5 sm:px-5 text-center">Conversions</th>
+                <th className="px-4 py-3.5 sm:px-5 text-center">Win Rate %</th>
+                <th className="px-4 py-3.5 sm:px-5">Workload Status</th>
+                <th className="px-4 py-3.5 sm:px-5 text-right">Quick Allocation</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
-              {teamBdes.map((bde) => {
+              {filteredTeamBdes.map((bde) => {
                 const bdeLeads = leads.filter((l) => l.currentBdeId === bde.id);
                 const pending = openLeadsForBde(bde.id);
                 const capacity = bdeCapacity(bde.id);
@@ -376,10 +487,10 @@ export const TLDistribution: React.FC = () => {
 
                 return (
                   <tr key={bde.id} className="hover:bg-[#F8FAFC] transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-[#0F172A]">{bde.name}</td>
-                    <td className="py-3.5 px-4">
+                    <td className="px-4 py-3.5 sm:px-5 font-bold text-[#0F172A]">{bde.name}</td>
+                    <td className="px-4 py-3.5 sm:px-5">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
                           bde.status === 'ACTIVE'
                             ? 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]'
                             : 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
@@ -388,13 +499,16 @@ export const TLDistribution: React.FC = () => {
                         {bde.status}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-center font-semibold text-[#0F172A]">{bdeLeads.length}</td>
-                    <td className="py-3.5 px-4 text-center font-bold">
+                    <td className="px-4 py-3.5 sm:px-5 text-center font-semibold text-[#0F172A]">{bdeLeads.length}</td>
+                    <td className="px-4 py-3.5 sm:px-5 text-center font-bold">
                       <span className={pending === 0 ? 'text-[#D97706]' : 'text-[#059669]'}>
                         {pending} / {maxLeadsPerBde}
                       </span>
-                      <div className="w-24 bg-[#E2E8F0] h-1.5 rounded-full mx-auto mt-1 overflow-hidden">
-                        <div
+                      <div className="mx-auto mt-1.5 h-1.5 w-24 overflow-hidden rounded-full bg-[#E2E8F0]">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (pending / maxLeadsPerBde) * 100)}%` }}
+                          transition={{ duration: 0.65, ease: 'easeOut' }}
                           className={`h-full ${
                             pending >= maxLeadsPerBde
                               ? 'bg-[#DC2626]'
@@ -402,36 +516,35 @@ export const TLDistribution: React.FC = () => {
                               ? 'bg-[#D97706]'
                               : 'bg-[#10B981]'
                           }`}
-                          style={{ width: `${Math.min(100, (pending / maxLeadsPerBde) * 100)}%` }}
                         />
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-center font-bold text-[#059669]">{conv}</td>
-                    <td className="py-3.5 px-4 text-center font-black text-[#0F172A]">{convPct}%</td>
-                    <td className="py-3.5 px-4">
+                    <td className="px-4 py-3.5 sm:px-5 text-center font-bold text-[#059669]">{conv}</td>
+                    <td className="px-4 py-3.5 sm:px-5 text-center font-black text-[#0F172A]">{convPct}%</td>
+                    <td className="px-4 py-3.5 sm:px-5">
                       {reason ? (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] font-bold">
+                        <span className="text-[10px] px-2 py-1 rounded-full bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] font-bold">
                           {reason}
                         </span>
                       ) : pending === 0 ? (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] font-bold">
+                        <span className="text-[10px] px-2 py-1 rounded-full bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] font-bold">
                           Queue Empty
                         </span>
                       ) : pending >= maxLeadsPerBde ? (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] font-bold">
+                        <span className="text-[10px] px-2 py-1 rounded-full bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] font-bold">
                           At Cap
                         </span>
                       ) : (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] font-bold">
+                        <span className="text-[10px] px-2 py-1 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] font-bold">
                           {capacity} slots free
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="px-4 py-3.5 sm:px-5 text-right">
                       <button
                         onClick={() => handleQuickReplenish(bde)}
                         disabled={!!reason}
-                        className="px-3 py-1.5 rounded-xl shimmer-button text-white font-bold text-[11px] disabled:opacity-40 cursor-pointer shadow-xs"
+                        className="rounded-lg px-3.5 py-2 text-[11px] font-bold text-white shadow-xs shimmer-button cursor-pointer disabled:opacity-40"
                       >
                         + Add 5 Leads
                       </button>
@@ -442,6 +555,12 @@ export const TLDistribution: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {filteredTeamBdes.length === 0 && (
+          <div className="border-t border-[#E2E8F0] px-5 py-8 text-center text-xs text-[#64748B]">
+            No executives match the selected workload filter.
+          </div>
+        )}
       </div>
 
       {/* Stage 2 Modal */}
@@ -450,23 +569,23 @@ export const TLDistribution: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel w-full max-w-lg space-y-5 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-2xl sm:p-6"
           >
-            <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] pb-4">
               <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
                 <FiSend className="text-[#059669]" />
                 <span>Distribute Leads to Team BDEs</span>
               </h3>
               <button
                 onClick={() => setShowStage2Modal(false)}
-                className="text-[#64748B] hover:text-[#0F172A] text-lg font-bold cursor-pointer"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg font-bold text-[#64748B] cursor-pointer hover:text-[#0F172A]"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleExecuteStage2} className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] font-semibold">
+              <div className="rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] p-4 font-semibold text-[#065F46]">
                 Available in Pool: <strong>{teamPoolLeads.length} leads</strong>
               </div>
 
@@ -494,7 +613,7 @@ export const TLDistribution: React.FC = () => {
                     return (
                       <label
                         key={b.id}
-                        className={`flex flex-wrap items-center gap-2.5 p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] transition-colors ${
+                        className={`flex flex-wrap items-center gap-2.5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 transition-colors ${
                           reason ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-white'
                         }`}
                       >
@@ -551,7 +670,7 @@ export const TLDistribution: React.FC = () => {
                     return (
                       <div
                         key={id}
-                        className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]"
+                        className="flex items-center justify-between gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5"
                       >
                         <div>
                           <div className="font-bold text-[#0F172A]">{bde.name}</div>
@@ -582,7 +701,7 @@ export const TLDistribution: React.FC = () => {
                 </p>
               )}
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+              <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
                 <button
                   type="button"
                   onClick={() => setShowStage2Modal(false)}
@@ -608,13 +727,13 @@ export const TLDistribution: React.FC = () => {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="modal-panel bg-white w-full max-w-lg rounded-2xl p-4 sm:p-5 border border-[#E2E8F0] shadow-2xl space-y-4"
+            className="modal-panel w-full max-w-lg space-y-5 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-2xl sm:p-6"
           >
-            <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] pb-4">
               <h3 className="text-base font-bold text-[#0F172A]">Reassign Leads (Absence / Deactivation)</h3>
               <button
                 onClick={() => setShowReassignModal(false)}
-                className="text-[#64748B] hover:text-[#0F172A] text-lg font-bold cursor-pointer"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg font-bold text-[#64748B] cursor-pointer hover:text-[#0F172A]"
               >
                 ✕
               </button>
@@ -667,7 +786,7 @@ export const TLDistribution: React.FC = () => {
                 </p>
               )}
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+              <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
                 <button
                   type="button"
                   onClick={() => setShowReassignModal(false)}

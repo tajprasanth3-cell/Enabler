@@ -46,7 +46,7 @@ export const leadsService = {
     });
   },
 
-  updateLeadStatus: async (leadId: string, payload: { status: string; remarks: string; dealValue?: number; nextFollowUpDate?: string; actor?: any }) => {
+  updateLeadStatus: async (leadId: string, payload: { status: string; remarks: string; dealValue?: number; nextFollowUpDate?: string | null; actor?: any }) => {
     return apiRequest<BackendLead>(`/leads/${leadId}/status`, {
       method: 'PATCH',
       body: JSON.stringify(payload),

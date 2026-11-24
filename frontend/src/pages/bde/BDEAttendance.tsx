@@ -35,6 +35,13 @@ const getStatusClass = (status: AttendanceRecord['status']): string => {
   return 'bg-[#F0FDF4] text-[#15803D] border-[#BBF7D0]';
 };
 
+const getStatusTextClass = (status: AttendanceRecord['status']): string => {
+  if (status === 'MISSING_PUNCH_OUT') return 'text-[#B91C1C]';
+  if (status === 'HALF_DAY') return 'text-[#B45309]';
+  if (status === 'LATE') return 'text-[#065F46]';
+  return 'text-[#059669]';
+};
+
 export const BDEAttendance: React.FC = () => {
   const {
     currentUser,
@@ -141,9 +148,10 @@ export const BDEAttendance: React.FC = () => {
   const displayPunchIn = formatClock(todayRecord?.punchInTime) || punchInTime || '—';
   const displayStatus =
     todayRecord?.status || (punchState === 'PUNCHED_IN' ? 'PRESENT' : punchState === 'PUNCHED_OUT' ? 'OFF SHIFT' : 'NOT PUNCHED');
+  const statusTone = todayRecord?.status || (displayStatus === 'PRESENT' ? 'PRESENT' : 'HALF_DAY');
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -247,7 +255,7 @@ export const BDEAttendance: React.FC = () => {
 
         <div className="glass-panel p-5 rounded-2xl">
           <div className="text-xs text-[#64748B] font-semibold">Attendance Status</div>
-          <div className="text-2xl font-black text-[#059669] mt-1">{displayStatus}</div>
+          <div className={`text-2xl font-black mt-1 ${getStatusTextClass(statusTone)}`}>{displayStatus}</div>
           <div className="text-[11px] text-[#64748B] mt-1">
             {todayRecord?.earlyDeparture
               ? 'Early departure recorded'
@@ -265,23 +273,23 @@ export const BDEAttendance: React.FC = () => {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-[#E2E8F0] text-[#64748B] font-bold bg-[#F8FAFC]">
-                <th className="py-2.5 px-3">Date</th>
-                <th className="py-2.5 px-3">Punch In</th>
-                <th className="py-2.5 px-3">Punch Out</th>
-                <th className="py-2.5 px-3">Logged Duration</th>
-                <th className="py-2.5 px-3">Audit Status</th>
+                <th className="py-3.5 px-4">Date</th>
+                <th className="py-3.5 px-4">Punch In</th>
+                <th className="py-3.5 px-4">Punch Out</th>
+                <th className="py-3.5 px-4">Logged Duration</th>
+                <th className="py-3.5 px-4">Audit Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
               {myRecords.map((rec: AttendanceRecord) => (
                 <tr key={rec.id} className="hover:bg-[#F8FAFC]">
-                  <td className="py-2.5 px-3 font-semibold text-[#0F172A]">{rec.date}</td>
-                  <td className="py-2.5 px-3 font-mono text-[#059669] font-bold">{formatClock(rec.punchInTime) || '—'}</td>
-                  <td className="py-2.5 px-3 font-mono text-[#64748B]">{formatClock(rec.punchOutTime) || '—'}</td>
-                  <td className="py-2.5 px-3 text-[#475569]">
+                  <td className="py-3.5 px-4 font-semibold text-[#0F172A]">{rec.date}</td>
+                  <td className="py-3.5 px-4 font-mono text-[#059669] font-bold">{formatClock(rec.punchInTime) || '—'}</td>
+                  <td className="py-3.5 px-4 font-mono text-[#64748B]">{formatClock(rec.punchOutTime) || '—'}</td>
+                  <td className="py-3.5 px-4 text-[#475569]">
                     {rec.punchInTime ? formatDuration(getRecordMinutes(rec)) : '—'}
                   </td>
-                  <td className="py-2.5 px-3">
+                  <td className="py-3.5 px-4">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusClass(rec.status)}`}>
                       {rec.status}
                     </span>

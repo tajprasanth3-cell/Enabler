@@ -41,6 +41,7 @@ export class DataStore {
     gracePeriodMinutes: 15,
     allocationMethod: 'WORKLOAD_BASED',
     workdayEndTime: '18:30',
+    earlyExitGracePeriodMinutes: 15,
     halfDayThresholdHours: 4.5,
     fullDayThresholdHours: 8,
     followUpReminderMinutes: 30,
@@ -90,7 +91,15 @@ export class DataStore {
         this.followUps = data.followUps || [];
         this.replenishmentAlerts = data.replenishmentAlerts || [];
         this.attendanceRecords = data.attendanceRecords || [];
-        this.transactions = data.transactions || [];
+        this.transactions = (data.transactions || []).map((tx: any) => ({
+          ...tx,
+          companySharePercentage: tx.companySharePercentage ?? tx.companySharePct ?? 30,
+          companySharePct: tx.companySharePct ?? tx.companySharePercentage ?? 30,
+          remainingSharePercentage: tx.remainingSharePercentage ?? tx.remainingSharePct ?? 70,
+          remainingSharePct: tx.remainingSharePct ?? tx.remainingSharePercentage ?? 70,
+          companyProfitShareAmount: tx.companyProfitShareAmount ?? (tx.netProfit ? Math.round((tx.netProfit * 30) / 100) : undefined),
+          remainingProfitShareAmount: tx.remainingProfitShareAmount ?? (tx.netProfit ? tx.netProfit - Math.round((tx.netProfit * 30) / 100) : undefined),
+        }));
         this.financialCalculationLogs = data.financialCalculationLogs || [];
         this.settings = { ...this.settings, ...(data.settings || {}) };
         this.auditLogs = data.auditLogs || [];
@@ -120,7 +129,9 @@ export class DataStore {
         settings: this.settings,
         auditLogs: this.auditLogs,
       };
-      fs.writeFileSync(this.dbFilePath, JSON.stringify(payload, null, 2), 'utf-8');
+      const tmpPath = `${this.dbFilePath}.tmp`;
+      fs.writeFileSync(tmpPath, JSON.stringify(payload, null, 2), 'utf-8');
+      fs.renameSync(tmpPath, this.dbFilePath);
     } catch (err) {
       logger.error('Failed to persist database to disk:', err);
     }
@@ -226,16 +237,47 @@ export class DataStore {
         teamName: 'Team Alpha',
         grossAmount: 50000,
         investmentCost: 15000,
+        companySharePercentage: 30,
         companySharePct: 30,
+        remainingSharePercentage: 70,
         remainingSharePct: 70,
         companyShareAmount: 15000,
         remainingShareAmount: 35000,
+        profitSharePercentage: 30,
+        companyProfitShareAmount: 10500,
+        remainingProfitShareAmount: 24500,
         netProfit: 35000,
         status: 'CONFIRMED',
         confirmedById: 'usr-1',
         confirmedByName: 'Vikram Sharma',
         confirmedAt: '2026-02-14 04:00 PM',
         createdAt: '2026-02-14 03:30 PM',
+      },
+      {
+        id: 'tx-2',
+        leadId: 'lead-101',
+        candidateName: 'Rahul Verma',
+        bdeId: 'usr-6',
+        bdeName: 'Rohan Mehta',
+        teamId: 'team-2',
+        teamName: 'Team Beta',
+        grossAmount: 75000,
+        investmentCost: 20000,
+        companySharePercentage: 30,
+        companySharePct: 30,
+        remainingSharePercentage: 70,
+        remainingSharePct: 70,
+        companyShareAmount: 22500,
+        remainingShareAmount: 52500,
+        profitSharePercentage: 30,
+        companyProfitShareAmount: 16500,
+        remainingProfitShareAmount: 38500,
+        netProfit: 55000,
+        status: 'CONFIRMED',
+        confirmedById: 'usr-1',
+        confirmedByName: 'Vikram Sharma',
+        confirmedAt: '2026-02-15 02:30 PM',
+        createdAt: '2026-02-15 01:15 PM',
       },
     ];
 
