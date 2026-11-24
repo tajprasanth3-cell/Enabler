@@ -23,7 +23,7 @@ export const AppLayout: React.FC = () => {
       : [];
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-x-clip transition-colors duration-200 text-[#0F172A] selection:bg-[#10B981] selection:text-white bde-theme">
+    <div className="readable-ui min-h-screen flex flex-col relative overflow-x-clip transition-colors duration-200 text-[#0F172A] selection:bg-[#10B981] selection:text-white bde-theme">
       <div className="ambient-bg" aria-hidden="true">
         <div className="ambient-image-layer" />
         <div className="ambient-gradient-overlay" />

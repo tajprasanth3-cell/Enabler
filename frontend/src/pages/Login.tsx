@@ -67,7 +67,7 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-[#0F172A]">
+    <div className="readable-ui relative min-h-screen overflow-hidden text-[#0F172A]">
       <div className="pointer-events-none absolute inset-0">
         <div className="login-background-image" />
         <div className="login-gradient-overlay" />
