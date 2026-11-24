@@ -225,9 +225,19 @@
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.25) 45%, rgba(15, 23, 42, 0.12) 100%), url('/cards/leads-pipeline.jpg');
   background-size: cover;
   background-position: center;
-  opacity: 0.18;
+  opacity: 0.22;
   filter: saturate(120%) contrast(105%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.login-form-card {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.9);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(241, 245, 249, 0.6) 100%), url('/cards/team-collab.jpg');
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: normal, soft-light;
 }
 
 .login-mobile-banner {
@@ -359,6 +369,44 @@
   background: rgba(255, 255, 255, 0.85);
   padding: 0.5rem;
   box-shadow: inset 0 0 0 1px rgba(203, 213, 225, 0.9);
+}
+
+.readable-ui .glass-panel:not(.card-frosted-cover) {
+  background-color: rgba(255, 255, 255, 0.9);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.55) 0%, rgba(241, 245, 249, 0.45) 100%), url('/cards/team-collab.jpg');
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: normal, soft-light;
+}
+
+.readable-ui h1[class],
+.readable-ui h2[class],
+.readable-ui h3[class] {
+  color: #0F172A;
+  font-weight: 800;
+}
+
+.readable-ui label[class] {
+  color: #334155;
+  font-weight: 700;
+}
+
+.readable-ui thead th[class] {
+  color: #334155;
+  font-weight: 800;
+  background-color: #E2E8F0;
+}
+
+.readable-ui input[class],
+.readable-ui select[class],
+.readable-ui textarea[class] {
+  color: #0F172A;
+  font-weight: 600;
+}
+
+.readable-ui input[class]::placeholder,
+.readable-ui textarea[class]::placeholder {
+  color: #64748B;
 }
 
 /* Interactive Card with Smooth Micro-Lift & Soft Emerald Aura */
